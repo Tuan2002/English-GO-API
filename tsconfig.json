@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "target": "es6",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "baseUrl": ".",
+    "rootDir": ".",
+    "typeRoots": ["./node_module/@types", "./src/types"],
+    "types": ["node", "express"],
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+  "lib": ["es2015"],
+  "exclude": ["node_modules", "src/tests"],
+  "include": ["src"]
+}

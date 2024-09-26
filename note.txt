@@ -1,0 +1,293 @@
+/** Users
+ * id: string;
+ * password: string;
+ * email: string;
+ * fullName: string;
+ * phoneNumber: string;
+ * avatar: string;
+ * groupRoleId: string;
+ * isBlocked: boolean;
+ * isDeleted: boolean;
+ * isActive: boolean;
+ * createdDate: string;
+ * updatedDate: string;
+ */
+
+/** groupRoles
+ * id: string;
+ * name: string;
+ * displayName: string;
+ * description: string;
+ * isDeleted: boolean;
+ * isActive: boolean;
+ * createdDate: string;
+ * updatedDate: string;
+ */
+
+/** functions
+ * id: string;
+ * name: string;
+ * displayName: string;
+ * description: string;
+ * functionLink: string;
+ * isDeleted: boolean;
+ * isActive: boolean;
+ * createdDate: string;
+ * updatedDate: string;
+ * parentId: string;
+ */
+
+/** permissions 
+ * id: string;
+ * roleId: string;
+ * functionId: string;
+ * isDeleted: boolean;
+ * isActive: boolean;
+ * createdDate: string;
+ * updatedDate: string;
+*/
+
+/** professions 
+ * id: string;
+ * name: string;
+ * description: string;
+ * isDeleted: boolean;
+ * isActive: boolean;
+ * createdDate: string;
+ * updatedDate: string;
+*/
+
+/** positions 
+ * id: string;
+ * name: string;
+ * description: string;
+ * isDeleted: boolean;
+ * isActive: boolean;
+ * createdDate: string;
+ * updatedDate: string;
+*/
+
+/** Profile
+ * id: string;
+ * userId: string;
+ * address: string;
+ * description: string;
+ * phoneNumber: string;
+ * email: string;
+ * birthday: string;
+ * sex: string;
+ * banner: string;
+ * profession: string;
+ * position: string;
+*/
+
+/** educations
+ * id: string;
+ * userId: string;
+ * school: string;
+ * specialzed: string;
+ * start-time: string;
+ * end-time: string;
+ * isWorking: bool;
+ * description: string;
+*/
+
+/** experiences
+ * id: string;
+ * userId: string;
+ * company: string;
+ * position: string;
+ * start-time: string;
+ * end-time: string;
+ * isWorking: bool;
+ * description: string;
+*/
+
+/** skills
+ * id: string;
+ * userId: string;
+ * name: string;
+ * level: string;
+ * description: string;
+*/
+
+/** skillLevels
+ * id: string;
+ * level: string;
+ * description: string;
+*/
+
+/** activities
+ * id: string;
+ * userId: string;
+ * name: string;
+ * organization: string;
+ * position: string;
+ * proofImage: string;
+ * startTime: string;
+ * endTime: string;
+ * isActive: string;
+ * description: string;
+*/
+
+/** certificates
+ * id: string;
+ * userId: string;
+ * name: string;
+ * organization: string;
+ * proofImage: string;
+ * startTime: string;
+ * endTime: string;
+ * description: string;
+*/
+
+/** awards
+ * id: string;
+ * userId: string;
+ * name: string;
+ * organization: string;
+ * proofImage: string;
+ * startTime: string;
+ * endTime: string;
+ * description: string;
+*/
+
+/** products
+ * id: string;
+ * userId: string;
+ * name: string;
+ * position: string;
+ * profession: string;
+ * proofImage: string;
+ * startTime: string;
+ * endTime: string;
+ * description: string;
+*/
+
+/** cvCreateds
+ * id: string;
+ * userId: string;
+ * name: string;
+ * profession: string;
+ * position: string;
+ * appliedPosition: string;
+ * cvSample: string;
+
+ * avatar: string;
+ * phoneNumber: string;
+ * email: string;
+ * facebook: string;
+ * address: string;
+ * fullName: string;
+ * birthday: string;
+ 
+ * infomationPosition: []
+ * careerTarget: string;
+ * referrer: [string $ string];
+ * educations: [educationId];
+ * experiences: [experienceId];
+ * skills: [skillId];
+ * activities: [activityId];
+ * certificates: [certificateId];
+ * awards: [awardId];
+ * products: [productId];
+
+ * proofImage: string;
+ * createdDate: string;
+ * updatedDate: string;
+ * isActive: bool;
+ * isPublic: bool;
+*/
+
+/** cvUploads
+ * id: string;
+ * userId: string;
+ * name: string;
+ * organization: string;
+ * proofImage: string;
+ * startTime: string;
+ * endTime: string;
+ * description: string;
+*/
+
+/** cvSamples
+ * id: string;
+ * userId: string;
+ * name: string;
+ * organization: string;
+ * proofImage: string;
+ * startTime: string;
+ * endTime: string;
+ * description: string;
+*/
+
+CVCreateds: [
+  {
+    id: string;
+    displayName: string;
+    fullName: string;
+    avatar: string;
+    position: string;
+
+    infomations: {
+      data: [
+        {value: 'abc@gmail.com', icon: 'EmailIcon'},
+        {value: 'address', icon: 'AddressIcon'},
+        {value: 'phoneNumber', icon: 'phoneNumberIcon'},
+        {value: 'birthday', icon: 'birthdayIcon'},
+      ],
+      position: 0,
+      box: "box-0"
+    },
+    experiences: {
+      data: [
+        experienceId,
+        experienceId
+      ],
+      position: 0,
+      box: "box-1"
+    },
+    educations: {
+      data: [
+        educationId,
+        educationId
+      ],
+      position: 1,
+      box: "box-1"
+    },
+    awards: {
+      data: [
+        awardId,
+        awardId
+      ],
+      position: 0,
+      box: "box-2"
+    }
+  }
+]
+
+boxs: {
+  box-0: [
+    {
+      name: 'infomations',
+      data: []
+    }
+  ],
+  box-1: [
+    {
+      name: 'educations',
+      data: []
+    },
+    {
+      name: 'awards',
+      data: []
+    }
+  ]
+}
+
+
+
+
+executeQuery() => thực hiện câu lệnh select, trả về một tập hợp các kết quả
+executeUpdate() => Thực hiện câu lệnh update, trả về số lượng các bản ghi bị ảnh hưởng, bị thay đổi.
+execute() => thực hiện bất kì câu lệnh nào, trả về dữ liệu kiểu boolean
