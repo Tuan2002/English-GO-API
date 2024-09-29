@@ -1,26 +1,22 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
-  PrimaryColumn,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn } from "typeorm";
 import { GroupRole } from "./GroupRole";
-import { Profile } from "./Profile";
-import { EGenderStatus } from "@/interfaces/user/UserDTO";
+
+enum EGenderStatus {
+  FEMALE = "F",
+  MALE = "M",
+  OTHER = "O",
+}
 
 @Entity({ name: "Users" })
 export class User {
   @PrimaryColumn({ type: "varchar", unsigned: true, nullable: false })
   id!: string;
 
-  @Column({ type: "varchar", length: 255, nullable: false })
+  @Column({ type: "varchar", length: 255, nullable: true })
   email!: string;
+
+  @Column({ type: "varchar", length: 255, nullable: false })
+  username!: string;
 
   @Column({ type: "varchar", length: 255, nullable: false })
   password!: string;
@@ -49,9 +45,6 @@ export class User {
   @Column({ type: "boolean", nullable: false, default: false })
   isBlocked!: boolean;
 
-  @Column({ type: "boolean", nullable: false, default: true })
-  isActive!: boolean;
-
   @Column({ type: "boolean", nullable: false, default: false })
   isDeleted!: boolean;
 
@@ -67,7 +60,4 @@ export class User {
   @ManyToOne(() => GroupRole, (groupRole) => groupRole.id, { onDelete: "CASCADE" })
   @JoinColumn({ name: "groupRoleId" })
   groupRole!: GroupRole;
-
-  @OneToOne(() => Profile, (profile) => profile.user)
-  profile!: Profile;
 }

@@ -4,7 +4,7 @@ import { IResponseBase } from "@/interfaces/base/IResponseBase";
 import IUserService from "@/interfaces/user/IUserService";
 import { Repo } from "@/repository";
 import { StatusCodes } from "http-status-codes";
-import { ICreateUserData } from "@/interfaces/user/UserDTO";
+import { ICreateUserData, IUpdateUserData } from "@/interfaces/user/UserDTO";
 import { User } from "@/entity/User";
 import { v4 as uuidv4 } from "uuid";
 import Extensions from "@/utils/Extensions";
@@ -17,41 +17,55 @@ export default class UserService implements IUserService {
     // constructor code
     this._roleService = new RoleService();
   }
-  async getUserByEmail(email: string): Promise<IResponseBase> {
+  async getUserByUsername(username: string): Promise<IResponseBase> {
     try {
-      if (!email) {
+      if (!username) {
         return {
           status: StatusCodes.BAD_REQUEST,
           success: false,
-          errorMessage: "Email is required",
+          errorMessage: "Tài khoản không được để trống",
           data: null,
           error: {
             message: "Bad Request",
-            errorDetail: "Email is required",
+            errorDetail: "Tài khoản không được để trống",
           },
         };
       }
-      const user = await Repo.UserRepo.findOne({
-        where: {
-          email,
-        },
-        relations: ["groupRole"],
-      });
+      const user = await Repo.UserRepo.createQueryBuilder("user")
+        .innerJoinAndSelect("user.groupRole", "groupRole")
+        .where("user.isDeleted = :isDeleted", { isDeleted: false })
+        .andWhere("user.username = :username", { username })
+        .orderBy("user.createdAt", "DESC")
+        .select([
+          "user.id",
+          "user.avatar",
+          "user.fullName",
+          "user.groupRoleId",
+          "user.groupRole",
+          "user.email",
+          "user.username",
+          "user.isBlocked",
+          "user.isDeleted",
+          "user.createdAt",
+          "groupRole.name",
+          "groupRole.displayName",
+        ])
+        .getOne();
       return {
         status: StatusCodes.OK,
         success: true,
         data: user,
         error: null,
       };
-    } catch {
+    } catch (error: any) {
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
-        errorMessage: "Internal Server Error",
+        errorMessage: ErrorMessages.INTERNAL_SERVER_ERROR,
         data: null,
         error: {
-          message: "Internal Server Error",
-          errorDetail: "Internal Server Error",
+          message: ErrorMessages.INTERNAL_SERVER_ERROR,
+          errorDetail: error.message,
         },
       };
     }
@@ -82,20 +96,7 @@ export default class UserService implements IUserService {
           })
         )
         .orderBy("user.createdAt", "DESC")
-        .select([
-          "user.id",
-          "user.avatar",
-          "user.fullName",
-          "user.groupRoleId",
-          "user.groupRole",
-          "user.email",
-          "user.isActive",
-          "user.isBlocked",
-          "user.isDeleted",
-          "user.createdAt",
-          "groupRole.name",
-          "groupRole.displayName",
-        ])
+        .select(["user", "groupRole.name", "groupRole.displayName"])
         .skip(Number((page - 1) * limit))
         .take(limit)
         .getMany();
@@ -142,7 +143,7 @@ export default class UserService implements IUserService {
           },
         ],
 
-        select: ["id", "avatar", "fullName", "groupRoleId", "groupRole", "email", "isActive", "isBlocked", "isDeleted"],
+        select: ["id", "avatar", "fullName", "groupRoleId", "groupRole", "email", "isBlocked", "isDeleted"],
         skip: (page - 1) * limit,
         take: limit,
       });
@@ -159,7 +160,7 @@ export default class UserService implements IUserService {
         },
         error: null,
       };
-    } catch {
+    } catch (error) {
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -167,7 +168,7 @@ export default class UserService implements IUserService {
         data: null,
         error: {
           message: ErrorMessages.INTERNAL_SERVER_ERROR,
-          errorDetail: ErrorMessages.INTERNAL_SERVER_ERROR,
+          errorDetail: error.message,
         },
       };
     }
@@ -175,13 +176,14 @@ export default class UserService implements IUserService {
 
   async getUserById(userId: string): Promise<IResponseBase> {
     try {
-      const user = await Repo.UserRepo.findOne({
-        where: {
-          id: userId,
-          isDeleted: false,
-        },
-        select: ["id", "avatar", "fullName", "groupRoleId", "groupRole", "email", "isActive", "isBlocked", "isDeleted"],
-      });
+      const user = await Repo.UserRepo.createQueryBuilder("user")
+        .innerJoinAndSelect("user.groupRole", "groupRole")
+        .where("user.isDeleted = :isDeleted", { isDeleted: false })
+        .andWhere("user.id = :userId", { userId })
+        .orderBy("user.createdAt", "DESC")
+        .select(["user", "groupRole.name", "groupRole.displayName"])
+        .getOne();
+      delete user?.password;
 
       if (!user) {
         return {
@@ -221,22 +223,23 @@ export default class UserService implements IUserService {
     try {
       const userData = new User();
       userData.email = data.email;
+      userData.username = data.username;
       userData.password = Extensions.hashPassword(data.password);
       userData.fullName = data.fullName;
       userData.avatar = data.avatar;
       userData.groupRoleId = data.groupRoleId;
       userData.id = uuidv4();
 
-      const checkEmailExist = await this.getUserByEmail(userData.email);
-      if (checkEmailExist.success && checkEmailExist.data) {
+      const checkUsernameIsExists = await this.getUserByUsername(userData.username);
+      if (checkUsernameIsExists.success && checkUsernameIsExists.data) {
         return {
           status: StatusCodes.CONFLICT,
           success: false,
-          errorMessage: "Email đã tồn tại trên hệ thống",
+          errorMessage: "Tài khoản đã tồn tại trên hệ thống",
           data: null,
           error: {
             message: "Conflict",
-            errorDetail: "Email đã tồn tại trên hệ thống",
+            errorDetail: "Tài khoản đã tồn tại trên hệ thống",
           },
         };
       }
@@ -258,11 +261,25 @@ export default class UserService implements IUserService {
       const user = Repo.UserRepo.create(userData);
       await Repo.UserRepo.save(user);
 
+      const userCreated = await this.getUserById(user.id);
+      if (!userCreated.success || !userCreated.data) {
+        return {
+          status: StatusCodes.INTERNAL_SERVER_ERROR,
+          success: false,
+          errorMessage: "Lỗi khi tạo mới người dùng",
+          data: null,
+          error: {
+            message: ErrorMessages.INTERNAL_SERVER_ERROR,
+            errorDetail: "Lỗi khi tạo mới người dùng",
+          },
+        };
+      }
+
       return {
         status: StatusCodes.CREATED,
         success: true,
         errorMessage: null,
-        data: user,
+        data: userCreated.data,
         error: null,
       };
     } catch (error: any) {
@@ -279,13 +296,17 @@ export default class UserService implements IUserService {
     }
   }
 
-  async updateUser(userId: string, data: ICreateUserData): Promise<IResponseBase> {
+  async updateUser(userId: string, data: IUpdateUserData): Promise<IResponseBase> {
     try {
       const userData = new User();
       userData.fullName = data.fullName;
       userData.avatar = data.avatar;
+      userData.email = data.email;
+      userData.phoneNumber = data.phoneNumber;
+      userData.birthday = data.birthday;
+      userData.gender = data.gender;
+      userData.id = userId;
       userData.groupRoleId = data.groupRoleId;
-      userData.password = Extensions.hashPassword(data.password);
 
       const checkRole = await this._roleService.getGroupRole(data.groupRoleId);
       if (!checkRole.success || !checkRole.data) {
@@ -307,11 +328,26 @@ export default class UserService implements IUserService {
       });
       const updatedUser = Repo.UserRepo.merge(user, userData);
       await Repo.UserRepo.save(updatedUser);
+
+      const userUpdated = await this.getUserById(userId);
+      if (!userUpdated.success || !userUpdated.data) {
+        return {
+          status: StatusCodes.INTERNAL_SERVER_ERROR,
+          success: false,
+          errorMessage: "Không tìm thấy thông tin người dùng hoặc người dùng đã bị xoá",
+          data: null,
+          error: {
+            message: ErrorMessages.INTERNAL_SERVER_ERROR,
+            errorDetail: "Không tìm thấy thông tin người dùng hoặc người dùng đã bị xoá",
+          },
+        };
+      }
+
       return {
         status: StatusCodes.OK,
         success: true,
         errorMessage: null,
-        data: updatedUser,
+        data: userUpdated.data,
         error: null,
       };
     } catch (error: any) {

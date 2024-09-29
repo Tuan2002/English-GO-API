@@ -2,7 +2,7 @@ import { IResponseBase } from "../base/IResponseBase";
 import { ICreateUserData, IUpdateUserData } from "./UserDTO";
 
 export default interface IUserService {
-  getUserByEmail(email: string): Promise<IResponseBase>;
+  getUserByUsername(username: string): Promise<IResponseBase>;
   getAllUser(page: number, limit: number, search: string): Promise<IResponseBase>;
   getDeletedUsers(page: number, limit: number, search: string): Promise<IResponseBase>;
   getUserById(userId: string): Promise<IResponseBase>;

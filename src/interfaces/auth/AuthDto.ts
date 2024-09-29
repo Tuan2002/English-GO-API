@@ -2,13 +2,13 @@ import { EGenderStatus } from "../user/UserDTO";
 import { IAccessTokenResponse } from "./IJWTService";
 
 export interface IUserLoginData {
-  email: string;
+  username: string;
   password: string;
   isRememberMe: boolean;
 }
 
 export interface IUserRegisterData {
-  email: string;
+  username: string;
   password: string;
   fullName: string;
   role: "3" | "4";
@@ -18,7 +18,7 @@ export interface IUserLoginResponse {
   accessToken: IAccessTokenResponse;
   userInfo: {
     userId: string;
-    email: string;
+    username: string;
     fullName: string;
     role: {
       roleName: string;
@@ -29,7 +29,7 @@ export interface IUserLoginResponse {
 }
 
 export interface IUserRegisterResponse {
-  email: string;
+  username: string;
   fullName: string;
 }
 
@@ -43,7 +43,7 @@ export interface IFunctionByRole {
 export interface IUpdateProfilePayload {
   id: string;
   avatar: string;
-  banner: string;
+  email: string;
   fullName: string;
   birthday: string;
   gerder: EGenderStatus;

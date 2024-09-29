@@ -1,3 +1,5 @@
+npm run migration:generate -- ./src/migrations/CreateUserTable
+npm run migration:run
 /** Users
  * id: string;
  * password: string;

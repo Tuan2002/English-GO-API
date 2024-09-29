@@ -1,9 +1,8 @@
 export interface IAccessTokenPayload {
   userId: string;
-  email: string;
+  username: string;
   role: string;
   roleName: string;
-  isRecruiter: boolean;
 }
 export interface IAccessTokenResponse {
   token: string;

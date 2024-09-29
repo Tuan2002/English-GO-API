@@ -1,9 +1,7 @@
-import bcrypt from "bcrypt";
 import { IUpdateProfilePayload, IUserLoginData, IUserLoginResponse, IUserRegisterData } from "@/interfaces/auth/AuthDto";
 import IAuthService from "@/interfaces/auth/IAuthService";
 import { IResponseBase } from "@/interfaces/base/IResponseBase";
 import { Repo } from "@/repository";
-import { ENV } from "@/constants/env";
 import { StatusCodes } from "http-status-codes";
 import { IAccessTokenPayload, IJWTService } from "@/interfaces/auth/IJWTService";
 import JwtService from "./JWTService";
@@ -12,7 +10,6 @@ import RoleService from "./RoleService";
 import { v4 as uuidv4 } from "uuid";
 import EGroupRole from "@/constants/GroupRole";
 import Extensions from "@/utils/Extensions";
-import CompanyStatus from "@/constants/CompanyStatus";
 
 export default class AuthService implements IAuthService {
   private _JwtService!: IJWTService;
@@ -21,27 +18,18 @@ export default class AuthService implements IAuthService {
     this._JwtService = new JwtService();
     this._RoleService = new RoleService();
   }
-  // private hashPassword = (password: string): string => {
-  //   const salt = bcrypt.genSaltSync(Number(ENV.PASSWORD_SALT));
-  //   const hash = bcrypt.hashSync(password, salt);
-  //   return hash;
-  // };
-  // private async comparePassword(plaintextPassword: string, hashPassword: string): Promise<boolean> {
-  //   const checkPassword = bcrypt.compareSync(plaintextPassword, hashPassword);
-  //   return checkPassword;
-  // }
 
-  async getUserByEmail(email: string): Promise<IResponseBase> {
+  async getUserByusername(email: string): Promise<IResponseBase> {
     try {
       if (!email) {
         return {
           status: StatusCodes.BAD_REQUEST,
           success: false,
-          errorMessage: "Email is required",
+          errorMessage: "Email không được để trống",
           data: null,
           error: {
             message: "Bad Request",
-            errorDetail: "Email is required",
+            errorDetail: "Email không được để trống",
           },
         };
       }
@@ -61,11 +49,51 @@ export default class AuthService implements IAuthService {
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
-        errorMessage: "Internal Server Error",
+        errorMessage: "Lỗi từ phía server",
         data: null,
         error: {
-          message: "Internal Server Error",
-          errorDetail: "Internal Server Error",
+          message: "Lỗi từ phía server",
+          errorDetail: "Lỗi từ phía server",
+        },
+      };
+    }
+  }
+
+  async getUserByUsername(username: string): Promise<IResponseBase> {
+    try {
+      if (!username) {
+        return {
+          status: StatusCodes.BAD_REQUEST,
+          success: false,
+          errorMessage: "username không được để trống",
+          data: null,
+          error: {
+            message: "Bad Request",
+            errorDetail: "username không được để trống",
+          },
+        };
+      }
+      const user = await Repo.UserRepo.findOne({
+        where: {
+          username,
+        },
+        relations: ["groupRole"],
+      });
+      return {
+        status: StatusCodes.OK,
+        success: true,
+        data: user,
+        error: null,
+      };
+    } catch {
+      return {
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+        success: false,
+        errorMessage: "Lỗi từ phía server",
+        data: null,
+        error: {
+          message: "Lỗi từ phía server",
+          errorDetail: "Lỗi từ phía server",
         },
       };
     }
@@ -73,19 +101,19 @@ export default class AuthService implements IAuthService {
 
   async login(userLogin: IUserLoginData, setAccessTokenToCookie: (data: string) => void): Promise<IResponseBase> {
     try {
-      if (!userLogin.email || !userLogin.password) {
+      if (!userLogin.username || !userLogin.password) {
         return {
           status: StatusCodes.BAD_REQUEST,
           success: false,
-          errorMessage: "Email and Password is required",
+          errorMessage: "Tài khoản và mật khẩu không được để trống",
           data: null,
           error: {
             message: "Bad Request",
-            errorDetail: "Email and Password is required",
+            errorDetail: "Tài khoản và mật khẩu không được để trống",
           },
         };
       }
-      const user = await this.getUserByEmail(userLogin.email);
+      const user = await this.getUserByUsername(userLogin.username);
       if (!user.success || user.data === null || user.data.isDeleted) {
         return {
           status: StatusCodes.NOT_FOUND,
@@ -131,23 +159,11 @@ export default class AuthService implements IAuthService {
         return userRoles;
       }
 
-      const checkIsRecruiter = await Repo.CompanyRepo.findOne({
-        where: {
-          recruiterId: user.data.id,
-          status: CompanyStatus.APPROVE,
-          isActive: true,
-          isDeleted: false,
-        },
-      });
-
-      const isRecruiter: boolean = checkIsRecruiter ? true : false;
-
       const tokenPayload: IAccessTokenPayload = {
         userId: user.data.id,
-        email: user.data.email,
+        username: user.data.username,
         role: userRoles.data,
         roleName: user.data.groupRole.name,
-        isRecruiter,
       };
 
       const token = this._JwtService.generateAccessToken(tokenPayload);
@@ -156,7 +172,7 @@ export default class AuthService implements IAuthService {
         accessToken: token,
         userInfo: {
           userId: user.data.id,
-          email: user.data.email,
+          username: user.data.username,
           fullName: user.data.fullName,
           role: {
             roleName: user.data.groupRole.name,
@@ -176,11 +192,11 @@ export default class AuthService implements IAuthService {
       return {
         status: 500,
         success: false,
-        errorMessage: "Internal Server Error",
+        errorMessage: "Lỗi từ phía server",
         data: null,
         error: {
-          message: "Internal Server Error",
-          errorDetail: "Internal Server Error",
+          message: "Lỗi từ phía server",
+          errorDetail: "Lỗi từ phía server",
         },
       };
     }
@@ -188,34 +204,34 @@ export default class AuthService implements IAuthService {
 
   async register(userRegister: IUserRegisterData): Promise<IResponseBase> {
     try {
-      if (!userRegister.email || !userRegister.password || !userRegister.fullName) {
+      if (!userRegister.username || !userRegister.password || !userRegister.fullName) {
         return {
           status: StatusCodes.BAD_REQUEST,
           success: false,
-          errorMessage: "Email, password and fullName is required",
+          errorMessage: "Tài khoản, mật khẩu và họ tên không được để trống",
           data: null,
           error: {
             message: "Bad Request",
-            errorDetail: "Email, password and fullName is required",
+            errorDetail: "Tài khoản, mật khẩu và họ tên không được để trống",
           },
         };
       }
 
-      const checkEmailExist = await this.getUserByEmail(userRegister.email);
-      if (checkEmailExist.success && checkEmailExist.data) {
+      const checkUsernameIsExists = await this.getUserByUsername(userRegister.username);
+      if (checkUsernameIsExists.success && checkUsernameIsExists.data) {
         return {
           status: StatusCodes.CONFLICT,
           success: false,
-          errorMessage: "Email đã tồn tại trên hệ thống",
+          errorMessage: "Tài khoản đã tồn tại trên hệ thống",
           data: null,
           error: {
             message: "Conflict",
-            errorDetail: "Email đã tồn tại trên hệ thống",
+            errorDetail: "Tài khoản đã tồn tại trên hệ thống",
           },
         };
       }
 
-      const checkRole = await this._RoleService.getGroupRole(EGroupRole.CANDIDATE);
+      const checkRole = await this._RoleService.getGroupRole(EGroupRole.CONTESTANT);
       if (!checkRole.success || !checkRole.data) {
         return {
           status: StatusCodes.BAD_REQUEST,
@@ -233,13 +249,14 @@ export default class AuthService implements IAuthService {
 
       const registerData = {
         id: uuidv4(),
-        email: userRegister.email,
+        username: userRegister.username,
         password: hashPassword,
         fullName: userRegister.fullName,
-        groupRoleId: EGroupRole.CANDIDATE,
+        groupRoleId: EGroupRole.CONTESTANT,
       };
 
       const newUser = await Repo.UserRepo.save(registerData);
+      console.log("createUser");
 
       if (!newUser) {
         return {
@@ -258,22 +275,23 @@ export default class AuthService implements IAuthService {
         status: StatusCodes.CREATED,
         success: true,
         data: {
-          email: newUser.email,
+          username: newUser.username,
           fullName: newUser.fullName,
           id: newUser.id,
           role: newUser.groupRole,
         },
         error: null,
       };
-    } catch {
+    } catch (error: any) {
+      console.log(error);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
-        errorMessage: "Internal Server Error",
+        errorMessage: "Lỗi từ phía server",
         data: null,
         error: {
-          message: "Internal Server Error",
-          errorDetail: "Internal Server Error",
+          message: "Lỗi từ phía server",
+          errorDetail: "Lỗi từ phía server",
         },
       };
     }
@@ -284,11 +302,11 @@ export default class AuthService implements IAuthService {
       return {
         status: StatusCodes.BAD_REQUEST,
         success: false,
-        errorMessage: "User Id is required",
+        errorMessage: "Mã người dùng không được để trống",
         data: null,
         error: {
           message: "Bad Request",
-          errorDetail: "User Id is required",
+          errorDetail: "Mã người dùng không được để trống",
         },
       };
     }
@@ -309,8 +327,8 @@ export default class AuthService implements IAuthService {
           errorMessage: "Không tìm thấy thông tin người dùng",
           data: null,
           error: {
-            message: "User not found",
-            errorDetail: "User not found",
+            message: "Không tìm thấy thông tin người dùng",
+            errorDetail: "Không tìm thấy thông tin người dùng",
           },
         };
       }
@@ -324,11 +342,11 @@ export default class AuthService implements IAuthService {
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
-        errorMessage: "Internal Server Error",
+        errorMessage: "Lỗi từ phía server",
         data: null,
         error: {
-          message: "Internal Server Error",
-          errorDetail: "Internal Server Error",
+          message: "Lỗi từ phía server",
+          errorDetail: "Lỗi từ phía server",
         },
       };
     }
@@ -340,11 +358,11 @@ export default class AuthService implements IAuthService {
         return {
           status: StatusCodes.BAD_REQUEST,
           success: false,
-          errorMessage: "User Id is required",
+          errorMessage: "Mã người dùng không được để trống",
           data: null,
           error: {
             message: "Bad Request",
-            errorDetail: "User Id is required",
+            errorDetail: "Mã người dùng không được để trống",
           },
         };
       }
@@ -352,11 +370,11 @@ export default class AuthService implements IAuthService {
         return {
           status: StatusCodes.BAD_REQUEST,
           success: false,
-          errorMessage: "Full Name is required",
+          errorMessage: "Họ và tên không được để trống",
           data: null,
           error: {
             message: "Bad Request",
-            errorDetail: "Full Name is required",
+            errorDetail: "Họ và tên không được để trống",
           },
         };
       }
@@ -364,11 +382,11 @@ export default class AuthService implements IAuthService {
         return {
           status: StatusCodes.BAD_REQUEST,
           success: false,
-          errorMessage: "Birthday is required",
+          errorMessage: "Ngày sinh không được để trống",
           data: null,
           error: {
             message: "Bad Request",
-            errorDetail: "Birthday is required",
+            errorDetail: "Ngày sinh không được để trống",
           },
         };
       }
@@ -381,11 +399,11 @@ export default class AuthService implements IAuthService {
         return {
           status: StatusCodes.NOT_FOUND,
           success: false,
-          errorMessage: "User not found",
+          errorMessage: "Không tìm thấy thông tin người dùng",
           data: null,
           error: {
             message: "Not Found",
-            errorDetail: "User not found",
+            errorDetail: "Không tìm thấy thông tin người dùng",
           },
         };
       }
@@ -393,17 +411,17 @@ export default class AuthService implements IAuthService {
         return {
           status: StatusCodes.FORBIDDEN,
           success: false,
-          errorMessage: "User is blocked or deleted",
+          errorMessage: "Tài khoản người dùng không tồn tại hoặc đã bị khoá",
           data: null,
           error: {
             message: "Forbidden",
-            errorDetail: "User is blocked or deleted",
+            errorDetail: "Tài khoản người dùng không tồn tại hoặc đã bị khoá",
           },
         };
       }
       user.fullName = data.fullName;
+      user.email = data.email;
       user.birthday = data.birthday;
-      user.banner = data.banner;
       user.avatar = data.avatar;
       user.gender = data.gerder;
       user.phoneNumber = data.phoneNumber;
@@ -414,11 +432,11 @@ export default class AuthService implements IAuthService {
         return {
           status: StatusCodes.INTERNAL_SERVER_ERROR,
           success: false,
-          errorMessage: "Update profile failed",
+          errorMessage: "Cập nhật thông tin cá nhân thất bại",
           data: null,
           error: {
-            message: "Internal Server Error",
-            errorDetail: "Update profile failed",
+            message: "Lỗi từ phía server",
+            errorDetail: "Cập nhật thông tin cá nhân thất bại",
           },
         };
       }
@@ -432,11 +450,11 @@ export default class AuthService implements IAuthService {
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
-        errorMessage: "Internal Server Error",
+        errorMessage: "Lỗi từ phía server",
         data: null,
         error: {
-          message: "Internal Server Error",
-          errorDetail: "Internal Server Error",
+          message: "Lỗi từ phía server",
+          errorDetail: "Lỗi từ phía server",
         },
       };
     }
