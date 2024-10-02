@@ -18,7 +18,7 @@ export default class RoleService implements IRoleService {
         return {
           status: StatusCodes.NOT_FOUND,
           success: false,
-          errorMessage: "User roles not found",
+          message: "User roles not found",
           data: null,
           error: {
             message: "Not Found",
@@ -36,7 +36,7 @@ export default class RoleService implements IRoleService {
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
-        errorMessage: "Internal Server Error",
+        message: "Internal Server Error",
         data: null,
         error: {
           message: "Internal Server Error",
@@ -57,7 +57,7 @@ export default class RoleService implements IRoleService {
         return {
           status: StatusCodes.NOT_FOUND,
           success: false,
-          errorMessage: "Group role not found",
+          message: "Group role not found",
           data: null,
           error: {
             message: "Not Found",
@@ -75,7 +75,7 @@ export default class RoleService implements IRoleService {
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
-        errorMessage: "Internal Server Error",
+        message: "Internal Server Error",
         data: null,
         error: {
           message: "Internal Server Error",
@@ -107,7 +107,7 @@ export default class RoleService implements IRoleService {
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
-        errorMessage: "Internal Server Error",
+        message: "Internal Server Error",
         data: null,
         error: {
           message: "Internal Server Error",
@@ -134,7 +134,7 @@ export default class RoleService implements IRoleService {
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
-        errorMessage: "Internal Server Error",
+        message: "Internal Server Error",
         data: null,
         error: {
           message: "Internal Server Error",

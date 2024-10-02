@@ -18,6 +18,12 @@ class LevelRoutes extends BaseRoute {
     this.router.get("/get-level/:levelId", (req: ExpressRequest, res: Response) => {
       this._levelController.getLevelById(req, res);
     });
+    this.router.get("/get-level-of-skill/:skillId", (req: ExpressRequest, res: Response) => {
+      this._levelController.getLevelOfSkillId(req, res);
+    });
+    this.router.put("/update-level/:levelId", (req: ExpressRequest, res: Response) => {
+      this._levelController.updateLevel(req, res);
+    });
   }
 }
 

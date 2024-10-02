@@ -19,4 +19,11 @@ export class SkillController {
     const skill = await this._skillService.getSkillById(skillId);
     return res.status(skill.status).json(skill);
   }
+
+  async updateSkill(req: Request, res: Response) {
+    const { skillId } = req.params;
+    const skillData = req.body;
+    const skill = await this._skillService.updateSkill(skillId, skillData);
+    return res.status(skill.status).json(skill);
+  }
 }

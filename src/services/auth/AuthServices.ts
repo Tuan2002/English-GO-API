@@ -25,7 +25,7 @@ export default class AuthService implements IAuthService {
         return {
           status: StatusCodes.BAD_REQUEST,
           success: false,
-          errorMessage: "Email không được để trống",
+          message: "Email không được để trống",
           data: null,
           error: {
             message: "Bad Request",
@@ -49,7 +49,7 @@ export default class AuthService implements IAuthService {
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
-        errorMessage: "Lỗi từ phía server",
+        message: "Lỗi từ phía server",
         data: null,
         error: {
           message: "Lỗi từ phía server",
@@ -65,7 +65,7 @@ export default class AuthService implements IAuthService {
         return {
           status: StatusCodes.BAD_REQUEST,
           success: false,
-          errorMessage: "username không được để trống",
+          message: "username không được để trống",
           data: null,
           error: {
             message: "Bad Request",
@@ -89,7 +89,7 @@ export default class AuthService implements IAuthService {
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
-        errorMessage: "Lỗi từ phía server",
+        message: "Lỗi từ phía server",
         data: null,
         error: {
           message: "Lỗi từ phía server",
@@ -105,7 +105,7 @@ export default class AuthService implements IAuthService {
         return {
           status: StatusCodes.BAD_REQUEST,
           success: false,
-          errorMessage: "Tài khoản và mật khẩu không được để trống",
+          message: "Tài khoản và mật khẩu không được để trống",
           data: null,
           error: {
             message: "Bad Request",
@@ -118,7 +118,7 @@ export default class AuthService implements IAuthService {
         return {
           status: StatusCodes.NOT_FOUND,
           success: false,
-          errorMessage: "Tài khoản của bạn không tồn tại trên hệ thống",
+          message: "Tài khoản của bạn không tồn tại trên hệ thống",
           data: null,
           error: {
             message: "Not Found",
@@ -131,7 +131,7 @@ export default class AuthService implements IAuthService {
         return {
           status: StatusCodes.UNAUTHORIZED,
           success: false,
-          errorMessage: "Mật khẩu không chính xác",
+          message: "Mật khẩu không chính xác",
           data: null,
           error: {
             message: "Unauthorized",
@@ -144,7 +144,7 @@ export default class AuthService implements IAuthService {
         return {
           status: StatusCodes.FORBIDDEN,
           success: false,
-          errorMessage: "Tài khoản của bạn đã bị khóa",
+          message: "Tài khoản của bạn đã bị khóa",
           data: null,
           error: {
             message: "Forbidden",
@@ -192,7 +192,7 @@ export default class AuthService implements IAuthService {
       return {
         status: 500,
         success: false,
-        errorMessage: "Lỗi từ phía server",
+        message: "Lỗi từ phía server",
         data: null,
         error: {
           message: "Lỗi từ phía server",
@@ -208,7 +208,7 @@ export default class AuthService implements IAuthService {
         return {
           status: StatusCodes.BAD_REQUEST,
           success: false,
-          errorMessage: "Tài khoản, mật khẩu và họ tên không được để trống",
+          message: "Tài khoản, mật khẩu và họ tên không được để trống",
           data: null,
           error: {
             message: "Bad Request",
@@ -222,7 +222,7 @@ export default class AuthService implements IAuthService {
         return {
           status: StatusCodes.CONFLICT,
           success: false,
-          errorMessage: "Tài khoản đã tồn tại trên hệ thống",
+          message: "Tài khoản đã tồn tại trên hệ thống",
           data: null,
           error: {
             message: "Conflict",
@@ -236,7 +236,7 @@ export default class AuthService implements IAuthService {
         return {
           status: StatusCodes.BAD_REQUEST,
           success: false,
-          errorMessage: "Đăng kí tài khoản không thành công",
+          message: "Đăng kí tài khoản không thành công",
           data: null,
           error: {
             message: "Phân quyền không tồn tại",
@@ -262,7 +262,7 @@ export default class AuthService implements IAuthService {
         return {
           status: StatusCodes.INTERNAL_SERVER_ERROR,
           success: false,
-          errorMessage: "Đăng kí tài khoản không thành công, vui lòng kiểm tra lại",
+          message: "Đăng kí tài khoản không thành công, vui lòng kiểm tra lại",
           data: null,
           error: {
             message: "Đăng kí tài khoản thất bại",
@@ -287,7 +287,7 @@ export default class AuthService implements IAuthService {
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
-        errorMessage: "Lỗi từ phía server",
+        message: "Lỗi từ phía server",
         data: null,
         error: {
           message: "Lỗi từ phía server",
@@ -302,7 +302,7 @@ export default class AuthService implements IAuthService {
       return {
         status: StatusCodes.BAD_REQUEST,
         success: false,
-        errorMessage: "Mã người dùng không được để trống",
+        message: "Mã người dùng không được để trống",
         data: null,
         error: {
           message: "Bad Request",
@@ -324,7 +324,7 @@ export default class AuthService implements IAuthService {
         return {
           status: StatusCodes.NOT_FOUND,
           success: false,
-          errorMessage: "Không tìm thấy thông tin người dùng",
+          message: "Không tìm thấy thông tin người dùng",
           data: null,
           error: {
             message: "Không tìm thấy thông tin người dùng",
@@ -342,7 +342,7 @@ export default class AuthService implements IAuthService {
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
-        errorMessage: "Lỗi từ phía server",
+        message: "Lỗi từ phía server",
         data: null,
         error: {
           message: "Lỗi từ phía server",
@@ -358,7 +358,7 @@ export default class AuthService implements IAuthService {
         return {
           status: StatusCodes.BAD_REQUEST,
           success: false,
-          errorMessage: "Mã người dùng không được để trống",
+          message: "Mã người dùng không được để trống",
           data: null,
           error: {
             message: "Bad Request",
@@ -370,7 +370,7 @@ export default class AuthService implements IAuthService {
         return {
           status: StatusCodes.BAD_REQUEST,
           success: false,
-          errorMessage: "Họ và tên không được để trống",
+          message: "Họ và tên không được để trống",
           data: null,
           error: {
             message: "Bad Request",
@@ -382,7 +382,7 @@ export default class AuthService implements IAuthService {
         return {
           status: StatusCodes.BAD_REQUEST,
           success: false,
-          errorMessage: "Ngày sinh không được để trống",
+          message: "Ngày sinh không được để trống",
           data: null,
           error: {
             message: "Bad Request",
@@ -399,7 +399,7 @@ export default class AuthService implements IAuthService {
         return {
           status: StatusCodes.NOT_FOUND,
           success: false,
-          errorMessage: "Không tìm thấy thông tin người dùng",
+          message: "Không tìm thấy thông tin người dùng",
           data: null,
           error: {
             message: "Not Found",
@@ -411,7 +411,7 @@ export default class AuthService implements IAuthService {
         return {
           status: StatusCodes.FORBIDDEN,
           success: false,
-          errorMessage: "Tài khoản người dùng không tồn tại hoặc đã bị khoá",
+          message: "Tài khoản người dùng không tồn tại hoặc đã bị khoá",
           data: null,
           error: {
             message: "Forbidden",
@@ -432,7 +432,7 @@ export default class AuthService implements IAuthService {
         return {
           status: StatusCodes.INTERNAL_SERVER_ERROR,
           success: false,
-          errorMessage: "Cập nhật thông tin cá nhân thất bại",
+          message: "Cập nhật thông tin cá nhân thất bại",
           data: null,
           error: {
             message: "Lỗi từ phía server",
@@ -450,7 +450,7 @@ export default class AuthService implements IAuthService {
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
-        errorMessage: "Lỗi từ phía server",
+        message: "Lỗi từ phía server",
         data: null,
         error: {
           message: "Lỗi từ phía server",

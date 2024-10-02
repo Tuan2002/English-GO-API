@@ -18,6 +18,9 @@ class SkillRoutes extends BaseRoute {
     this.router.get("/get-skill/:skillId", (req: ExpressRequest, res: Response) => {
       this._skillController.getSkillById(req, res);
     });
+    this.router.put("/update-skill/:skillId", (req: ExpressRequest, res: Response) => {
+      this._skillController.updateSkill(req, res);
+    });
   }
 }
 

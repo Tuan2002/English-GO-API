@@ -5,7 +5,7 @@ interface IError {
 export interface IResponseBase {
   status: number;
   success: boolean;
-  errorMessage?: string;
+  message?: string;
   data: any;
   error: IError | null;
 }

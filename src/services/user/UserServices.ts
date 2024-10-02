@@ -23,7 +23,7 @@ export default class UserService implements IUserService {
         return {
           status: StatusCodes.BAD_REQUEST,
           success: false,
-          errorMessage: "Tài khoản không được để trống",
+          message: "Tài khoản không được để trống",
           data: null,
           error: {
             message: "Bad Request",
@@ -61,7 +61,7 @@ export default class UserService implements IUserService {
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
-        errorMessage: ErrorMessages.INTERNAL_SERVER_ERROR,
+        message: ErrorMessages.INTERNAL_SERVER_ERROR,
         data: null,
         error: {
           message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -105,7 +105,7 @@ export default class UserService implements IUserService {
       return {
         status: StatusCodes.OK,
         success: false,
-        errorMessage: null,
+        message: null,
         data: {
           users,
           page,
@@ -119,7 +119,7 @@ export default class UserService implements IUserService {
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
-        errorMessage: ErrorMessages.INTERNAL_SERVER_ERROR,
+        message: ErrorMessages.INTERNAL_SERVER_ERROR,
         data: null,
         error: {
           message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -150,7 +150,7 @@ export default class UserService implements IUserService {
       return {
         status: StatusCodes.OK,
         success: false,
-        errorMessage: null,
+        message: null,
         data: {
           users,
           page,
@@ -164,7 +164,7 @@ export default class UserService implements IUserService {
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
-        errorMessage: ErrorMessages.INTERNAL_SERVER_ERROR,
+        message: ErrorMessages.INTERNAL_SERVER_ERROR,
         data: null,
         error: {
           message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -189,7 +189,7 @@ export default class UserService implements IUserService {
         return {
           status: StatusCodes.NOT_FOUND,
           success: false,
-          errorMessage: "Không tìm thấy thông tin người dùng hoặc người dùng đã bị xoá",
+          message: "Không tìm thấy thông tin người dùng hoặc người dùng đã bị xoá",
           data: null,
           error: {
             message: ErrorMessages.NOT_FOUND,
@@ -201,7 +201,7 @@ export default class UserService implements IUserService {
       return {
         status: StatusCodes.OK,
         success: true,
-        errorMessage: null,
+        message: null,
         data: user,
         error: null,
       };
@@ -209,7 +209,7 @@ export default class UserService implements IUserService {
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
-        errorMessage: ErrorMessages.INTERNAL_SERVER_ERROR,
+        message: ErrorMessages.INTERNAL_SERVER_ERROR,
         data: null,
         error: {
           message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -235,7 +235,7 @@ export default class UserService implements IUserService {
         return {
           status: StatusCodes.CONFLICT,
           success: false,
-          errorMessage: "Tài khoản đã tồn tại trên hệ thống",
+          message: "Tài khoản đã tồn tại trên hệ thống",
           data: null,
           error: {
             message: "Conflict",
@@ -249,7 +249,7 @@ export default class UserService implements IUserService {
         return {
           status: StatusCodes.BAD_REQUEST,
           success: false,
-          errorMessage: "Đăng kí tài khoản không thành công",
+          message: "Đăng kí tài khoản không thành công",
           data: null,
           error: {
             message: "Phân quyền không tồn tại",
@@ -266,7 +266,7 @@ export default class UserService implements IUserService {
         return {
           status: StatusCodes.INTERNAL_SERVER_ERROR,
           success: false,
-          errorMessage: "Lỗi khi tạo mới người dùng",
+          message: "Lỗi khi tạo mới người dùng",
           data: null,
           error: {
             message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -278,7 +278,7 @@ export default class UserService implements IUserService {
       return {
         status: StatusCodes.CREATED,
         success: true,
-        errorMessage: null,
+        message: null,
         data: userCreated.data,
         error: null,
       };
@@ -286,7 +286,7 @@ export default class UserService implements IUserService {
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
-        errorMessage: ErrorMessages.INTERNAL_SERVER_ERROR,
+        message: ErrorMessages.INTERNAL_SERVER_ERROR,
         data: null,
         error: {
           message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -313,7 +313,7 @@ export default class UserService implements IUserService {
         return {
           status: StatusCodes.BAD_REQUEST,
           success: false,
-          errorMessage: "Phân quyền không tồn tại",
+          message: "Phân quyền không tồn tại",
           data: null,
           error: {
             message: "Phân quyền không tồn tại",
@@ -334,7 +334,7 @@ export default class UserService implements IUserService {
         return {
           status: StatusCodes.INTERNAL_SERVER_ERROR,
           success: false,
-          errorMessage: "Không tìm thấy thông tin người dùng hoặc người dùng đã bị xoá",
+          message: "Không tìm thấy thông tin người dùng hoặc người dùng đã bị xoá",
           data: null,
           error: {
             message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -346,7 +346,7 @@ export default class UserService implements IUserService {
       return {
         status: StatusCodes.OK,
         success: true,
-        errorMessage: null,
+        message: null,
         data: userUpdated.data,
         error: null,
       };
@@ -354,7 +354,7 @@ export default class UserService implements IUserService {
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
-        errorMessage: ErrorMessages.INTERNAL_SERVER_ERROR,
+        message: ErrorMessages.INTERNAL_SERVER_ERROR,
         data: null,
         error: {
           message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -376,7 +376,7 @@ export default class UserService implements IUserService {
         return {
           status: StatusCodes.NOT_FOUND,
           success: false,
-          errorMessage: "Không tìm thấy thông tin người dùng hoặc người dùng đã bị xoá",
+          message: "Không tìm thấy thông tin người dùng hoặc người dùng đã bị xoá",
           data: null,
           error: {
             message: ErrorMessages.NOT_FOUND,
@@ -389,7 +389,7 @@ export default class UserService implements IUserService {
       return {
         status: StatusCodes.OK,
         success: true,
-        errorMessage: null,
+        message: null,
         data: {
           message: "Xóa người dùng thành công",
           userId,
@@ -400,7 +400,7 @@ export default class UserService implements IUserService {
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
-        errorMessage: ErrorMessages.INTERNAL_SERVER_ERROR,
+        message: ErrorMessages.INTERNAL_SERVER_ERROR,
         data: null,
         error: {
           message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -422,7 +422,7 @@ export default class UserService implements IUserService {
         return {
           status: StatusCodes.NOT_FOUND,
           success: false,
-          errorMessage: "Không tìm thấy thông tin người dùng hoặc người dùng đã bị xoá",
+          message: "Không tìm thấy thông tin người dùng hoặc người dùng đã bị xoá",
           data: null,
           error: {
             message: ErrorMessages.NOT_FOUND,
@@ -435,7 +435,7 @@ export default class UserService implements IUserService {
       return {
         status: StatusCodes.OK,
         success: true,
-        errorMessage: null,
+        message: null,
         data: {
           message: "Khôi phục người dùng thành công",
           userId,
@@ -446,7 +446,7 @@ export default class UserService implements IUserService {
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
-        errorMessage: ErrorMessages.INTERNAL_SERVER_ERROR,
+        message: ErrorMessages.INTERNAL_SERVER_ERROR,
         data: null,
         error: {
           message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -467,7 +467,7 @@ export default class UserService implements IUserService {
         return {
           status: StatusCodes.NOT_FOUND,
           success: false,
-          errorMessage: "Không tìm thấy thông tin người dùng hoặc người dùng đã bị xoá",
+          message: "Không tìm thấy thông tin người dùng hoặc người dùng đã bị xoá",
           data: null,
           error: {
             message: ErrorMessages.NOT_FOUND,
@@ -479,7 +479,7 @@ export default class UserService implements IUserService {
       return {
         status: StatusCodes.OK,
         success: true,
-        errorMessage: null,
+        message: null,
         data: {
           message: "Xóa người dùng vĩnh viễn thành công",
           userId,
@@ -490,7 +490,7 @@ export default class UserService implements IUserService {
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
-        errorMessage: ErrorMessages.INTERNAL_SERVER_ERROR,
+        message: ErrorMessages.INTERNAL_SERVER_ERROR,
         data: null,
         error: {
           message: ErrorMessages.INTERNAL_SERVER_ERROR,
