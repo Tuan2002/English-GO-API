@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 import AppDataSource from "@/data-source";
 import { Category } from "@/entity/Category";
 import { Function } from "@/entity/Function";
@@ -17,6 +18,10 @@ const LevelRepo = AppDataSource.getRepository(Level);
 const CategoryRepo = AppDataSource.getRepository(Category);
 const QuestionRepo = AppDataSource.getRepository(Question);
 
+const createUUID = (): string => {
+  return uuidv4();
+};
+
 export const Repo = {
   FunctionRepo,
   GroupRoleRepo,
@@ -26,4 +31,5 @@ export const Repo = {
   LevelRepo,
   CategoryRepo,
   QuestionRepo,
+  createUUID,
 };

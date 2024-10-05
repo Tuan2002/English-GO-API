@@ -7,6 +7,7 @@ import UserRoutes from "./UserRoutes";
 import AuthenticationMiddleware from "@/middlewares/AuthenticateMiddleware";
 import SkillRoutes from "./SkillRoutes";
 import LevelRoutes from "./LevelRoutes";
+import CategoryRoutes from "./CategoryRoutes";
 
 class AppRoute extends BaseRoute {
   private _authenticationMiddleware: AuthenticationMiddleware;
@@ -26,6 +27,7 @@ class AppRoute extends BaseRoute {
     this.router.use("/users", UserRoutes);
     this.router.use("/skills", SkillRoutes);
     this.router.use("/levels", LevelRoutes);
+    this.router.use("/categories", CategoryRoutes);
 
     this.router.get("/status", (req, res) => {
       res.status(StatusCodes.OK).json({

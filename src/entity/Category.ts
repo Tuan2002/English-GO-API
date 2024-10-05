@@ -20,7 +20,7 @@ export class Category {
   @Column({ type: "boolean", nullable: false, default: false })
   isDeleted!: boolean;
 
-  @Column({ type: "boolean", nullable: true, default: false })
+  @Column({ type: "boolean", nullable: true, default: true })
   isActive!: boolean;
 
   @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
