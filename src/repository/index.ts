@@ -8,6 +8,8 @@ import { Permission } from "@/entity/Permission";
 import { Question } from "@/entity/Question";
 import { Skill } from "@/entity/Skill";
 import { User } from "@/entity/User";
+import { SubQuestion } from "@/entity/SubQuestion";
+import { Answer } from "@/entity/Answer";
 
 const FunctionRepo = AppDataSource.getRepository(Function);
 const GroupRoleRepo = AppDataSource.getRepository(GroupRole);
@@ -17,6 +19,8 @@ const SkillRepo = AppDataSource.getRepository(Skill);
 const LevelRepo = AppDataSource.getRepository(Level);
 const CategoryRepo = AppDataSource.getRepository(Category);
 const QuestionRepo = AppDataSource.getRepository(Question);
+const SubQuesionRepo = AppDataSource.getRepository(SubQuestion);
+const AnswerRepo = AppDataSource.getRepository(Answer);
 
 const createUUID = (): string => {
   return uuidv4();
@@ -31,5 +35,7 @@ export const Repo = {
   LevelRepo,
   CategoryRepo,
   QuestionRepo,
+  SubQuesionRepo,
+  AnswerRepo,
   createUUID,
 };

@@ -2,6 +2,7 @@ import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
 import { Level } from "./Level";
 import { Category } from "./Category";
 import { Skill } from "./Skill";
+import { SubQuestion } from "./SubQuestion";
 
 @Entity({ name: "Questions" })
 export class Question {
@@ -58,4 +59,7 @@ export class Question {
 
   @ManyToOne(() => Skill, (skill) => skill.id, { onDelete: "CASCADE" })
   skill!: Skill;
+
+  @OneToMany(() => SubQuestion, (subQuestion) => subQuestion.question)
+  subQuestions!: SubQuestion[];
 }
