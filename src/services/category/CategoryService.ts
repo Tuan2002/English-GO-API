@@ -326,7 +326,6 @@ export class CategoryService implements ICategoryService {
       };
     }
   }
-
   async deleteCategoryPermanently(id: string): Promise<IResponseBase> {
     try {
       if (!id) {
@@ -379,7 +378,6 @@ export class CategoryService implements ICategoryService {
       };
     }
   }
-
   async restoreCategory(id: string): Promise<IResponseBase> {
     try {
       if (!id) {
@@ -433,7 +431,6 @@ export class CategoryService implements ICategoryService {
       };
     }
   }
-
   async activeCategory(id: string): Promise<IResponseBase> {
     try {
       if (!id) {
@@ -487,7 +484,6 @@ export class CategoryService implements ICategoryService {
       };
     }
   }
-
   async inactiveCategory(id: string): Promise<IResponseBase> {
     try {
       if (!id) {
