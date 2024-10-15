@@ -162,73 +162,74 @@ export default class QuestionService implements IQuestionService {
       status: StatusCodes.OK,
     };
   }
-
-  async createNewQuestion(questionData: IQuestionDetail, userId: string): Promise<IResponseBase> {
-    const checkQuestionData = await this.checkQuestionData(questionData);
-    if (checkQuestionData.success === false) {
-      return checkQuestionData;
-    }
-
+  async createNewQuestion(questionDatas: IQuestionDetail[], userId: string): Promise<IResponseBase> {
     const queryRunner = AppDataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-
     try {
-      const question = new Question();
-      question.id = questionData.id; // Ensure questionData.id is provided
-      question.skillId = questionData.skillId;
-      question.levelId = questionData.levelId;
-      question.categoryId = questionData.categoryId;
-      question.questionContent = questionData.questionContent;
-      question.questionNote = questionData.questionNote;
-      question.description = questionData.description;
-      question.attachedFile = questionData.attachedFile;
-      question.isDeleted = false;
-      question.isActive = true;
-      question.createdBy = userId;
-      question.updatedBy = userId;
-
-      const savedQuestion = await queryRunner.manager.insert(Question, question);
-
-      // Thay thế forEach bằng Promise.all
       await Promise.all(
-        questionData.subQuestions?.map(async (subQuestion) => {
-          const newSubQuestion = new SubQuestion();
-          newSubQuestion.id = subQuestion.id; // Ensure subQuestion.id is provided
-          newSubQuestion.content = subQuestion.content;
-          // newSubQuestion.question = savedQuestion;
-          newSubQuestion.questionId = savedQuestion.identifiers[0].id;
-          newSubQuestion.order = subQuestion.order;
-          newSubQuestion.createdBy = userId;
-          newSubQuestion.updatedBy = userId;
-          newSubQuestion.isDeleted = false;
-          newSubQuestion.isActive = true;
-          newSubQuestion.correctAnswer = subQuestion.correctAnswer;
+        questionDatas.map(async (questionData) => {
+          const checkQuestionData = await this.checkQuestionData(questionData);
+          if (checkQuestionData.success === false) {
+            return checkQuestionData;
+          }
+          const question = new Question();
+          question.id = questionData.id; // Ensure questionData.id is provided
+          question.skillId = questionData.skillId;
+          question.levelId = questionData.levelId;
+          question.categoryId = questionData.categoryId;
+          question.questionContent = questionData.questionContent;
+          question.questionNote = questionData.questionNote;
+          question.description = questionData.description;
+          question.attachedFile = questionData.attachedFile;
+          question.isDeleted = false;
+          question.isActive = true;
+          question.createdBy = userId;
+          question.updatedBy = userId;
 
-          const savedSubQuestion = await queryRunner.manager.insert(SubQuestion, newSubQuestion);
+          const savedQuestion = await queryRunner.manager.insert(Question, question);
 
-          // Lưu các Answer
+          // Thay thế forEach bằng Promise.all
           await Promise.all(
-            subQuestion.answers?.map(async (answer) => {
-              const newAnswer = new Answer();
-              newAnswer.id = answer.id; // Ensure answer.id is provided
-              newAnswer.answerContent = answer.answerContent;
-              // newAnswer.subQuestion = savedSubQuestion;
-              newAnswer.subQuestionId = savedSubQuestion.identifiers[0].id;
-              newAnswer.order = answer.order;
-              newAnswer.createdBy = userId;
-              newAnswer.updatedBy = userId;
-              newAnswer.isCorrect = answer.isCorrect;
+            questionData.subQuestions?.map(async (subQuestion) => {
+              const newSubQuestion = new SubQuestion();
+              newSubQuestion.id = subQuestion.id; // Ensure subQuestion.id is provided
+              newSubQuestion.content = subQuestion.content;
+              // newSubQuestion.question = savedQuestion;
+              newSubQuestion.questionId = savedQuestion.identifiers[0].id;
+              newSubQuestion.order = subQuestion.order;
+              newSubQuestion.createdBy = userId;
+              newSubQuestion.updatedBy = userId;
+              newSubQuestion.isDeleted = false;
+              newSubQuestion.isActive = true;
+              newSubQuestion.correctAnswer = subQuestion.correctAnswer;
 
-              await queryRunner.manager.save(Answer, newAnswer);
+              const savedSubQuestion = await queryRunner.manager.insert(SubQuestion, newSubQuestion);
+
+              // Lưu các Answer
+              await Promise.all(
+                subQuestion.answers?.map(async (answer) => {
+                  const newAnswer = new Answer();
+                  newAnswer.id = answer.id; // Ensure answer.id is provided
+                  newAnswer.answerContent = answer.answerContent;
+                  // newAnswer.subQuestion = savedSubQuestion;
+                  newAnswer.subQuestionId = savedSubQuestion.identifiers[0].id;
+                  newAnswer.order = answer.order;
+                  newAnswer.createdBy = userId;
+                  newAnswer.updatedBy = userId;
+                  newAnswer.isCorrect = answer.isCorrect;
+
+                  await queryRunner.manager.save(Answer, newAnswer);
+                })
+              );
             })
           );
         })
       );
-
       // Commit transaction
       await queryRunner.commitTransaction();
-      const questionCreated = await this.getQuestionById(savedQuestion.identifiers[0].id);
+      const questionIds = questionDatas.map((questionData) => questionData.id);
+      const questionCreated = await this.getQuestionByListId(questionIds);
       if (!questionCreated || !questionCreated.success) {
         return questionCreated;
       }
@@ -255,7 +256,6 @@ export default class QuestionService implements IQuestionService {
       await queryRunner.release();
     }
   }
-
   async updateQuestion(questionData: IQuestionDetail, userId: string): Promise<IResponseBase> {
     const checkQuestionData = await this.checkQuestionData(questionData);
     if (checkQuestionData.success === false) {
@@ -405,11 +405,11 @@ export default class QuestionService implements IQuestionService {
       if (!questionId) {
         return {
           data: null,
-          message: "Please provide categoryId",
+          message: "Please provide questionId",
           success: false,
           error: {
-            message: "Please provide categoryId",
-            errorDetail: "CategoryId is required",
+            message: "Please provide questionId",
+            errorDetail: "questionId is required",
           },
           status: StatusCodes.BAD_REQUEST,
         };
@@ -436,7 +436,63 @@ export default class QuestionService implements IQuestionService {
       }
       return {
         data: questions,
-        message: "Get all questions by categoryId successfully",
+        message: "Get all questions by questionId successfully",
+        success: true,
+        error: null,
+        status: StatusCodes.OK,
+      };
+    } catch (error) {
+      return {
+        data: null,
+        message: ErrorMessages.INTERNAL_SERVER_ERROR,
+        success: false,
+        error: {
+          message: error.message,
+          errorDetail: error.message,
+        },
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+      };
+    }
+  }
+  async getQuestionByListId(questionIds: string[]): Promise<IResponseBase> {
+    try {
+      if (!questionIds || questionIds.length === 0) {
+        return {
+          data: null,
+          message: "Please provide questionId",
+          success: false,
+          error: {
+            message: "Please provide questionId",
+            errorDetail: "questionId is required",
+          },
+          status: StatusCodes.BAD_REQUEST,
+        };
+      }
+      const questions = await Repo.QuestionRepo.createQueryBuilder("question")
+        .innerJoin("question.category", "category")
+        .innerJoin("question.level", "level")
+        .innerJoin("question.skill", "skill")
+        .where("question.id IN (:...questionIds)", { questionIds }) // Sử dụng IN để lấy nhiều câu hỏi
+        .andWhere("question.isDeleted = :isDeleted", { isDeleted: false })
+        .select([...this.questionFields])
+        .getMany(); // Lấy nhiều câu hỏi
+
+      // Kiểm tra xem có câu hỏi nào được tìm thấy không
+      if (!questions || questions.length === 0) {
+        return {
+          data: null,
+          message: "Questions not found",
+          success: false,
+          error: {
+            message: "Questions not found",
+            errorDetail: "No questions found for the provided IDs",
+          },
+          status: StatusCodes.NOT_FOUND,
+        };
+      }
+      return {
+        data: questions,
+        message: "Get list question by id successfully",
         success: true,
         error: null,
         status: StatusCodes.OK,
