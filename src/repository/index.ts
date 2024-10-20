@@ -10,6 +10,9 @@ import { Skill } from "@/entity/Skill";
 import { User } from "@/entity/User";
 import { SubQuestion } from "@/entity/SubQuestion";
 import { Answer } from "@/entity/Answer";
+import { Exam } from "@/entity/Exam";
+import { ExamQuestion } from "@/entity/ExamQuestion";
+import { ExamSkillStatus } from "@/entity/ExamSkillStatus";
 
 const FunctionRepo = AppDataSource.getRepository(Function);
 const GroupRoleRepo = AppDataSource.getRepository(GroupRole);
@@ -21,6 +24,9 @@ const CategoryRepo = AppDataSource.getRepository(Category);
 const QuestionRepo = AppDataSource.getRepository(Question);
 const SubQuesionRepo = AppDataSource.getRepository(SubQuestion);
 const AnswerRepo = AppDataSource.getRepository(Answer);
+const ExamRepo = AppDataSource.getRepository(Exam);
+const ExamQuestionRepo = AppDataSource.getRepository(ExamQuestion);
+const ExamSkillStatusRepo = AppDataSource.getRepository(ExamSkillStatus);
 
 const createUUID = (): string => {
   return uuidv4();
@@ -37,5 +43,8 @@ export const Repo = {
   QuestionRepo,
   SubQuesionRepo,
   AnswerRepo,
+  ExamRepo,
+  ExamQuestionRepo,
+  ExamSkillStatusRepo,
   createUUID,
 };

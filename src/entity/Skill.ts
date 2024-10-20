@@ -2,6 +2,7 @@ import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
 import { Level } from "./Level";
 import { Category } from "./Category";
 import { Question } from "./Question";
+import { ExamSkillStatus } from "./ExamSkillStatus";
 
 @Entity({ name: "Skills" })
 export class Skill {
@@ -20,6 +21,9 @@ export class Skill {
   @Column({ type: "varchar", length: 255, nullable: true })
   image?: string;
 
+  @Column({ type: "integer", nullable: false, default: 0 })
+  expiredTime!: number;
+
   @OneToMany(() => Level, (level) => level.skill)
   levels!: Level[];
 
@@ -28,4 +32,7 @@ export class Skill {
 
   @OneToMany(() => Question, (question) => question.skill)
   questions!: Question[];
+
+  @OneToMany(() => ExamSkillStatus, (examSkillStatus) => examSkillStatus.skill)
+  examSkillStatuses!: ExamSkillStatus[];
 }
