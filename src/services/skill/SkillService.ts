@@ -14,7 +14,7 @@ export default class SkillService implements ISkillService {
     try {
       const skills = await Repo.SkillRepo.find({
         order: {
-          id: "ASC",
+          order: "ASC",
         },
       });
       return {

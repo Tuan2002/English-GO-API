@@ -22,6 +22,9 @@ export class Skill {
   image?: string;
 
   @Column({ type: "integer", nullable: false, default: 0 })
+  order!: number;
+
+  @Column({ type: "integer", nullable: false, default: 0 })
   expiredTime!: number;
 
   @OneToMany(() => Level, (level) => level.skill)

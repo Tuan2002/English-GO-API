@@ -293,3 +293,32 @@ boxs: {
 executeQuery() => thực hiện câu lệnh select, trả về một tập hợp các kết quả
 executeUpdate() => Thực hiện câu lệnh update, trả về số lượng các bản ghi bị ảnh hưởng, bị thay đổi.
 execute() => thực hiện bất kì câu lệnh nào, trả về dữ liệu kiểu boolean
+
+
+let title = `Current weather in ${data?.location?.name} - ${data?.location?.country} at ${data?.location?.localtime}\n`;
+const formatNumber = ' '.repeat(15);
+title +=
+`${formatNumber}Condition  : ${data?.current?.condition?.text}\n` +
+`${formatNumber}Temperature: ${data?.current?.temp_c}℃ / ${data?.current?.temp_f}℉\n` +
+`${formatNumber}Humidity   : ${data?.current?.humidity} %\n` +
+`${formatNumber}Cloud cover: ${data?.current?.cloud} %\n` +
+`${formatNumber}Rainfall   : ${data?.current?.precip_mm} mm\n` +
+`${formatNumber}UV         : ${data?.current?.uv}\n`;
+
+return title;
+
+
+let title = "Randoms cards from Tarot deck to know your future\n";
+const formatNumber = ' '.repeat(4);
+title += '';
+data.cards.forEach((card) => {
+  title += 
+  `${formatNumber}- Name        : ${card.name}\n` +
+  `${formatNumber}- Type        : ${card.type} \n` +
+  `${formatNumber}- Value       : ${card.value_int}\n` +
+  `${formatNumber}- Meaning Up  : ${card.meaning_up} \n` +
+  `${formatNumber}- Meaning Rev : ${card.meaning_rev} \n` +
+  `${formatNumber}- Description : ${card.desc} \n` +
+  `${formatNumber}\n`;
+})
+return title

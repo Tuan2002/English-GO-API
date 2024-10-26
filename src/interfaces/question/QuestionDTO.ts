@@ -4,6 +4,7 @@ export interface ISubQuestion {
   content: string;
   order: number;
   correctAnswer?: string;
+  selectedAnswerId?: string;
   answers: ISubQuestionAnswer[];
 }
 export interface ISubQuestionAnswer {
@@ -25,7 +26,9 @@ export interface IQuestion {
   isDeleted: boolean;
   isActive: boolean;
 }
+export interface IQuestionAnswer {}
 
 export interface IQuestionDetail extends IQuestion {
   subQuestions?: ISubQuestion[];
+  questionData?: string;
 }

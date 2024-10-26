@@ -27,4 +27,9 @@ export class ExamController {
     const response = await this._examService.continueExam(userId);
     return res.status(response.status).json(response);
   }
+  async submitSkill(req: Request, res: Response) {
+    const userId = req.user.id;
+    const response = await this._examService.submitSkill(userId, req.body);
+    return res.status(response.status).json(response);
+  }
 }

@@ -24,6 +24,9 @@ class ExamRoute extends BaseRoute {
     this.router.post("/continue-exam", (req: ExpressRequest, res: Response) => {
       this._examController.continueExam(req, res);
     });
+    this.router.post("/submit-skill", (req: ExpressRequest, res: Response) => {
+      this._examController.submitSkill(req, res);
+    });
   }
 }
 
