@@ -18,6 +18,12 @@ export class ExamSchedule {
   @Column({ type: "text", nullable: true })
   note?: string;
 
+  @Column({ type: "timestamp", nullable: false })
+  startDate!: string;
+
+  @Column({ type: "timestamp", nullable: false })
+  endDate!: string;
+
   @ManyToOne(() => Organization, (organization) => organization.id)
   organization!: Organization;
 }

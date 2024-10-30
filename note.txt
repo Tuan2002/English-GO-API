@@ -322,3 +322,23 @@ data.cards.forEach((card) => {
   `${formatNumber}\n`;
 })
 return title
+
+- Bài 1: Viết chương trình nhập vào 2 số a, b. Giải và biện luận nghiệm của phương trình bậc nhật ax + b =0;
+- Bài 2: Viết chương trình nhập vào 3 số a, b, c. Giải và biện luận nghiệm của phương trình bậc hai a * x^2 + bx + c = 0
+- Bài 3: Viết chương trình C++ để người dùng nhập vào 3 số nguyên và tìm số lớn nhất trong 3 số đó.
+- Bài 4: Viết chương trình C++ xếp hạng học lực của học sinh dựa trên các điểm bài kiểm tra, điểm thi giữa kỳ, điểm thi cuối kỳ. 
+    Nếu:
+      Điểm trung bình >= 9.0 là hạng A.
+      Điểm trung bình >=7.0 và < 9.0 là hạng B
+      Điểm trung bình >=5.0 và < 7.0 là hạng C
+      Điểm trung bình <5.0 là hạng F
+- Bài 5: Cửa hàng của bạn nhận gửi bán sản phẩm cho một công ty khác và hưởng hoa hồng, với mức hoa hồng theo doanh số bán như sau:
+      5% nếu tổng doanh số nhỏ hơn hoặc bằng 100 triệu.
+      10% nếu tổng doanh số nhỏ hơn hoặc bằng 300 triệu.
+      20 % nếu tổng doanh số là lớn hơn 300 triệu.
+  Hãy viết chương trình C++ để tính hoa hồng bạn sẽ nhận được dựa trên doanh số bán hàng.      
+
+
+// javis 03a867c2-063c-4d38-8f46-90536f732b50
+// jokes a28498fe-3500-4476-9d5b-237b3d7ac2c2
+// gemini ed68d03b-70e3-4008-b45a-7506d33129ef

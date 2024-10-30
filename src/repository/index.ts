@@ -13,6 +13,8 @@ import { Answer } from "@/entity/Answer";
 import { Exam } from "@/entity/Exam";
 import { ExamQuestion } from "@/entity/ExamQuestion";
 import { ExamSkillStatus } from "@/entity/ExamSkillStatus";
+import { Organization } from "@/entity/Organization";
+import { ExamSchedule } from "@/entity/ExamSchedule";
 
 const FunctionRepo = AppDataSource.getRepository(Function);
 const GroupRoleRepo = AppDataSource.getRepository(GroupRole);
@@ -27,6 +29,8 @@ const AnswerRepo = AppDataSource.getRepository(Answer);
 const ExamRepo = AppDataSource.getRepository(Exam);
 const ExamQuestionRepo = AppDataSource.getRepository(ExamQuestion);
 const ExamSkillStatusRepo = AppDataSource.getRepository(ExamSkillStatus);
+const OrganizationRepo = AppDataSource.getRepository(Organization);
+const ScheduleRepo = AppDataSource.getRepository(ExamSchedule);
 
 const createUUID = (): string => {
   return uuidv4();
@@ -46,5 +50,7 @@ export const Repo = {
   ExamRepo,
   ExamQuestionRepo,
   ExamSkillStatusRepo,
+  OrganizationRepo,
+  ScheduleRepo,
   createUUID,
 };
