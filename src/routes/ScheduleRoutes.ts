@@ -2,7 +2,7 @@ import { ScheduleController } from "@/controllers/ScheduleController";
 import { BaseRoute } from "./BaseRoute";
 import { Response, Request as ExpressRequest } from "express";
 
-class ScheduelRoutes extends BaseRoute {
+class ScheduleRoutes extends BaseRoute {
   private _scheduleController: ScheduleController;
   constructor() {
     super();
@@ -27,3 +27,5 @@ class ScheduelRoutes extends BaseRoute {
     });
   }
 }
+
+export = new ScheduleRoutes().router;

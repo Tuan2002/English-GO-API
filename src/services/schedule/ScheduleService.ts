@@ -301,7 +301,9 @@ export class ScheduleService implements IScheduleService {
         id: scheduleId,
       });
       return {
-        data: null,
+        data: {
+          id: scheduleId,
+        },
         message: "Delete schedule successfully",
         success: true,
         error: null,

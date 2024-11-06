@@ -15,6 +15,7 @@ import { ExamResultReading } from "@/entity/ExamResultReading";
 import { ExamResultListening } from "@/entity/ExamResultListening";
 import { ExamResultWriting } from "@/entity/ExamResultWriting";
 import { ExamResultSpeaking } from "@/entity/ExamResultSpeaking";
+import { IQuestionDetail } from "@/interfaces/question/QuestionDTO";
 
 export default class ExamServices implements IExamService {
   private _levelService: ILevelService;
@@ -464,7 +465,7 @@ export default class ExamServices implements IExamService {
         });
         const examSkillStatus = await Repo.ExamSkillStatusRepo.findOne({
           where: {
-            examId: currentExamData.data.id,
+            examId: currentExamData.data.exam.id,
             skillId,
           },
         });
@@ -502,7 +503,7 @@ export default class ExamServices implements IExamService {
         });
         const examSkillStatus = await Repo.ExamSkillStatusRepo.findOne({
           where: {
-            examId: currentExamData.data.id,
+            examId: currentExamData.data.exam.id,
             skillId,
           },
         });
@@ -527,7 +528,7 @@ export default class ExamServices implements IExamService {
         });
         const examSkillStatus = await Repo.ExamSkillStatusRepo.findOne({
           where: {
-            examId: currentExamData.data.id,
+            examId: currentExamData.data.exam.id,
             skillId,
           },
         });
@@ -551,7 +552,7 @@ export default class ExamServices implements IExamService {
         });
         const examSkillStatus = await Repo.ExamSkillStatusRepo.findOne({
           where: {
-            examId: currentExamData.data.id,
+            examId: currentExamData.data.exam.id,
             skillId,
           },
         });
@@ -568,6 +569,79 @@ export default class ExamServices implements IExamService {
       };
     } catch (error) {
       queryRunner.rollbackTransaction();
+      return {
+        data: null,
+        message: ErrorMessages.INTERNAL_SERVER_ERROR,
+        success: false,
+        error: {
+          message: error.message,
+          errorDetail: error.message,
+        },
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+      };
+    }
+  }
+  async submitSpeakingSkill(userId: string, data: IQuestionDetail): Promise<IResponseBase> {
+    try {
+      const currentExamData = await this.getCurrentExam(userId);
+      if (!currentExamData || !currentExamData.success || !currentExamData.data) {
+        return currentExamData;
+      }
+      const skillId = "speaking";
+      const exam = currentExamData.data.exam;
+      const examSkillStatus = await Repo.ExamSkillStatusRepo.findOne({
+        where: {
+          examId: exam.id,
+          skillId,
+        },
+      });
+      if (!examSkillStatus) {
+        return {
+          data: null,
+          message: "No exam skill status found",
+          success: false,
+          error: {
+            message: "No exam skill status found",
+            errorDetail: "No exam skill status found",
+          },
+          status: StatusCodes.NOT_FOUND,
+        };
+      }
+      const examQuestion = await Repo.ExamQuestionRepo.findOne({
+        where: {
+          examId: exam.id,
+          levelId: data.levelId,
+        },
+      });
+      if (!examQuestion) {
+        return {
+          data: null,
+          message: "No exam question found",
+          success: false,
+          error: {
+            message: "No exam question found",
+            errorDetail: "No exam question found",
+          },
+          status: StatusCodes.NOT_FOUND,
+        };
+      }
+
+      // const examResultSpeaking = new ExamResultSpeaking();
+      // examResultSpeaking.id = uuidv4();
+      // examResultSpeaking.examQuestionId = examQuestion.id;
+      // examResultSpeaking.data = data.questionData;
+      // examResultSpeaking.feedback = "";
+      // await Repo.ExamResultSpeakingRepo.save(examResultSpeaking);
+      // examSkillStatus.status = EExamSkillStatus.FINISHED;
+      // await Repo.ExamSkillStatusRepo.save(examSkillStatus);
+      // return {
+      //   data: null,
+      //   message: "Submit successfully",
+      //   success: true,
+      //   status: StatusCodes.OK,
+      //   error: null,
+      // };
+    } catch (error) {
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
