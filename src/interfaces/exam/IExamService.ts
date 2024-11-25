@@ -1,5 +1,5 @@
 import { IResponseBase } from "../base/IResponseBase";
-import { IQuestionDetail } from "../question/QuestionDTO";
+import { IQuestionDetail, ISpeakingQuestionSubmit } from "../question/QuestionDTO";
 import { ISubmitSkillRequest } from "./IExamDTO";
 
 export default interface IExamService {
@@ -8,5 +8,7 @@ export default interface IExamService {
   participateExam(userId: string): Promise<IResponseBase>;
   continueExam(userId: string): Promise<IResponseBase>;
   submitSkill(userId: string, data: ISubmitSkillRequest): Promise<IResponseBase>;
-  submitSpeakingSkill(userId: string, data: IQuestionDetail): Promise<IResponseBase>;
+  submitSpeakingSkill(userId: string, data: ISpeakingQuestionSubmit): Promise<IResponseBase>;
+  getCurrentSpeakingQuestion(userId: string): Promise<IResponseBase>;
+  getScoreOfExam(examId: string): Promise<IResponseBase>;
 }

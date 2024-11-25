@@ -15,7 +15,7 @@ import { ExamResultReading } from "@/entity/ExamResultReading";
 import { ExamResultListening } from "@/entity/ExamResultListening";
 import { ExamResultWriting } from "@/entity/ExamResultWriting";
 import { ExamResultSpeaking } from "@/entity/ExamResultSpeaking";
-import { IQuestionDetail } from "@/interfaces/question/QuestionDTO";
+import { IQuestionDetail, ISpeakingQuestionSubmit } from "@/interfaces/question/QuestionDTO";
 
 export default class ExamServices implements IExamService {
   private _levelService: ILevelService;
@@ -218,9 +218,9 @@ export default class ExamServices implements IExamService {
   }
 
   async participateExam(userId: string): Promise<IResponseBase> {
-    const queryRunner = AppDataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+    // const queryRunner = AppDataSource.createQueryRunner();
+    // await queryRunner.connect();
+    // await queryRunner.startTransaction();
 
     try {
       const exam = await this.getCurrentExam(userId);
@@ -581,7 +581,7 @@ export default class ExamServices implements IExamService {
       };
     }
   }
-  async submitSpeakingSkill(userId: string, data: IQuestionDetail): Promise<IResponseBase> {
+  async submitSpeakingSkill(userId: string, data: ISpeakingQuestionSubmit): Promise<IResponseBase> {
     try {
       const currentExamData = await this.getCurrentExam(userId);
       if (!currentExamData || !currentExamData.success || !currentExamData.data) {
@@ -589,24 +589,7 @@ export default class ExamServices implements IExamService {
       }
       const skillId = "speaking";
       const exam = currentExamData.data.exam;
-      const examSkillStatus = await Repo.ExamSkillStatusRepo.findOne({
-        where: {
-          examId: exam.id,
-          skillId,
-        },
-      });
-      if (!examSkillStatus) {
-        return {
-          data: null,
-          message: "No exam skill status found",
-          success: false,
-          error: {
-            message: "No exam skill status found",
-            errorDetail: "No exam skill status found",
-          },
-          status: StatusCodes.NOT_FOUND,
-        };
-      }
+
       const examQuestion = await Repo.ExamQuestionRepo.findOne({
         where: {
           examId: exam.id,
@@ -626,21 +609,196 @@ export default class ExamServices implements IExamService {
         };
       }
 
-      // const examResultSpeaking = new ExamResultSpeaking();
-      // examResultSpeaking.id = uuidv4();
-      // examResultSpeaking.examQuestionId = examQuestion.id;
-      // examResultSpeaking.data = data.questionData;
-      // examResultSpeaking.feedback = "";
-      // await Repo.ExamResultSpeakingRepo.save(examResultSpeaking);
-      // examSkillStatus.status = EExamSkillStatus.FINISHED;
-      // await Repo.ExamSkillStatusRepo.save(examSkillStatus);
-      // return {
-      //   data: null,
-      //   message: "Submit successfully",
-      //   success: true,
-      //   status: StatusCodes.OK,
-      //   error: null,
-      // };
+      const checkIsSubmitted = await Repo.ExamResultSpeakingRepo.findOne({
+        where: {
+          examQuestionId: examQuestion.id,
+        },
+      });
+      if (checkIsSubmitted) {
+        return {
+          data: null,
+          message: "This question has been submitted",
+          success: false,
+          error: {
+            message: "This question has been submitted",
+            errorDetail: "This question has been submitted",
+          },
+          status: StatusCodes.BAD_REQUEST,
+        };
+      }
+
+      const examResultSpeaking = new ExamResultSpeaking();
+      examResultSpeaking.id = uuidv4();
+      examResultSpeaking.examQuestionId = examQuestion.id;
+      examResultSpeaking.data = data.answer;
+      examResultSpeaking.feedback = "";
+      const submited = await Repo.ExamResultSpeakingRepo.save(examResultSpeaking);
+
+      const checkIsDone = await Repo.ExamResultSpeakingRepo.createQueryBuilder("examResultSpeaking")
+        .innerJoinAndSelect("examResultSpeaking.examQuestion", "examQuestion")
+        .where("examQuestion.examId = :examId", { examId: exam.id })
+        .getMany();
+      if (checkIsDone.length === 3) {
+        const examSkillStatus = await Repo.ExamSkillStatusRepo.findOne({
+          where: {
+            examId: exam.id,
+            skillId,
+          },
+        });
+        examSkillStatus.status = EExamSkillStatus.FINISHED;
+        await Repo.ExamSkillStatusRepo.save(examSkillStatus);
+      }
+
+      return {
+        data: submited,
+        message: "Submit successfully",
+        success: true,
+        status: StatusCodes.OK,
+        error: null,
+      };
+    } catch (error) {
+      return {
+        data: null,
+        message: ErrorMessages.INTERNAL_SERVER_ERROR,
+        success: false,
+        error: {
+          message: error.message,
+          errorDetail: error.message,
+        },
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+      };
+    }
+  }
+
+  async getCurrentSpeakingQuestion(userId: string): Promise<IResponseBase> {
+    try {
+      const exam = await this.getCurrentExam(userId);
+      if (!exam || !exam.success || !exam.data) {
+        return exam;
+      }
+      const currentExam = exam.data.exam;
+      const checkIsDone = await Repo.ExamSkillStatusRepo.findOne({
+        where: {
+          examId: currentExam.id,
+          skillId: "speaking",
+          status: EExamSkillStatus.FINISHED,
+        },
+      });
+      if (checkIsDone) {
+        return {
+          data: null,
+          message: "Speaking skill is done",
+          success: false,
+          error: {
+            message: "Speaking skill is done",
+            errorDetail: "Speaking skill is done",
+          },
+          status: StatusCodes.BAD_REQUEST,
+        };
+      }
+      const examSpeakingQuestion = await Repo.ExamQuestionRepo.createQueryBuilder("examQuestion")
+        .leftJoinAndSelect("examQuestion.question", "question")
+        .where("examQuestion.examId = :examId", { examId: currentExam.id })
+        .andWhere("question.skillId = :skillId", { skillId: "speaking" })
+        .orderBy("examQuestion.levelId", "ASC")
+        .getMany();
+
+      const examSpeakingSubmited = await Repo.ExamResultSpeakingRepo.createQueryBuilder("examResultSpeaking")
+        .innerJoinAndSelect("examResultSpeaking.examQuestion", "examQuestion")
+        .where("examQuestion.examId = :examId", { examId: currentExam.id })
+        .getMany();
+      let currentExamSpeakingQuestion = null;
+      for (let i = 0; i < examSpeakingQuestion.length; i++) {
+        if (!examSpeakingSubmited.find((submitted) => submitted.examQuestionId === examSpeakingQuestion[i].id)) {
+          currentExamSpeakingQuestion = examSpeakingQuestion[i];
+          break;
+        }
+      }
+      if (!currentExamSpeakingQuestion) {
+        const examSkillStatus = await Repo.ExamSkillStatusRepo.findOne({
+          where: {
+            examId: currentExam.id,
+            skillId: "speaking",
+          },
+        });
+        examSkillStatus.status = EExamSkillStatus.FINISHED;
+        await Repo.ExamSkillStatusRepo.save(examSkillStatus);
+        return {
+          data: null,
+          message: "OK",
+          success: true,
+          status: StatusCodes.OK,
+          error: null,
+        };
+      }
+      return {
+        data: currentExamSpeakingQuestion.questionId,
+        message: "Get speaking question successfully",
+        success: true,
+        status: StatusCodes.OK,
+        error: null,
+      };
+    } catch (error) {
+      return {
+        data: null,
+        message: ErrorMessages.INTERNAL_SERVER_ERROR,
+        success: false,
+        error: {
+          message: error.message,
+          errorDetail: error.message,
+        },
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+      };
+    }
+  }
+
+  async getScoreOfExam(examId: string): Promise<IResponseBase> {
+    try {
+      if (!examId) {
+        return {
+          data: null,
+          message: "ExamId is required",
+          success: false,
+          error: {
+            message: "ExamId is required",
+            errorDetail: "ExamId is required",
+          },
+          status: StatusCodes.BAD_REQUEST,
+        };
+      }
+      const exam = await Repo.ExamRepo.createQueryBuilder("exam")
+        .leftJoinAndSelect("exam.examSkillStatuses", "examSkillStatuses")
+        .where("exam.id = :examId", { examId })
+        .select([
+          "exam.id",
+          "exam.examCode",
+          "exam.startTime",
+          "exam.endTime",
+          "examSkillStatuses.skillId",
+          "examSkillStatuses.status",
+          "examSkillStatuses.score",
+          "examSkillStatuses.totalQuestion",
+        ])
+        .getOne();
+      if (!exam) {
+        return {
+          data: null,
+          message: "Exam not found",
+          success: false,
+          error: {
+            message: "Exam not found",
+            errorDetail: "Exam not found",
+          },
+          status: StatusCodes.NOT_FOUND,
+        };
+      }
+      return {
+        data: exam,
+        message: "Get score of exam successfully",
+        success: true,
+        status: StatusCodes.OK,
+        error: null,
+      };
     } catch (error) {
       return {
         data: null,

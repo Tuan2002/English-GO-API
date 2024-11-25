@@ -15,6 +15,10 @@ import { ExamQuestion } from "@/entity/ExamQuestion";
 import { ExamSkillStatus } from "@/entity/ExamSkillStatus";
 import { Organization } from "@/entity/Organization";
 import { ExamSchedule } from "@/entity/ExamSchedule";
+import { ExamResultListening } from "@/entity/ExamResultListening";
+import { ExamResultReading } from "@/entity/ExamResultReading";
+import { ExamResultWriting } from "@/entity/ExamResultWriting";
+import { ExamResultSpeaking } from "@/entity/ExamResultSpeaking";
 
 const FunctionRepo = AppDataSource.getRepository(Function);
 const GroupRoleRepo = AppDataSource.getRepository(GroupRole);
@@ -29,6 +33,10 @@ const AnswerRepo = AppDataSource.getRepository(Answer);
 const ExamRepo = AppDataSource.getRepository(Exam);
 const ExamQuestionRepo = AppDataSource.getRepository(ExamQuestion);
 const ExamSkillStatusRepo = AppDataSource.getRepository(ExamSkillStatus);
+const ExamResultListeningRepo = AppDataSource.getRepository(ExamResultListening);
+const ExamResultReadingRepo = AppDataSource.getRepository(ExamResultReading);
+const ExamResultWritingRepo = AppDataSource.getRepository(ExamResultWriting);
+const ExamResultSpeakingRepo = AppDataSource.getRepository(ExamResultSpeaking);
 const OrganizationRepo = AppDataSource.getRepository(Organization);
 const ScheduleRepo = AppDataSource.getRepository(ExamSchedule);
 
@@ -50,6 +58,10 @@ export const Repo = {
   ExamRepo,
   ExamQuestionRepo,
   ExamSkillStatusRepo,
+  ExamResultListeningRepo,
+  ExamResultReadingRepo,
+  ExamResultWritingRepo,
+  ExamResultSpeakingRepo,
   OrganizationRepo,
   ScheduleRepo,
   createUUID,

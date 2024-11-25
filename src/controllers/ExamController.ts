@@ -32,4 +32,19 @@ export class ExamController {
     const response = await this._examService.submitSkill(userId, req.body);
     return res.status(response.status).json(response);
   }
+  async submitSpeakingSkill(req: Request, res: Response) {
+    const userId = req.user.id;
+    const response = await this._examService.submitSpeakingSkill(userId, req.body);
+    return res.status(response.status).json(response);
+  }
+  async getCurrentSpeakingQuestion(req: Request, res: Response) {
+    const userId = req.user.id;
+    const response = await this._examService.getCurrentSpeakingQuestion(userId);
+    return res.status(response.status).json(response);
+  }
+  async getScoreOfExam(req: Request, res: Response) {
+    const examId = req.params.examId;
+    const response = await this._examService.getScoreOfExam(examId);
+    return res.status(response.status).json(response);
+  }
 }

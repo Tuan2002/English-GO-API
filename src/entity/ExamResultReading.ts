@@ -17,12 +17,12 @@ export class ExamResultReading {
   @Column({ type: "varchar", length: 255, nullable: false })
   answerId!: string;
 
-  @ManyToOne(() => ExamQuestion, (examQuestion) => examQuestion.id)
+  @ManyToOne(() => ExamQuestion, (examQuestion) => examQuestion.id, { onDelete: "CASCADE" })
   examQuestion!: ExamQuestion;
 
-  @ManyToOne(() => SubQuestion, (subQuestion) => subQuestion.id)
+  @ManyToOne(() => SubQuestion, (subQuestion) => subQuestion.id, { onDelete: "CASCADE" })
   subQuestion!: SubQuestion;
 
-  @ManyToOne(() => Answer, (answer) => answer.id)
+  @ManyToOne(() => Answer, (answer) => answer.id, { onDelete: "CASCADE" })
   answer!: Answer;
 }

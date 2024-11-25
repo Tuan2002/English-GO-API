@@ -32,3 +32,10 @@ export interface IQuestionDetail extends IQuestion {
   subQuestions?: ISubQuestion[];
   questionData?: string;
 }
+
+export interface ISpeakingQuestionSubmit {
+  questionId: string;
+  answer: string;
+  skillId: string;
+  levelId: string;
+}

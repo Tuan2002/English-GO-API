@@ -21,6 +21,6 @@ export class ExamResultSpeaking {
   @Column({ type: "boolean", nullable: false, default: false })
   isRated!: boolean;
 
-  @ManyToOne(() => ExamQuestion, (examQuestion) => examQuestion.id)
+  @ManyToOne(() => ExamQuestion, (examQuestion) => examQuestion.id, { onDelete: "CASCADE" })
   examQuestion!: ExamQuestion;
 }

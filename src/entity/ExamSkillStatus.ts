@@ -28,6 +28,9 @@ export class ExamSkillStatus {
   @Column({ type: "float", nullable: false, default: 0 })
   score!: number;
 
+  @Column({ type: "integer", nullable: false, default: 1 })
+  totalQuestion!: number;
+
   @ManyToOne(() => Exam, (exam) => exam.id, { onDelete: "CASCADE" })
   exam!: Exam;
 

@@ -336,7 +336,28 @@ return title
       5% nếu tổng doanh số nhỏ hơn hoặc bằng 100 triệu.
       10% nếu tổng doanh số nhỏ hơn hoặc bằng 300 triệu.
       20 % nếu tổng doanh số là lớn hơn 300 triệu.
-  Hãy viết chương trình C++ để tính hoa hồng bạn sẽ nhận được dựa trên doanh số bán hàng.      
+  Hãy viết chương trình C++ để tính hoa hồng bạn sẽ nhận được dựa trên doanh số bán hàng.     
+
+
+Bài 1: Viết chương trình nhập vào học lực của học một học sinh, kiểm tra và in ra thông báo tương ứng
+  A => xếp loại xuất sắc
+  B => xếp loại giỏi
+  C => xếp loại khá
+  D => xếp loại trung bình
+  F => xếp loại yếu
+Bài 2: Viết chương trình nhập vào 1 tháng và hiển thị số ngày của tháng đó. Yêu cầu nhập lại nếu tháng không chính xác
+Bài 3: Viết chương trình nhập vào một số nguyên n (nguyên dương). Tính tổng từ 1 => n.
+Bài 4: Viết chương trình để xây dựng ứng dụng như sau:
+******************************************************
+**            CHUONG TRINH TINH TOAN                **
+**         Hãy chọn một số để thực hiện             **
+** 1. Tính tổng của các số tự nhiên từ 1 đến n      **
+** 2. Giải phương trình bậc 1                       **
+** 3. Giải phương trình bậc 2                       **
+**                                                  **
+** ************************************************ **
+Yêu cầu: khi nhập một số k, nó sẽ thực hiện chương trình tương ứng với chức năng mà mình đã chọn
+Ví dụ: khi nhập vào số 2, tiếp tục yêu cầu người dùng nhập a, b để giải phương trình ax + b = 0
 
 
 // javis 03a867c2-063c-4d38-8f46-90536f732b50

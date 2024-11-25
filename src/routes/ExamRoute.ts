@@ -27,6 +27,15 @@ class ExamRoute extends BaseRoute {
     this.router.post("/submit-skill", (req: ExpressRequest, res: Response) => {
       this._examController.submitSkill(req, res);
     });
+    this.router.post("/submit-speaking-skill", (req: ExpressRequest, res: Response) => {
+      this._examController.submitSpeakingSkill(req, res);
+    });
+    this.router.get("/current-speaking-question", (req: ExpressRequest, res: Response) => {
+      this._examController.getCurrentSpeakingQuestion(req, res);
+    });
+    this.router.get("/get-score/:examId", (req: ExpressRequest, res: Response) => {
+      this._examController.getScoreOfExam(req, res);
+    });
   }
 }
 
