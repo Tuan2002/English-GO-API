@@ -363,3 +363,197 @@ Ví dụ: khi nhập vào số 2, tiếp tục yêu cầu người dùng nhập 
 // javis 03a867c2-063c-4d38-8f46-90536f732b50
 // jokes a28498fe-3500-4476-9d5b-237b3d7ac2c2
 // gemini ed68d03b-70e3-4008-b45a-7506d33129ef
+
+1. Viết chương trình in ra các số từ 1 đến 1000 theo thứ tự
+  - Tăng dần
+  - Giảm dần
+2. Viết chương trình tính tổng các số từ 1
+  - đến 1000
+  - đến 1 số n nhập từ bàn phím
+3. Viết chương trình nhập 1 số n và 
+  - in ra các số chẵn từ 1 đến n
+  - in ra các số lẻ từ 1 đến n
+4. Viết chương trình nhập vào 1 số nguyên n và 
+  - Kiểm tra n có phải là số nguyên tố hay không
+  - In ra các số nguyên tố từ 1 đến n
+  Số nguyên tố là số chỉ có 2 ước là 1 và chính nó
+
+5. Viết chương trình nhập vào số nguyên n, tìm các ước số của n
+6. Viết chương trình nhập vào số nguyên n, in ra số đảo ngược của n. 
+  Ví dụ: số 123456 => in ra 654321
+7. Viết chương trình nhập vào số nguyên n, tính giai thừa của n.
+8. Viết chương trình nhập vào số nguyên n, vẽ tam giác vuông có 2 cạnh bên = n
+    * * * * * *
+    * * * * *
+    * * * *
+    * * * 
+    * *
+    *
+9. Viết chương trình tính giá trị của biểu thức
+  1 + 1/2 + 1/3 + ... + 1/n
+  Với n nhập từ bàn phím
+
+==============================================
+
+1. Viết chương trình để:
+  - Nhập vào 1 số nguyên và in ra số nguyên đó
+  - Nhập vào 1 số thực và in ra số thực đó
+  - Nhập vào 1 chữ cái và in ra chữ cái đó
+2. Viết chương trình nhập 3 số nguyên 
+  - in ra số nguyên lớn nhất
+  - in ra 3 số theo thứ tự tăng dần
+  Ví dụ:
+    Nhap a: 3
+    Nhap b: 7
+    Nhap c: 5
+    So nguyen lon nhat la: 7
+    Sap xep lai: 3 => 5 => 7
+3. Viết chương trình nhập 2 số nguyên a, b và 
+  - Tính tổng;
+  - Tính hiệu;
+  - Tính tích;
+  - Tính thương;
+  - Tính phần dư;
+  - Tính luỹ thừa;
+  - Tính tổng các số từ a đến b
+
+  Ví dụ:
+    Nhap a: 2
+    Nhap b: 6
+    Ket qua cac phep toan:
+    a + b = 2 + 6 = 8
+    a - b = 2 - 6 = -4
+    a * b = 2 * 6 = 12
+    a / b = 2 / 6 = 0.33333
+    a % b = 2 % 6 = 2
+    a ^ b = 2 ^ 6 = 64
+    tong cac so tu a den b = 2 + 3 + 4 + 5 + 6 = 20
+
+4. Viết chương trình nhập vào 2 số a, b. Giải phương trình ax + b = 0
+5. Viết chương trình nhập vào 3 số a, b, c. Giải phương trình bậc 2.
+6. Viết chương trình nhập vào số nguyên n:
+  - Kiểm tra xem n có phải là số nguyên tố hay không;
+  - Tính tổng các số nguyên tố từ 1 đến n;
+  - Tính giá trị của biểu thức: S1 = 1 + 1/4 + 1/8 + 1/16 + ... + 1/(2^n)
+  - Tính giá trị của biểu thức: S2 = 1 + 2^2 + 3^3 + 4^4 + ... + n^n
+
+  Ví dụ:
+    Nhap n = 4
+    n = 4 khong phai la so nguyen to
+    tong cac so nguyen to tu 1 den 4: 2 + 3 = 5
+    Gia tri cua bieu thuc S1 = 1 + 1/4 + 1/8 + 1/16 = ...
+    Gia tri cua bieu thuc S2 = 1 + 4 + 27 + 256 = ...
+7. Viết chương trình nhập độ dài 2 cạnh của 1 hình chữ nhật, Tính chu vi và diện tích của HCN ấy
+8. Viết chương trình nhap vao so nguyen dương n:
+  - Tìm số chữ số của n
+  - Tính tổng các chữ số của số nguyên n
+  - Tìm số đảo ngược của số nguyên n ( ví dụ: số đảo ngược của 123456 là 654321)
+  - Kiểm tra xem n có phải là số đối xứng hay không.
+  
+  Ví dụ:
+    Nhap n = 1234321
+    So nguyen 1234321 la so co 7 chu so
+    Tong cac chu so cua so nguyen 1234321 la 1 + 2 + 3 + 4 + 3 + 2 + 1 = 16
+    So dao nguoc cua 1234321 la 1234321
+    So nguyen 1234321 la so doi xung 
+
+9. Cửa hàng của bạn nhận gửi bán sản phẩm cho một công ty khác và Với mức hoa hồng theo doanh số bán hàng như sau:
+  + 5% nếu tổng doanh số nhỏ hơn hoặc bằng 100 triệu.
+  + 10% nếu tổng doanh số nhỏ hơn hoặc bằng 300 triệu.
+  + 20 % nếu tổng doanh số là lớn hơn 300 triệu.
+  => Tính số tiền hoa hồng nhận được sau mỗi tháng. 
+  Ví dụ:
+    Nhap doanh thu cua cua hang: 250
+    => So tien hoa hong nhan duoc la 250 * 10% = 25 triệu
+
+
+==============================================
+1. đọc ảnh: img = cv2.imread("Đường dẫn ảnh");
+2. Hiện ảnh: cv2.imshow(...)
+3. Lưu ảnh: cv2.imwrite("Đường dẫn mới", ảnh_cần_lưu)
+
+4. Các phép toán với ảnh:
+  - Lấy chiều dài, chiều rộng, số kênh màu: w, h, d = img.shape
+    Nếu chỉ cần lấy chiều dài và chiều rộng : w, h = img.shape[:2]
+  - Chuyển đổi màu ảnh:
+    + Ảnh BGR => Ảnh xám: Ảnh_mới = cv2.cvtColor(Ảnh_Cũ, cv2.COLOR_BGR2GRAY)
+    + Ảnh BGR => Ảnh RGB: Ảnh_mới = cv2.cvtColor(Ảnh_Cũ, cv2.COLOR_BGR2RGB)
+  - Cắt ảnh (Lấy 1 phần trên ảnh): Ảnh_Mới = Ảnh_Cũ[x1:x2, y1:y2]
+      với x1, x2 là toạ độ theo chiều ngang
+      Và  y1, y2 là toạ độ theo chiều dọc
+
+5. Các phép toán với video
+  - Đọc video: video = cv2.VideoCapture("Đường dẫn video")
+  - Lấy số khung hình trên giây: FPS = video.get(5)
+  - Lấy tổng số khung hình: total = video.get(7)
+  - Lấy chiều rộng khung hình của video: rong = video.get(3)
+  - Lấy chiều dài khung hình của video: dai = video.get(4)
+
+6. Đọc video:
+  video = cv2.VideoCapture("Đường dẫn")
+  while True:
+    ret, frame = video.read()
+    cv2.imshow("Tên khung hình", frame)
+    if cv2.waitKey(20) == ord('q'): break
+  video.release()
+  cv2.destroyAllWindows()
+
+7. Tạo trackbar:
+  - Tạo 1 cửa sổ trackbar: cv2.namedWindow("Tên cửa sổ trackbar")
+  - Tạo 1 hàm để thay đổi giá trị trên trackbar:
+    x = 0
+    def change_value(pos):
+      global x
+      x = pos
+  - Tạo 1 trackbar trên cửa sổ:
+    cv2.createTrackbar("Tên trackbar", "Tên cửa sổ trackbar", Gia_Tri_Min, Gia_Tri_Max, change_value)
+  
+  - Tạo 1 vòng lặp while để xử lí khi giá trị trên trackbar thay đổi:
+    while True:
+      ...
+      ...
+      ...
+      if cv2.waitKey(20) == ord('q'): break
+  - Bỏ hết cửa sổ: cv2.destroyAllWindows()
+
+8. Dịch ảnh: Cần dịch ảnh theo chiều ngang x (px) và theo chiều dọc y (px)
+  - Tạo 1 ma trận để dịch ảnh:
+    M = np.float32([[1, 0, x], [0, 1, y]])
+  - Dịch ảnh:
+    Ảnh_mới = cv2.warpAffine(ảnh_cũ, M, (w, h))
+
+9. Xoay ảnh: Cần xoay ảnh 1 góc alpha, tâm xoay có toạ độ (x, y), độ phóng đại k
+  - Tạo 1 ma trận để xoay ảnh:
+    M = cv2.getRotationMatrix2D((x, y), alpha, k)
+  - Xoay ảnh:
+    Ảnh_mới = cv2.warpAffine(Ảnh_Cũ, M, (w, h))
+
+10. Phóng đại ảnh: Cần thay đổi chiều dài và chiều rộng của ảnh:
+    ảnh_mới = cv2.resize(ảnh_cũ, kích_thước_ảnh, độ_phóng_đại_theo_chiều_ngang, độ_phóng_đại_theo_chiều_dọc)
+  - Cần phóng đại ảnh, tạo ảnh mới có kích thước mới là w1, h1
+    ảnh_mới = cv2.resize(ảnh_cũ, (w1, h1))
+  - Cần phóng đại ảnh, tạo ảnh mới với chiều dài gấp fx lần và chiều cao gấp fy lần
+    ảnh_mới = cv2.resize(ảnh_cũ, None, fx, fy)
+
+11. Các bộ lọc:
+  - Bộ lọc trung bình:
+    ảnh_sau_khi_lọc = cv2.blur(ảnh_cũ, (k, k), )
+  - Bộ lọc Gauss
+  - Bộ lọc song phương
+  - Bộ lọc trung vị
+
+12. Tách biên: Trước khi tách biên phải chuyển qua ảnh xám
+  - Sobel
+  - Canny
+  - Laplace
+
+13. Phân ngưỡng
+
+14. Biến đổi hình thái:
+  - Phép co, phép giãn
+  - Phép đóng, phép mở
+ => Trước khi biến đổi hình thái cần biến đổi qua ảnh nhị phân, phân ngưỡng hoặc tách biên Trước
+
+15. Các phép toán với contours
+
+  

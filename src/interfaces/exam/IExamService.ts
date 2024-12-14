@@ -11,4 +11,5 @@ export default interface IExamService {
   submitSpeakingSkill(userId: string, data: ISpeakingQuestionSubmit): Promise<IResponseBase>;
   getCurrentSpeakingQuestion(userId: string): Promise<IResponseBase>;
   getScoreOfExam(examId: string): Promise<IResponseBase>;
+  getResultOfExam(examId: string, skillId: string): Promise<IResponseBase>;
 }

@@ -36,6 +36,9 @@ class ExamRoute extends BaseRoute {
     this.router.get("/get-score/:examId", (req: ExpressRequest, res: Response) => {
       this._examController.getScoreOfExam(req, res);
     });
+    this.router.get("/get-result/:examId", (req: ExpressRequest, res: Response) => {
+      this._examController.getResultOfExam(req, res);
+    });
   }
 }
 

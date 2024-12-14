@@ -162,6 +162,7 @@ export default class QuestionService implements IQuestionService {
       status: StatusCodes.OK,
     };
   }
+
   async createNewQuestion(questionDatas: IQuestionDetail[], userId: string): Promise<IResponseBase> {
     const queryRunner = AppDataSource.createQueryRunner();
     await queryRunner.connect();

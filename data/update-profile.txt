@@ -1,0 +1,32 @@
+{
+  avatar : null
+  birthday : "26/11/2024"
+  email : "ta2k3quyen@gmail.com"
+  fullName : "hihihi"
+  gender : "M"
+  id : "ab1c14f1-3375-4751-8570-74a6f441f152"
+  phoneNumber : "012309189"
+}
+
+{
+    "status": 200,
+    "success": true,
+    "data": {
+        "id": "ab1c14f1-3375-4751-8570-74a6f441f152",
+        "email": "ta2k3quyen@gmail.com",
+        "username": "hihihi",
+        "password": "$2b$10$6/kC/SwK8ICNz3XAodKGoeQ7Zoijt1de2K5vcu6sty4pa/ekff9x.",
+        "fullName": "hihihi",
+        "groupRoleId": "3",
+        "phoneNumber": "012309189",
+        "birthday": "26/11/2024",
+        "avatar": null,
+        "banner": null,
+        "isBlocked": false,
+        "isDeleted": false,
+        "isUpdated": true,
+        "createdAt": "2024-11-25T17:45:06.578Z",
+        "updatedAt": "2024-11-25T17:45:37.379Z"
+    },
+    "error": null
+}

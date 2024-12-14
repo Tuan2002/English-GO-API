@@ -168,16 +168,23 @@ export default class ExamServices implements IExamService {
       const examCreated = await queryRunner.manager.save(Exam, newExam);
 
       // Thêm các kĩ năng vào bảng examSkillStatuses
-      const skills = ["listening", "reading", "writing", "speaking"];
-      skills.forEach(async (skill, index) => {
+      // const skills = ["listening", "reading", "writing", "speaking"];
+      const listSkills = [
+        { name: "listening", totalQuestion: 35 },
+        { name: "reading", totalQuestion: 40 },
+        { name: "writing", totalQuestion: 2 },
+        { name: "speaking", totalQuestion: 3 },
+      ];
+      listSkills.forEach(async (skill, index) => {
         const examSkillStatus = new ExamSkillStatus();
         examSkillStatus.examId = examCreated.id;
         examSkillStatus.id = uuidv4();
         examSkillStatus.startTime = new Date().getTime().toString();
         examSkillStatus.endTime = (new Date().getTime() + 50 * 60 * 1000).toString();
-        examSkillStatus.skillId = skill;
+        examSkillStatus.skillId = skill.name;
         examSkillStatus.score = 0;
         examSkillStatus.order = index;
+        examSkillStatus.totalQuestion = skill.totalQuestion;
         examSkillStatus.status = EExamSkillStatus.NOT_STARTED; // "PENDING" | "COMPLETED" | "MAKING"
         await queryRunner.manager.save(ExamSkillStatus, examSkillStatus);
       });
@@ -434,89 +441,119 @@ export default class ExamServices implements IExamService {
     await queryRunner.startTransaction();
 
     try {
-      if (skillId === "reading") {
-        // do something
-        let score = 0;
-        questions.forEach(async (question) => {
-          const examQuestion = await Repo.ExamQuestionRepo.findOne({
-            where: {
-              levelId: question.levelId,
-            },
-          });
-          question.subQuestions.forEach(async (subquestion) => {
-            if (subquestion.selectedAnswerId) {
-              const subQuestionScore = await Repo.SubQuesionRepo.findOne({
-                where: {
-                  id: subquestion.id,
-                },
-              });
-              if (subquestion.selectedAnswerId === subQuestionScore.correctAnswer) {
-                score += 1;
-              }
-              const examResultReading = new ExamResultReading();
-              examResultReading.id = uuidv4();
-              examResultReading.examQuestionId = examQuestion.id;
-              examResultReading.subQuestionId = subquestion.id;
-              examResultReading.answerId = subquestion.selectedAnswerId;
-
-              await queryRunner.manager.save(ExamResultReading, examResultReading);
-            }
-          });
-        });
-        const examSkillStatus = await Repo.ExamSkillStatusRepo.findOne({
-          where: {
-            examId: currentExamData.data.exam.id,
-            skillId,
-          },
-        });
-        examSkillStatus.status = EExamSkillStatus.FINISHED;
-        examSkillStatus.score = score;
-        await queryRunner.manager.save(ExamSkillStatus, examSkillStatus);
-      }
       if (skillId === "listening") {
-        // do something
         let score = 0;
-        questions.forEach(async (question) => {
-          const examQuestion = await Repo.ExamQuestionRepo.findOne({
-            where: {
-              levelId: question.levelId,
-            },
-          });
-          question.subQuestions.forEach(async (subquestion) => {
-            if (subquestion.selectedAnswerId) {
-              const subQuestionScore = await Repo.SubQuesionRepo.findOne({
-                where: {
-                  id: subquestion.id,
-                },
-              });
-              if (subquestion.selectedAnswerId === subQuestionScore.correctAnswer) {
-                score += 1;
-              }
-              const examResultListening = new ExamResultListening();
-              examResultListening.id = uuidv4();
-              examResultListening.examQuestionId = examQuestion.id;
-              examResultListening.subQuestionId = subquestion.id;
-              examResultListening.answerId = subquestion.selectedAnswerId;
-              await queryRunner.manager.save(ExamResultListening, examResultListening);
-            }
-          });
-        });
+
+        // Duyệt tất cả các câu hỏi song song
+        await Promise.all(
+          questions.map(async (question) => {
+            const examQuestion = await Repo.ExamQuestionRepo.findOne({
+              where: {
+                levelId: question.levelId,
+                examId: currentExamData.data.exam.id,
+              },
+            });
+
+            // Duyệt tất cả các sub-questions song song
+            await Promise.all(
+              question.subQuestions.map(async (subquestion) => {
+                if (subquestion.selectedAnswerId) {
+                  const subQuestionScore = await Repo.SubQuesionRepo.findOne({
+                    where: {
+                      id: subquestion.id,
+                    },
+                  });
+
+                  if (subquestion.selectedAnswerId === subQuestionScore.correctAnswer) {
+                    score += 1;
+                  }
+
+                  const examResultListening = new ExamResultListening();
+                  examResultListening.id = uuidv4();
+                  examResultListening.examQuestionId = examQuestion.id;
+                  examResultListening.subQuestionId = subquestion.id;
+                  examResultListening.answerId = subquestion.selectedAnswerId;
+                  await queryRunner.manager.save(ExamResultListening, examResultListening);
+                }
+              })
+            );
+          })
+        );
+
+        // Cập nhật trạng thái và điểm cho kỹ năng
         const examSkillStatus = await Repo.ExamSkillStatusRepo.findOne({
           where: {
             examId: currentExamData.data.exam.id,
             skillId,
           },
         });
+
         examSkillStatus.status = EExamSkillStatus.FINISHED;
         examSkillStatus.score = score;
         await queryRunner.manager.save(ExamSkillStatus, examSkillStatus);
       }
+      if (skillId === "reading") {
+        let score = 0;
+
+        // Tất cả các promises của câu hỏi chính và sub-questions
+        await Promise.all(
+          questions.map(async (question) => {
+            const examQuestion = await Repo.ExamQuestionRepo.findOne({
+              where: {
+                levelId: question.levelId,
+                examId: currentExamData.data.exam.id,
+              },
+            });
+
+            // Mỗi sub-question là một promise
+            await Promise.all(
+              question.subQuestions.map(async (subquestion) => {
+                if (subquestion.selectedAnswerId) {
+                  const subQuestionScore = await Repo.SubQuesionRepo.findOne({
+                    where: {
+                      id: subquestion.id,
+                    },
+                  });
+
+                  // Kiểm tra nếu câu trả lời đúng thì cộng điểm
+                  if (subquestion.selectedAnswerId === subQuestionScore.correctAnswer) {
+                    score += 1; // Vì các callback chạy song song, cần cẩn thận với race condition
+                  }
+
+                  // Lưu kết quả câu hỏi đã trả lời vào ExamResultReading
+                  const examResultReading = new ExamResultReading();
+                  examResultReading.id = uuidv4();
+                  examResultReading.examQuestionId = examQuestion.id;
+                  examResultReading.subQuestionId = subquestion.id;
+                  examResultReading.answerId = subquestion.selectedAnswerId;
+
+                  await queryRunner.manager.save(ExamResultReading, examResultReading);
+                }
+              })
+            );
+          })
+        );
+
+        // Sau khi tất cả các câu hỏi và sub-questions đã được xử lý
+        const examSkillStatus = await Repo.ExamSkillStatusRepo.findOne({
+          where: {
+            examId: currentExamData.data.exam.id,
+            skillId,
+          },
+        });
+
+        examSkillStatus.status = EExamSkillStatus.FINISHED;
+        examSkillStatus.score = score;
+        await queryRunner.manager.save(ExamSkillStatus, examSkillStatus);
+      }
+
       if (skillId === "writing") {
         // do something
         questions.forEach(async (question) => {
           const examQuestion = await Repo.ExamQuestionRepo.findOne({
             where: {
               levelId: question.levelId,
+              examId: currentExamData.data.exam.id,
             },
           });
           const examResultWriting = new ExamResultWriting();
@@ -541,14 +578,22 @@ export default class ExamServices implements IExamService {
           const examQuestion = await Repo.ExamQuestionRepo.findOne({
             where: {
               levelId: question.levelId,
+              examId: currentExamData.data.exam.id,
             },
           });
-          const examResultSpeaking = new ExamResultSpeaking();
-          examResultSpeaking.id = uuidv4();
-          examResultSpeaking.examQuestionId = examQuestion.id;
-          examResultSpeaking.data = question.questionData;
-          examResultSpeaking.feedback = "";
-          await queryRunner.manager.save(ExamResultSpeaking, examResultSpeaking);
+          const checkIsSubmitted = await Repo.ExamResultSpeakingRepo.findOne({
+            where: {
+              examQuestionId: examQuestion.id,
+            },
+          });
+          if (!checkIsSubmitted) {
+            const examResultSpeaking = new ExamResultSpeaking();
+            examResultSpeaking.id = uuidv4();
+            examResultSpeaking.examQuestionId = examQuestion.id;
+            examResultSpeaking.data = question.questionData;
+            examResultSpeaking.feedback = "";
+            await queryRunner.manager.save(ExamResultSpeaking, examResultSpeaking);
+          }
         });
         const examSkillStatus = await Repo.ExamSkillStatusRepo.findOne({
           where: {
@@ -568,6 +613,7 @@ export default class ExamServices implements IExamService {
         error: null,
       };
     } catch (error) {
+      console.log("error", error);
       queryRunner.rollbackTransaction();
       return {
         data: null,
@@ -777,8 +823,10 @@ export default class ExamServices implements IExamService {
           "examSkillStatuses.skillId",
           "examSkillStatuses.status",
           "examSkillStatuses.score",
+          "examSkillStatuses.order",
           "examSkillStatuses.totalQuestion",
         ])
+        .orderBy("examSkillStatuses.order", "ASC")
         .getOne();
       if (!exam) {
         return {
@@ -795,6 +843,344 @@ export default class ExamServices implements IExamService {
       return {
         data: exam,
         message: "Get score of exam successfully",
+        success: true,
+        status: StatusCodes.OK,
+        error: null,
+      };
+    } catch (error) {
+      return {
+        data: null,
+        message: ErrorMessages.INTERNAL_SERVER_ERROR,
+        success: false,
+        error: {
+          message: error.message,
+          errorDetail: error.message,
+        },
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+      };
+    }
+  }
+  async getResultOfExam(examId: string, skillId: string = "listening"): Promise<IResponseBase> {
+    try {
+      if (!examId) {
+        return {
+          data: null,
+          message: "ExamId is required",
+          success: false,
+          error: {
+            message: "ExamId is required",
+            errorDetail: "ExamId is required",
+          },
+          status: StatusCodes.BAD_REQUEST,
+        };
+      }
+      if (!skillId) {
+        return {
+          data: null,
+          message: "SkillId is required",
+          success: false,
+          error: {
+            message: "SkillId is required",
+            errorDetail: "SkillId is required",
+          },
+          status: StatusCodes.BAD_REQUEST,
+        };
+      }
+
+      const currentExam = await Repo.ExamRepo.createQueryBuilder("exam")
+        .where("exam.id = :examId", { examId })
+        .andWhere("exam.isDeleted = :isDeleted", { isDeleted: false })
+        .orderBy("exam.createdAt", "DESC")
+        .getOne();
+      const examSkillStatuses = await Repo.ExamSkillStatusRepo.createQueryBuilder("examSkillStatus")
+        .innerJoinAndSelect("examSkillStatus.skill", "skill")
+        .where("examSkillStatus.examId = :examId", { examId: currentExam.id })
+        .orderBy("examSkillStatus.order", "ASC")
+        .select([
+          "examSkillStatus.id",
+          "examSkillStatus.examId",
+          "examSkillStatus.skillId",
+          "examSkillStatus.startTime",
+          "examSkillStatus.endTime",
+          "examSkillStatus.status",
+          "examSkillStatus.order",
+          "skill.name",
+          "skill.expiredTime",
+        ])
+        .getMany();
+      if (!examSkillStatuses || examSkillStatuses.length === 0) {
+        return {
+          data: null,
+          message: "No exam skill status found, please try again later",
+          success: false,
+          error: {
+            message: "No exam skill status found, please try again later",
+            errorDetail: "No exam skill status found",
+          },
+          status: StatusCodes.INTERNAL_SERVER_ERROR,
+        };
+      }
+
+      const currentSkillData = examSkillStatuses.find((examSkillStatus) => examSkillStatus.skillId === skillId);
+      if (!currentSkillData) {
+        return {
+          data: null,
+          message: "Skill not found",
+          success: false,
+          error: {
+            message: "Skill not found",
+            errorDetail: "Skill not found",
+          },
+          status: StatusCodes.NOT_FOUND,
+        };
+      }
+      let resultOfSkill = null;
+      if (skillId === "listening") {
+        const listeningResult = await Repo.ExamQuestionRepo.createQueryBuilder("examQuestion")
+          .innerJoinAndSelect("examQuestion.question", "questions")
+          .innerJoinAndSelect("questions.skill", "skill")
+          .innerJoinAndSelect("questions.level", "level")
+          .leftJoinAndSelect("questions.subQuestions", "subQuestions")
+          .leftJoinAndSelect("subQuestions.answers", "answers")
+          .leftJoinAndSelect("examQuestion.examResultListenings", "results")
+          .where("examQuestion.examId = :examId", { examId: currentExam.id })
+          .andWhere("questions.skillId = :skillId", { skillId })
+          .select([
+            "examQuestion.id",
+            "examQuestion.examId",
+            "examQuestion.questionId",
+            "questions.id",
+            "questions.levelId",
+            "questions.questionContent",
+            "questions.questionNote",
+            "questions.description",
+            "questions.attachedFile",
+            "skill.id",
+            "skill.name",
+            "skill.displayName",
+            "level.id",
+            "level.displayName",
+            "level.description",
+            "level.subQuestionNumber",
+            "subQuestions.id",
+            "subQuestions.content",
+            "subQuestions.order",
+            "subQuestions.correctAnswer",
+            "answers.id",
+            "answers.answerContent",
+            "answers.order",
+            "answers.isCorrect",
+            "results",
+          ])
+          .orderBy("questions.levelId", "ASC")
+          .addOrderBy("subQuestions.order", "ASC")
+          .addOrderBy("answers.order", "ASC")
+          .getMany();
+        const result = listeningResult.map((result) => {
+          const newResult = {
+            ...result,
+            results: result.question.subQuestions.map((subquestion) => {
+              const subQuestionResult = result.examResultListenings.find((result) => result.subQuestionId === subquestion.id);
+              if (subQuestionResult) {
+                return {
+                  id: subQuestionResult.id,
+                  question: subQuestionResult.subQuestionId,
+                  answer: subQuestionResult.answerId,
+                  point: null,
+                  feedback: null,
+                  isRated: false,
+                };
+              }
+              return {
+                id: null,
+                subQuestion: subquestion.id,
+                answer: null,
+                point: null,
+                feedback: null,
+                isRated: false,
+              };
+            }),
+          };
+          delete newResult.examResultListenings;
+          return newResult;
+        });
+        resultOfSkill = result;
+      }
+      if (skillId === "reading") {
+        const readingResult = await Repo.ExamQuestionRepo.createQueryBuilder("examQuestion")
+          .innerJoinAndSelect("examQuestion.question", "questions")
+          .innerJoinAndSelect("questions.skill", "skill")
+          .innerJoinAndSelect("questions.level", "level")
+          .leftJoinAndSelect("questions.subQuestions", "subQuestions")
+          .leftJoinAndSelect("subQuestions.answers", "answers")
+          .leftJoinAndSelect("examQuestion.examResultReadings", "results") // Dùng alias "results" thay vì "examResultListenings"
+          .where("examQuestion.examId = :examId", { examId: currentExam.id })
+          .andWhere("questions.skillId = :skillId", { skillId })
+          .select([
+            "examQuestion.id",
+            "examQuestion.examId",
+            "examQuestion.questionId",
+            "questions.id",
+            "questions.levelId",
+            "questions.questionContent",
+            "questions.questionNote",
+            "questions.description",
+            "questions.attachedFile",
+            "skill.id",
+            "skill.name",
+            "skill.displayName",
+            "level.id",
+            "level.displayName",
+            "level.description",
+            "level.subQuestionNumber",
+            "subQuestions.id",
+            "subQuestions.content",
+            "subQuestions.order",
+            "subQuestions.correctAnswer",
+            "answers.id",
+            "answers.answerContent",
+            "answers.order",
+            "answers.isCorrect",
+            "results",
+          ])
+          .orderBy("questions.levelId", "ASC")
+          .addOrderBy("subQuestions.order", "ASC")
+          .addOrderBy("answers.order", "ASC")
+          .getMany();
+        const result = readingResult.map((result) => {
+          const newResult = {
+            ...result,
+            results: result.question.subQuestions.map((subquestion) => {
+              const subQuestionResult = result.examResultReadings.find((result) => result.subQuestionId === subquestion.id);
+              if (subQuestionResult) {
+                return {
+                  id: subQuestionResult.id,
+                  question: subQuestionResult.subQuestionId,
+                  answer: subQuestionResult.answerId,
+                  point: null,
+                  feedback: null,
+                  isRated: false,
+                };
+              }
+              return {
+                id: null,
+                question: subquestion.id,
+                answer: null,
+                point: null,
+                feedback: null,
+                isRated: false,
+              };
+            }),
+          };
+          delete newResult.examResultReadings;
+          return newResult;
+        });
+        resultOfSkill = result;
+      }
+      if (skillId === "writing") {
+        const writingResult = await Repo.ExamQuestionRepo.createQueryBuilder("examQuestion")
+          .innerJoinAndSelect("examQuestion.question", "questions")
+          .innerJoinAndSelect("questions.skill", "skill")
+          .innerJoinAndSelect("questions.level", "level")
+          .leftJoinAndSelect("examQuestion.examResultWritings", "results")
+          .where("examQuestion.examId = :examId", { examId: currentExam.id })
+          .andWhere("questions.skillId = :skillId", { skillId })
+          .select([
+            "examQuestion.id",
+            "examQuestion.examId",
+            "examQuestion.questionId",
+            "questions.id",
+            "questions.levelId",
+            "questions.questionContent",
+            "questions.questionNote",
+            "questions.description",
+            "questions.attachedFile",
+            "skill.id",
+            "skill.name",
+            "skill.displayName",
+            "level.id",
+            "level.displayName",
+            "level.description",
+            "level.subQuestionNumber",
+            "results",
+          ])
+          .orderBy("questions.levelId", "ASC")
+          .getMany();
+        const result = writingResult.map((result) => {
+          const newResult = {
+            ...result,
+            results: result.examResultWritings.map((writing) => {
+              return {
+                id: writing.id,
+                question: writing.examQuestionId,
+                answer: writing.data,
+                feedback: writing.feedback,
+                point: null,
+                isRated: false,
+              };
+            }),
+          };
+          delete newResult.examResultWritings;
+          return newResult;
+        });
+        resultOfSkill = result;
+      }
+      if (skillId === "speaking") {
+        const speakingResult = await Repo.ExamQuestionRepo.createQueryBuilder("examQuestion")
+          .innerJoinAndSelect("examQuestion.question", "questions")
+          .innerJoinAndSelect("questions.skill", "skill")
+          .innerJoinAndSelect("questions.level", "level")
+          .leftJoinAndSelect("examQuestion.examResultSpeakings", "results") // Dùng alias "results" thay vì "examResultListenings"
+          .where("examQuestion.examId = :examId", { examId: currentExam.id })
+          .andWhere("questions.skillId = :skillId", { skillId })
+          .select([
+            "examQuestion.id",
+            "examQuestion.examId",
+            "examQuestion.questionId",
+            "questions.id",
+            "questions.levelId",
+            "questions.questionContent",
+            "questions.questionNote",
+            "questions.description",
+            "questions.attachedFile",
+            "skill.id",
+            "skill.name",
+            "skill.displayName",
+            "level.id",
+            "level.displayName",
+            "level.description",
+            "level.subQuestionNumber",
+            "results",
+          ])
+          .orderBy("questions.levelId", "ASC")
+          .getMany();
+        const result = speakingResult.map((result) => {
+          const newResult = {
+            ...result,
+            results: result.examResultSpeakings.map((speaking) => {
+              return {
+                id: speaking.id,
+                question: speaking.examQuestionId,
+                answer: speaking.data,
+                feedback: speaking.feedback,
+                point: null,
+                isRated: false,
+              };
+            }),
+          };
+          delete newResult.examResultSpeakings;
+          return newResult;
+        });
+        resultOfSkill = result;
+      }
+
+      return {
+        data: {
+          exam: currentExam,
+          skill: currentSkillData,
+          questions: resultOfSkill,
+        },
+        message: "Continue with the last exam",
         success: true,
         status: StatusCodes.OK,
         error: null,

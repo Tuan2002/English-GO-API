@@ -7,18 +7,15 @@ export class OrganizationController {
   constructor() {
     this._organizationService = new OrganizationService();
   }
-
   async getListOrganizations(req: Request, res: Response) {
     const response = await this._organizationService.getAllOrganization();
     return res.status(response.status).json(response);
   }
-
   async getOrganizationById(req: Request, res: Response) {
     const organizationId = req.params.id;
     const response = await this._organizationService.getOrganizationById(organizationId);
     return res.status(response.status).json(response);
   }
-
   async createOrganization(req: Request, res: Response) {
     const data = req.body;
     const response = await this._organizationService.createOrganization(data);
