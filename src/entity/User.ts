@@ -42,6 +42,9 @@ export class User {
   @Column({ type: "varchar", length: 1000, nullable: true })
   banner?: string;
 
+  @Column({ type: "boolean", nullable: true })
+  isExternal?: boolean;
+
   @Column({ type: "boolean", nullable: false, default: false })
   isBlocked!: boolean;
 

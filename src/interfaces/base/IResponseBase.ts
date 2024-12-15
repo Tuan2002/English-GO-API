@@ -7,5 +7,5 @@ export interface IResponseBase {
   success: boolean;
   message?: string;
   data: any;
-  error: IError | null;
+  error?: IError | null;
 }

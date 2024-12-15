@@ -21,7 +21,6 @@ export default class AuthenticationMiddleware {
       "/member-counts/get-member-counts",
     ];
     if (nonSecurePaths.includes(req.path)) return next();
-
     let accessToken = "";
     switch (ENV.AUTH_MODE) {
       case "COOKIE": {
@@ -52,8 +51,9 @@ export default class AuthenticationMiddleware {
     // Decode the token to get the payload
     const payload: any = this._jwtService.getTokenPayload(accessToken);
     const isValid: boolean = this._jwtService.verifyAccessToken(accessToken);
+    const isOAuthValid: boolean = !payload?.isCredential ? await this._jwtService.verifyOAuthToken(accessToken) : false;
     // If the token is not valid, return an 401 error code
-    if (!isValid) {
+    if (!isValid && !isOAuthValid) {
       return res.status(StatusCodes.UNAUTHORIZED).json({
         status: StatusCodes.UNAUTHORIZED,
         error: {
@@ -76,10 +76,11 @@ export default class AuthenticationMiddleware {
     // }
     // // Attach the user to the request object
     req.user = {
-      id: payload?.userId,
+      id: payload?.userId || payload?.userid,
       email: payload?.email,
       roleName: payload?.roleName,
       role: payload?.role,
+      accessToken: accessToken,
     };
     next();
   };

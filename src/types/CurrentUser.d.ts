@@ -9,4 +9,5 @@ type CurrentUser = {
       displayName: string;
     }
   ];
+  accessToken: string;
 };

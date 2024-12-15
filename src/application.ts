@@ -37,12 +37,13 @@ class Application {
 
       this.server.app.use(Securities.MEDIA_PATH, express.static(path.join(__dirname, "./../uploads")));
       this.server.app.use(express.static(path.join(path.resolve(), "public")));
+      this.server.app.use(asyncLocalStorageMiddleware());
 
       this.server.app.use("/api", AppRoute);
 
-      this.server.app.use(asyncLocalStorageMiddleware());
-
-      this.serverInstance = this.server.app.listen(port, () => console.log(`==> Listening on port ${port} with domain 🚀🚀 http://localhost:${port}  🚀🚀`));
+      this.serverInstance = this.server.app.listen(port, () =>
+        console.log(`==> Listening on port ${port} with domain 🚀🚀 http://localhost:${port}  🚀🚀`)
+      );
     })();
   }
   close() {

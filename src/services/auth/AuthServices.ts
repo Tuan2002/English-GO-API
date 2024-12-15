@@ -10,6 +10,11 @@ import RoleService from "./RoleService";
 import { v4 as uuidv4 } from "uuid";
 import EGroupRole from "@/constants/GroupRole";
 import Extensions from "@/utils/Extensions";
+import axios from "axios";
+import { RequestStorage } from "@/middlewares/AsyncLocalStorage";
+import { LocalStorage } from "@/constants/LocalStorage";
+import { ENV } from "@/constants/env";
+import { EGenderStatus } from "@/interfaces/user/UserDTO";
 
 export default class AuthService implements IAuthService {
   private _JwtService!: IJWTService;
@@ -202,6 +207,124 @@ export default class AuthService implements IAuthService {
     }
   }
 
+  async checkUserExist(): Promise<IResponseBase> {
+    try {
+      const request = RequestStorage.getStore()?.get(LocalStorage.REQUEST_STORE);
+      const userId = request?.user.id;
+      console.log("ID ", userId);
+      const isExist = await Repo.UserRepo.exists({
+        where: {
+          id: userId,
+        },
+      });
+      return {
+        status: StatusCodes.OK,
+        success: isExist,
+        data: isExist,
+        error: null,
+      };
+    } catch {
+      return {
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+        success: false,
+        message: "Lỗi từ phía server",
+        data: null,
+        error: {
+          message: "Lỗi từ phía server",
+          errorDetail: "Lỗi từ phía server",
+        },
+      };
+    }
+  }
+
+  async registerUserSSO(): Promise<IResponseBase> {
+    try {
+      const request = RequestStorage.getStore()?.get(LocalStorage.REQUEST_STORE);
+      const userId = request?.user.id;
+      if (!userId) {
+        return {
+          status: StatusCodes.UNAUTHORIZED,
+          success: false,
+          message: "Bạn không có quyền truy cập",
+          data: null,
+          error: {
+            message: "Unauthorized",
+            errorDetail: "Bạn không có quyền truy cập",
+          },
+        };
+      }
+      const user = await Repo.UserRepo.findOne({
+        where: {
+          id: userId,
+        },
+      });
+      if (user) {
+        return {
+          status: StatusCodes.OK,
+          success: false,
+          message: "Tài khoản đã tồn tại trên hệ thống",
+          data: null,
+        };
+      }
+      const accessToken = request?.user.accessToken;
+      const response = await axios.get(`${ENV.VINHUNI_API_URL}/gwsg/organizationmanagement/user/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      if (response.data.success === false) {
+        return {
+          status: StatusCodes.UNAUTHORIZED,
+          success: false,
+          message: "Không thể xác thực người dùng",
+          data: null,
+          error: {
+            message: "Unauthorized",
+            errorDetail: "Không thể xác thực người dùng",
+          },
+        };
+      }
+
+      const userData = response.data.data;
+      const date = new Date(userData.dob ?? new Date());
+      const formattedDate = date.toLocaleDateString("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+      const registerData = {
+        id: userId,
+        username: userData.userName,
+        password: Extensions.hashPassword("123123"),
+        fullName: userData.fullName,
+        groupRoleId: EGroupRole.CONTESTANT,
+        gender: userData.gender === 1 ? EGenderStatus.MALE : EGenderStatus.FEMALE,
+        email: userData.email,
+        phoneNumber: userData.phoneNumber,
+        birthday: formattedDate,
+        isExternal: true,
+      };
+      const newUser = await Repo.UserRepo.save(registerData);
+      return {
+        status: StatusCodes.CREATED,
+        success: true,
+        data: newUser,
+        error: null,
+      };
+    } catch (error) {
+      return {
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+        success: false,
+        message: "Lỗi từ phía server",
+        data: null,
+        error: {
+          message: "Lỗi từ phía server",
+          errorDetail: "Lỗi từ phía server",
+        },
+      };
+    }
+  }
+
   async register(userRegister: IUserRegisterData): Promise<IResponseBase> {
     try {
       if (!userRegister.username || !userRegister.password || !userRegister.fullName) {
@@ -297,25 +420,28 @@ export default class AuthService implements IAuthService {
     }
   }
 
-  async getMe(userId: string): Promise<IResponseBase> {
-    if (!userId) {
-      return {
-        status: StatusCodes.BAD_REQUEST,
-        success: false,
-        message: "Mã người dùng không được để trống",
-        data: null,
-        error: {
-          message: "Bad Request",
-          errorDetail: "Mã người dùng không được để trống",
-        },
-      };
-    }
+  async getMe(): Promise<IResponseBase> {
     try {
+      const request = RequestStorage.getStore()?.get(LocalStorage.REQUEST_STORE);
+      const userId = request?.user.id;
+      if (!userId) {
+        return {
+          status: StatusCodes.UNAUTHORIZED,
+          success: false,
+          message: "Bạn không có quyền truy cập",
+          data: null,
+          error: {
+            message: "Unauthorized",
+            errorDetail: "Bạn không có quyền truy cập",
+          },
+        };
+      }
       const user = await Repo.UserRepo.createQueryBuilder("user")
         .innerJoin("user.groupRole", "groupRole")
         .where("user.id = :userId", { userId })
         .select(["user", "groupRole.name", "groupRole.displayName"])
         .getOne();
+
       delete user?.password;
       delete user?.isDeleted;
       delete user?.updatedAt;

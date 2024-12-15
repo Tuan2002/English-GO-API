@@ -5,6 +5,8 @@ export const ENV = {
   ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET,
   ACCESS_TOKEN_EXPIRES_IN: process.env.ACCESS_TOKEN_EXPIRES_IN || "1h",
   APP_ORIGIN: process.env.APP_ORIGIN || "http://localhost:3000",
+  VINHUNI_API_URL: process.env.VINHUNI_API_URL,
+  AUTH_SERVER_URL: process.env.AUTH_SERVER_URL,
 
   DB_USERNAME: process.env.DB_USERNAME || "postgres",
   DB_PASSWORD: process.env.DB_PASSWORD || "quyen",

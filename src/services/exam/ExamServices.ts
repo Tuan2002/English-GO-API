@@ -16,6 +16,8 @@ import { ExamResultListening } from "@/entity/ExamResultListening";
 import { ExamResultWriting } from "@/entity/ExamResultWriting";
 import { ExamResultSpeaking } from "@/entity/ExamResultSpeaking";
 import { IQuestionDetail, ISpeakingQuestionSubmit } from "@/interfaces/question/QuestionDTO";
+import { RequestStorage } from "@/middlewares";
+import { LocalStorage } from "@/constants/LocalStorage";
 
 export default class ExamServices implements IExamService {
   private _levelService: ILevelService;
@@ -1185,6 +1187,35 @@ export default class ExamServices implements IExamService {
         status: StatusCodes.OK,
         error: null,
       };
+    } catch (error) {
+      return {
+        data: null,
+        message: ErrorMessages.INTERNAL_SERVER_ERROR,
+        success: false,
+        error: {
+          message: error.message,
+          errorDetail: error.message,
+        },
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+      };
+    }
+  }
+  async getMyExams(): Promise<IResponseBase> {
+    try {
+      const request = RequestStorage.getStore()?.get(LocalStorage.REQUEST_STORE);
+      const userId = request?.user.id;
+      if (!userId) {
+        return {
+          status: StatusCodes.UNAUTHORIZED,
+          success: false,
+          message: "Bạn không có quyền truy cập",
+          data: null,
+          error: {
+            message: "Unauthorized",
+            errorDetail: "Bạn không có quyền truy cập",
+          },
+        };
+      }
     } catch (error) {
       return {
         data: null,

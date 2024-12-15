@@ -29,15 +29,25 @@ export class AuthController {
     res.status(response.status).json(response);
   }
 
+  async checkUserSSO(req: Request, res: Response) {
+    const accessToken = req.query.access_token as string;
+    const response = await this._authService.checkUserExist();
+    res.status(response.status).json(response);
+  }
+
   async register(req: Request, res: Response) {
     const registerData: IUserRegisterData = req.body;
     const response = await this._authService.register(registerData);
     res.status(response.status).json(response);
   }
 
+  async registerUserSSO(req: Request, res: Response) {
+    const response = await this._authService.registerUserSSO();
+    res.status(response.status).json(response);
+  }
+
   async getMe(req: Request, res: Response) {
-    const userId = req.user.id;
-    const response = await this._authService.getMe(userId);
+    const response = await this._authService.getMe();
     res.status(response.status).json(response);
   }
 

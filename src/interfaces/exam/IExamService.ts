@@ -12,4 +12,5 @@ export default interface IExamService {
   getCurrentSpeakingQuestion(userId: string): Promise<IResponseBase>;
   getScoreOfExam(examId: string): Promise<IResponseBase>;
   getResultOfExam(examId: string, skillId: string): Promise<IResponseBase>;
+  getMyExams(): Promise<IResponseBase>;
 }

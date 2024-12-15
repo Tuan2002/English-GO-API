@@ -22,6 +22,12 @@ class AuthRoutes extends BaseRoute {
     this.router.post("/login", (req: ExpressRequest, res: Response) => {
       this._authController.login(req, res);
     });
+    this.router.get("/check-user", (req: ExpressRequest, res: Response) => {
+      this._authController.checkUserSSO(req, res);
+    });
+    this.router.post("/register-user-sso", (req: Request, res: Response) => {
+      this._authController.registerUserSSO(req, res);
+    });
     this.router.get("/get-me", (req: ExpressRequest, res: Response) => {
       this._authController.getMe(req, res);
     });
