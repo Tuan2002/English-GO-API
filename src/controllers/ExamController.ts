@@ -53,4 +53,8 @@ export class ExamController {
     const response = await this._examService.getResultOfExam(examId, skillId);
     return res.status(response.status).json(response);
   }
+  async getMyExams(req: Request, res: Response) {
+    const response = await this._examService.getMyExams();
+    return res.status(response.status).json(response);
+  }
 }

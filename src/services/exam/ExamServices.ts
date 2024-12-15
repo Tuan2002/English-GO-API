@@ -1216,6 +1216,31 @@ export default class ExamServices implements IExamService {
           },
         };
       }
+      const exams = await Repo.ExamRepo.createQueryBuilder("exam")
+        .where("exam.userId = :userId", { userId })
+        .innerJoinAndSelect("exam.examSkillStatuses", "examSkillStatuses")
+        .andWhere("exam.isDeleted = :isDeleted", { isDeleted: false })
+        .orderBy("exam.createdAt", "DESC")
+        .select([
+          "exam.id",
+          "exam.examCode",
+          "exam.startTime",
+          "exam.endTime",
+          "exam.isDone",
+          "examSkillStatuses.skillId",
+          "examSkillStatuses.status",
+          "examSkillStatuses.score",
+          "examSkillStatuses.order",
+          "examSkillStatuses.totalQuestion",
+        ])
+        .getMany();
+      return {
+        data: exams,
+        message: "Get my exams successfully",
+        success: true,
+        status: StatusCodes.OK,
+        error: null,
+      };
     } catch (error) {
       return {
         data: null,
