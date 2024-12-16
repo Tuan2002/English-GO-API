@@ -25,7 +25,7 @@ class Application {
     ((port = ENV.APP_PORT || 5001) => {
       this.server.app.use(
         cors({
-          origin: [ENV.APP_ORIGIN || "http://localhost:3000" || "http://localhost:3001" || "http://localhost:3002"],
+          origin: ["http://localhost:5173", "https://contest.vinhuniversity.edu.vn", "http://contest.vinhuniversity.edu.vn"],
           methods: ["GET", "POST", "PUT", "DELETE"],
           credentials: true,
         })

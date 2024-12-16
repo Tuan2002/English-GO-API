@@ -19,6 +19,7 @@ export default class AuthenticationMiddleware {
       "/auth/get-group-roles",
       "/provinces/get-provincies",
       "/member-counts/get-member-counts",
+      "/setup/init-data",
     ];
     if (nonSecurePaths.includes(req.path)) return next();
     let accessToken = "";

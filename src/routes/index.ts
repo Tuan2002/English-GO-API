@@ -12,6 +12,7 @@ import QuestionRoutes from "./QuestionRoutes";
 import ExamRoute from "./ExamRoute";
 import OrganizationRoutes from "./OrganizationRoutes";
 import ScheduleRoutes from "./ScheduleRoutes";
+import SetupRoutes from "./SetupRoutes";
 
 class AppRoute extends BaseRoute {
   private _authenticationMiddleware: AuthenticationMiddleware;
@@ -36,6 +37,7 @@ class AppRoute extends BaseRoute {
     this.router.use("/exams", ExamRoute);
     this.router.use("/organizations", OrganizationRoutes);
     this.router.use("/schedules", ScheduleRoutes);
+    this.router.use("/setup", SetupRoutes);
 
     this.router.get("/status", (req, res) => {
       res.status(StatusCodes.OK).json({

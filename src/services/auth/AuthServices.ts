@@ -569,6 +569,7 @@ export default class AuthService implements IAuthService {
       return {
         status: StatusCodes.OK,
         success: true,
+        message: "Cập nhật thông tin cá nhân thành công",
         data: user,
         error: null,
       };
