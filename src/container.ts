@@ -2,7 +2,7 @@ import AuthService from "@/services/auth/AuthServices";
 import JwtService from "@/services/auth/JWTService";
 import RoleService from "@/services/auth/RoleService";
 import DatabaseService from "@/services/database/DatabaseService";
-import ExamServices from "@/services/exam/ExamServices";
+import ExamService from "@/services/exam/ExamServices";
 import LevelService from "@/services/level/LevelService";
 import OrganizationService from "@/services/organization/OrganizationService";
 import QuestionService from "@/services/question/QuestionService";
@@ -28,13 +28,11 @@ container.register({
     QuestionService: asClass(QuestionService).scoped(),
     OrganizationService: asClass(OrganizationService).scoped(),
     LevelService: asClass(LevelService).scoped(),
-    ExamServices: asClass(ExamServices).scoped(),
+    ExamService: asClass(ExamService).scoped(),
     SetupService: asClass(SetupService).scoped()
 });
 container.resolve("JwtService");
-const databaseService = container.resolve("DatabaseService");
-databaseService.createConnection().then(() => {
-    console.log("Database service initialized");
-});
+container.resolve("DatabaseService")
+
 export default container
 

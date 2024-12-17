@@ -9,6 +9,7 @@ import { ExamResultSpeaking } from "@/entity/ExamResultSpeaking";
 import { ExamResultWriting } from "@/entity/ExamResultWriting";
 import { ExamSchedule } from "@/entity/ExamSchedule";
 import { ExamSkillStatus } from "@/entity/ExamSkillStatus";
+import { Function } from "@/entity/Function";
 import { GroupRole } from "@/entity/GroupRole";
 import { Level } from "@/entity/Level";
 import { Organization } from "@/entity/Organization";
@@ -53,7 +54,7 @@ class DatabaseService {
             entities: [__dirname + '/../../**/entity/**/*.{js,ts}'],
             migrations: [__dirname + '/../../**/migration/**/*.{js,ts}'],
             synchronize: true,
-            logging: false,
+            logging: ["query", "error", "info", "warn"],
         });
         this.FunctionRepo = this._dataSource.getRepository(Function);
         this.GroupRoleRepo = this._dataSource.getRepository(GroupRole);
@@ -72,17 +73,14 @@ class DatabaseService {
         this.ExamResultReadingRepo = this._dataSource.getRepository(ExamResultReading);
         this.ExamResultWritingRepo = this._dataSource.getRepository(ExamResultWriting);
         this.ExamResultSpeakingRepo = this._dataSource.getRepository(ExamResultSpeaking);
-    }
-    public async createConnection(): Promise<void> {
-        try {
-            await this._dataSource.initialize();
-            console.log(`Database connection established with: ${ENV.DB_HOST}:${ENV.DB_PORT}`);
+        this._dataSource.initialize().then(() => {
+            console.log(`Database connection established at: ${new Date().toISOString()}`);
             logger.info(`Database connection established with: ${ENV.DB_HOST}:${ENV.DB_PORT} at: ${new Date().toISOString()}`);
         }
-        catch (error) {
-            console.log("Database connection failed");
-            console.log(error);
-        }
+        ).catch((error) => {
+            console.log("Database connection failed: ", error);
+            logger.error(`Database connection failed at: ${new Date().toISOString()}: ${error}`);
+        });
     }
     public createQueryRunner(): QueryRunner {
         return this._dataSource.createQueryRunner();
