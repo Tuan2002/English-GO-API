@@ -3,16 +3,46 @@ import { User } from "@/entity/User";
 import { IResponseBase } from "@/interfaces/base/IResponseBase";
 import { ISetupService } from "@/interfaces/setup/ISetupService";
 import Extensions from "@/utils/Extensions";
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid } from "uuid";
 import DatabaseService from "../database/DatabaseService";
 
 export class SetupService implements ISetupService {
-  private readonly _context: DatabaseService
+  private readonly _context: DatabaseService;
   constructor(DatabaseService: DatabaseService) {
     this._context = DatabaseService;
   }
   async setupService(): Promise<IResponseBase> {
     try {
+      // create group role
+      const groupRoles = await this._context.GroupRoleRepo.find();
+      if (!groupRoles || groupRoles.length === 0) {
+        const newGroupRoles = [
+          {
+            id: EGroupRole.ADMIN,
+            name: "admin",
+            displayName: "Quản trị viên",
+            description: "Quản trị viên hệ thống",
+          },
+          {
+            id: EGroupRole.EXAMINER,
+            name: "examiner",
+            displayName: "Giáo viên chấm bài",
+            description: "Giáo viên chấm bài",
+          },
+          {
+            id: EGroupRole.CONTESTANT,
+            name: "contestant",
+            displayName: "Thí sinh dự thi",
+            description: "Thí sinh tham gia thi thử",
+          },
+        ];
+        await Promise.all(
+          newGroupRoles.map((groupRole) => {
+            const newGroupRole = this._context.GroupRoleRepo.create(groupRole);
+            return this._context.GroupRoleRepo.save(newGroupRole);
+          })
+        );
+      }
       // create admin user
       const admin = await this._context.UserRepo.findOne({
         where: {
