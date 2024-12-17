@@ -33,6 +33,4 @@ container.register({
 });
 container.resolve("JwtService");
 container.resolve("DatabaseService")
-
 export default container
-

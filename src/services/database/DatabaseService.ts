@@ -53,6 +53,7 @@ class DatabaseService {
             database: ENV.DB_NAME,
             entities: [__dirname + '/../../**/entity/**/*.{js,ts}'],
             migrations: [__dirname + '/../../**/migration/**/*.{js,ts}'],
+            migrationsTableName: "migrations",
             synchronize: true,
             logging: ["query", "error", "info", "warn"],
         });
@@ -82,8 +83,13 @@ class DatabaseService {
             logger.error(`Database connection failed at: ${new Date().toISOString()}: ${error}`);
         });
     }
+
     public createQueryRunner(): QueryRunner {
         return this._dataSource.createQueryRunner();
+    }
+
+    public getDataSource(): DataSource {
+        return this._dataSource;
     }
 }
 
