@@ -8,13 +8,20 @@
     "outDir": "./dist",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "skipLibCheck": true,
     "baseUrl": ".",
     "rootDir": ".",
-    "typeRoots": ["./node_module/@types", "./src/types"],
-    "types": ["node", "express"],
     "paths": {
-      "@/*": ["src/*"]
-    }
+      "@/*": ["src/*"],
+      "@interfaces/*": ["src/interfaces/*"],
+      "@routes/*": ["src/routes/*"],
+      "@helpers/*": ["src/helpers/*"],
+      "@middlewares/*": ["src/middlewares/*"],
+      "@controllers/*": ["src/controllers/*"],
+      "@services/*": ["src/services/*"],
+      "@utils/*": ["src/utils/*"]
+    },
+    "typeRoots": ["./node_module/@types", "./src/types"]
   },
   "lib": ["es2015"],
   "exclude": ["node_modules", "src/tests"],

@@ -1,27 +1,29 @@
-import { IUpdateProfilePayload, IUserLoginData, IUserLoginResponse, IUserRegisterData } from "@/interfaces/auth/AuthDto";
-import IAuthService from "@/interfaces/auth/IAuthService";
-import { IResponseBase } from "@/interfaces/base/IResponseBase";
-import { Repo } from "@/repository";
-import { StatusCodes } from "http-status-codes";
-import { IAccessTokenPayload, IJWTService } from "@/interfaces/auth/IJWTService";
-import JwtService from "./JWTService";
-import IRoleService from "@/interfaces/auth/IRoleService";
-import RoleService from "./RoleService";
-import { v4 as uuidv4 } from "uuid";
 import EGroupRole from "@/constants/GroupRole";
-import Extensions from "@/utils/Extensions";
-import axios from "axios";
-import { RequestStorage } from "@/middlewares/AsyncLocalStorage";
 import { LocalStorage } from "@/constants/LocalStorage";
 import { ENV } from "@/constants/env";
+import { IUpdateProfilePayload, IUserLoginData, IUserLoginResponse, IUserRegisterData } from "@/interfaces/auth/AuthDto";
+import IAuthService from "@/interfaces/auth/IAuthService";
+import { IAccessTokenPayload, IJWTService } from "@/interfaces/auth/IJWTService";
+import IRoleService from "@/interfaces/auth/IRoleService";
+import { IResponseBase } from "@/interfaces/base/IResponseBase";
 import { EGenderStatus } from "@/interfaces/user/UserDTO";
+import { RequestStorage } from "@/middlewares/AsyncLocalStorage";
+import Extensions from "@/utils/Extensions";
+import axios from "axios";
+import { StatusCodes } from "http-status-codes";
+import { v4 as uuidv4 } from "uuid";
+import DatabaseService from "../database/DatabaseService";
 
 export default class AuthService implements IAuthService {
-  private _JwtService!: IJWTService;
-  private _RoleService!: IRoleService;
-  constructor() {
-    this._JwtService = new JwtService();
-    this._RoleService = new RoleService();
+
+  private readonly _JwtService!: IJWTService;
+  private readonly _RoleService!: IRoleService;
+  private readonly _context: DatabaseService;
+  
+  constructor(JwtService: IJWTService, RoleService: IRoleService, DatabaseService: DatabaseService) {
+    this._JwtService = JwtService;
+    this._RoleService = RoleService;
+    this._context = DatabaseService;
   }
 
   async getUserByusername(email: string): Promise<IResponseBase> {
@@ -38,7 +40,7 @@ export default class AuthService implements IAuthService {
           },
         };
       }
-      const user = await Repo.UserRepo.findOne({
+      const user = await this._context.UserRepo.findOne({
         where: {
           email,
         },
@@ -78,7 +80,7 @@ export default class AuthService implements IAuthService {
           },
         };
       }
-      const user = await Repo.UserRepo.findOne({
+      const user = await this._context.UserRepo.findOne({
         where: {
           username,
         },
@@ -212,7 +214,7 @@ export default class AuthService implements IAuthService {
       const request = RequestStorage.getStore()?.get(LocalStorage.REQUEST_STORE);
       const userId = request?.user.id;
       console.log("ID ", userId);
-      const isExist = await Repo.UserRepo.exists({
+      const isExist = await this._context.UserRepo.exists({
         where: {
           id: userId,
         },
@@ -253,7 +255,7 @@ export default class AuthService implements IAuthService {
           },
         };
       }
-      const user = await Repo.UserRepo.findOne({
+      const user = await this._context.UserRepo.findOne({
         where: {
           id: userId,
         },
@@ -304,7 +306,7 @@ export default class AuthService implements IAuthService {
         birthday: formattedDate,
         isExternal: true,
       };
-      const newUser = await Repo.UserRepo.save(registerData);
+      const newUser = await this._context.UserRepo.save(registerData);
       return {
         status: StatusCodes.CREATED,
         success: true,
@@ -378,7 +380,7 @@ export default class AuthService implements IAuthService {
         groupRoleId: EGroupRole.CONTESTANT,
       };
 
-      const newUser = await Repo.UserRepo.save(registerData);
+      const newUser = await this._context.UserRepo.save(registerData);
       console.log("createUser");
 
       if (!newUser) {
@@ -436,7 +438,7 @@ export default class AuthService implements IAuthService {
           },
         };
       }
-      const user = await Repo.UserRepo.createQueryBuilder("user")
+      const user = await this._context.UserRepo.createQueryBuilder("user")
         .innerJoin("user.groupRole", "groupRole")
         .where("user.id = :userId", { userId })
         .select(["user", "groupRole.name", "groupRole.displayName"])
@@ -516,7 +518,7 @@ export default class AuthService implements IAuthService {
           },
         };
       }
-      const user = await Repo.UserRepo.findOne({
+      const user = await this._context.UserRepo.findOne({
         where: {
           id: userId,
         },
@@ -553,7 +555,7 @@ export default class AuthService implements IAuthService {
       user.phoneNumber = data.phoneNumber;
       user.isUpdated = true;
 
-      const updatedUser = await Repo.UserRepo.save(user);
+      const updatedUser = await this._context.UserRepo.save(user);
       if (!updatedUser) {
         return {
           status: StatusCodes.INTERNAL_SERVER_ERROR,

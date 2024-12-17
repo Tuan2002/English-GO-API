@@ -1,4 +1,4 @@
-import express from "express";
+import express from 'express';
 
 /**
  * Express server application class.
@@ -6,5 +6,4 @@ import express from "express";
  */
 export class Server {
   public app = express();
-  // public router = MasterRouter;
 }

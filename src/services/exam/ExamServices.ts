@@ -1,38 +1,37 @@
 import { ErrorMessages } from "@/constants/ErrorMessages";
+import { LocalStorage } from "@/constants/LocalStorage";
+import { Exam } from "@/entity/Exam";
+import { ExamQuestion } from "@/entity/ExamQuestion";
+import { ExamResultListening } from "@/entity/ExamResultListening";
+import { ExamResultReading } from "@/entity/ExamResultReading";
+import { ExamResultSpeaking } from "@/entity/ExamResultSpeaking";
+import { ExamResultWriting } from "@/entity/ExamResultWriting";
+import { ExamSkillStatus } from "@/entity/ExamSkillStatus";
 import { IResponseBase } from "@/interfaces/base/IResponseBase";
+import { EExamSkillStatus, ISubmitSkillRequest } from "@/interfaces/exam/IExamDTO";
 import IExamService from "@/interfaces/exam/IExamService";
 import ILevelService from "@/interfaces/level/ILevelService";
-import { StatusCodes } from "http-status-codes";
-import LevelService from "../level/LevelService";
-import { Repo } from "@/repository";
-import AppDataSource from "@/data-source";
-import { Exam } from "@/entity/Exam";
-import { v4 as uuidv4 } from "uuid";
-import { ExamSkillStatus } from "@/entity/ExamSkillStatus";
-import { ExamQuestion } from "@/entity/ExamQuestion";
-import { EExamSkillStatus, ISubmitSkillRequest } from "@/interfaces/exam/IExamDTO";
-import { ExamResultReading } from "@/entity/ExamResultReading";
-import { ExamResultListening } from "@/entity/ExamResultListening";
-import { ExamResultWriting } from "@/entity/ExamResultWriting";
-import { ExamResultSpeaking } from "@/entity/ExamResultSpeaking";
-import { IQuestionDetail, ISpeakingQuestionSubmit } from "@/interfaces/question/QuestionDTO";
+import { ISpeakingQuestionSubmit } from "@/interfaces/question/QuestionDTO";
 import { RequestStorage } from "@/middlewares";
-import { LocalStorage } from "@/constants/LocalStorage";
+import { StatusCodes } from "http-status-codes";
+import { v4 as uuidv4 } from "uuid";
+import DatabaseService from "../database/DatabaseService";
 
 export default class ExamServices implements IExamService {
-  private _levelService: ILevelService;
-  constructor() {
-    this._levelService = new LevelService();
-    // Constructor
+  private readonly _levelService: ILevelService;
+  private readonly _context: DatabaseService;
+  constructor(LevelService: ILevelService, DatabaseService: DatabaseService) {
+    this._levelService = LevelService;
+    this._context = DatabaseService;
   }
   async getCurrentExam(userId: string): Promise<IResponseBase> {
     try {
-      const lastExam = await Repo.ExamRepo.createQueryBuilder("exam")
+      const lastExam = await this._context.ExamRepo.createQueryBuilder("exam")
         .where("exam.userId = :userId", { userId })
         .andWhere("exam.isDeleted = :isDeleted", { isDeleted: false })
         .orderBy("exam.createdAt", "DESC")
         .getOne();
-      const examSkillStatuses = await Repo.ExamSkillStatusRepo.createQueryBuilder("examSkillStatus")
+      const examSkillStatuses = await this._context.ExamSkillStatusRepo.createQueryBuilder("examSkillStatus")
         .innerJoinAndSelect("examSkillStatus.skill", "skill")
         .where("examSkillStatus.examId = :examId", { examId: lastExam.id })
         .orderBy("examSkillStatus.order", "ASC")
@@ -124,7 +123,7 @@ export default class ExamServices implements IExamService {
   }
 
   async startNewExam(userId: string): Promise<IResponseBase> {
-    const queryRunner = AppDataSource.createQueryRunner();
+    const queryRunner = this._context.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
@@ -132,7 +131,7 @@ export default class ExamServices implements IExamService {
       if (!levels || !levels.success) {
         return levels;
       }
-      const groupedQuestions = await Repo.QuestionRepo.createQueryBuilder("question")
+      const groupedQuestions = await this._context.QuestionRepo.createQueryBuilder("question")
         .where("question.isActive = :isActive", { isActive: true })
         .andWhere("question.isDeleted = :isDeleted", { isDeleted: false })
         .groupBy("question.levelId")
@@ -262,7 +261,7 @@ export default class ExamServices implements IExamService {
         return exam;
       }
       const currentExam = exam.data.exam;
-      const examSkillStatuses = await Repo.ExamSkillStatusRepo.createQueryBuilder("examSkillStatus")
+      const examSkillStatuses = await this._context.ExamSkillStatusRepo.createQueryBuilder("examSkillStatus")
         .innerJoinAndSelect("examSkillStatus.skill", "skill")
         .where("examSkillStatus.examId = :examId", { examId: currentExam.id })
         .orderBy("examSkillStatus.order", "ASC")
@@ -325,10 +324,10 @@ export default class ExamServices implements IExamService {
         currentSkillData.status = EExamSkillStatus.IN_PROGRESS;
         currentSkillData.startTime = new Date().getTime().toString();
         currentSkillData.endTime = (new Date().getTime() + currentSkillData.skill.expiredTime * 60 * 1000).toString();
-        await Repo.ExamSkillStatusRepo.save(currentSkillData);
+        await this._context.ExamSkillStatusRepo.save(currentSkillData);
       }
 
-      const listQuestionOfCurrentExamSkill = await Repo.ExamQuestionRepo.createQueryBuilder("examQuestion")
+      const listQuestionOfCurrentExamSkill = await this._context.ExamQuestionRepo.createQueryBuilder("examQuestion")
         .innerJoinAndSelect("examQuestion.question", "questions")
         .innerJoinAndSelect("questions.skill", "skill")
         .innerJoinAndSelect("questions.level", "level")
@@ -409,7 +408,7 @@ export default class ExamServices implements IExamService {
         status: StatusCodes.BAD_REQUEST,
       };
     }
-    const skillData = await Repo.SkillRepo.createQueryBuilder("skill")
+    const skillData = await this._context.SkillRepo.createQueryBuilder("skill")
       .innerJoinAndSelect("skill.levels", "levels")
       .where("skill.id = :skillId", { skillId })
       .getOne();
@@ -438,7 +437,7 @@ export default class ExamServices implements IExamService {
         status: StatusCodes.BAD_REQUEST,
       };
     }
-    const queryRunner = AppDataSource.createQueryRunner();
+    const queryRunner = this._context.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
@@ -449,7 +448,7 @@ export default class ExamServices implements IExamService {
         // Duyệt tất cả các câu hỏi song song
         await Promise.all(
           questions.map(async (question) => {
-            const examQuestion = await Repo.ExamQuestionRepo.findOne({
+            const examQuestion = await this._context.ExamQuestionRepo.findOne({
               where: {
                 levelId: question.levelId,
                 examId: currentExamData.data.exam.id,
@@ -460,7 +459,7 @@ export default class ExamServices implements IExamService {
             await Promise.all(
               question.subQuestions.map(async (subquestion) => {
                 if (subquestion.selectedAnswerId) {
-                  const subQuestionScore = await Repo.SubQuesionRepo.findOne({
+                  const subQuestionScore = await this._context.SubQuesionRepo.findOne({
                     where: {
                       id: subquestion.id,
                     },
@@ -483,7 +482,7 @@ export default class ExamServices implements IExamService {
         );
 
         // Cập nhật trạng thái và điểm cho kỹ năng
-        const examSkillStatus = await Repo.ExamSkillStatusRepo.findOne({
+        const examSkillStatus = await this._context.ExamSkillStatusRepo.findOne({
           where: {
             examId: currentExamData.data.exam.id,
             skillId,
@@ -500,7 +499,7 @@ export default class ExamServices implements IExamService {
         // Tất cả các promises của câu hỏi chính và sub-questions
         await Promise.all(
           questions.map(async (question) => {
-            const examQuestion = await Repo.ExamQuestionRepo.findOne({
+            const examQuestion = await this._context.ExamQuestionRepo.findOne({
               where: {
                 levelId: question.levelId,
                 examId: currentExamData.data.exam.id,
@@ -511,7 +510,7 @@ export default class ExamServices implements IExamService {
             await Promise.all(
               question.subQuestions.map(async (subquestion) => {
                 if (subquestion.selectedAnswerId) {
-                  const subQuestionScore = await Repo.SubQuesionRepo.findOne({
+                  const subQuestionScore = await this._context.SubQuesionRepo.findOne({
                     where: {
                       id: subquestion.id,
                     },
@@ -537,7 +536,7 @@ export default class ExamServices implements IExamService {
         );
 
         // Sau khi tất cả các câu hỏi và sub-questions đã được xử lý
-        const examSkillStatus = await Repo.ExamSkillStatusRepo.findOne({
+        const examSkillStatus = await this._context.ExamSkillStatusRepo.findOne({
           where: {
             examId: currentExamData.data.exam.id,
             skillId,
@@ -552,7 +551,7 @@ export default class ExamServices implements IExamService {
       if (skillId === "writing") {
         // do something
         questions.forEach(async (question) => {
-          const examQuestion = await Repo.ExamQuestionRepo.findOne({
+          const examQuestion = await this._context.ExamQuestionRepo.findOne({
             where: {
               levelId: question.levelId,
               examId: currentExamData.data.exam.id,
@@ -565,7 +564,7 @@ export default class ExamServices implements IExamService {
           examResultWriting.feedback = "";
           await queryRunner.manager.save(ExamResultWriting, examResultWriting);
         });
-        const examSkillStatus = await Repo.ExamSkillStatusRepo.findOne({
+        const examSkillStatus = await this._context.ExamSkillStatusRepo.findOne({
           where: {
             examId: currentExamData.data.exam.id,
             skillId,
@@ -577,13 +576,13 @@ export default class ExamServices implements IExamService {
       if (skillId === "speaking") {
         // do something
         questions.forEach(async (question) => {
-          const examQuestion = await Repo.ExamQuestionRepo.findOne({
+          const examQuestion = await this._context.ExamQuestionRepo.findOne({
             where: {
               levelId: question.levelId,
               examId: currentExamData.data.exam.id,
             },
           });
-          const checkIsSubmitted = await Repo.ExamResultSpeakingRepo.findOne({
+          const checkIsSubmitted = await this._context.ExamResultSpeakingRepo.findOne({
             where: {
               examQuestionId: examQuestion.id,
             },
@@ -597,7 +596,7 @@ export default class ExamServices implements IExamService {
             await queryRunner.manager.save(ExamResultSpeaking, examResultSpeaking);
           }
         });
-        const examSkillStatus = await Repo.ExamSkillStatusRepo.findOne({
+        const examSkillStatus = await this._context.ExamSkillStatusRepo.findOne({
           where: {
             examId: currentExamData.data.exam.id,
             skillId,
@@ -638,7 +637,7 @@ export default class ExamServices implements IExamService {
       const skillId = "speaking";
       const exam = currentExamData.data.exam;
 
-      const examQuestion = await Repo.ExamQuestionRepo.findOne({
+      const examQuestion = await this._context.ExamQuestionRepo.findOne({
         where: {
           examId: exam.id,
           levelId: data.levelId,
@@ -657,7 +656,7 @@ export default class ExamServices implements IExamService {
         };
       }
 
-      const checkIsSubmitted = await Repo.ExamResultSpeakingRepo.findOne({
+      const checkIsSubmitted = await this._context.ExamResultSpeakingRepo.findOne({
         where: {
           examQuestionId: examQuestion.id,
         },
@@ -680,21 +679,21 @@ export default class ExamServices implements IExamService {
       examResultSpeaking.examQuestionId = examQuestion.id;
       examResultSpeaking.data = data.answer;
       examResultSpeaking.feedback = "";
-      const submited = await Repo.ExamResultSpeakingRepo.save(examResultSpeaking);
+      const submited = await this._context.ExamResultSpeakingRepo.save(examResultSpeaking);
 
-      const checkIsDone = await Repo.ExamResultSpeakingRepo.createQueryBuilder("examResultSpeaking")
+      const checkIsDone = await this._context.ExamResultSpeakingRepo.createQueryBuilder("examResultSpeaking")
         .innerJoinAndSelect("examResultSpeaking.examQuestion", "examQuestion")
         .where("examQuestion.examId = :examId", { examId: exam.id })
         .getMany();
       if (checkIsDone.length === 3) {
-        const examSkillStatus = await Repo.ExamSkillStatusRepo.findOne({
+        const examSkillStatus = await this._context.ExamSkillStatusRepo.findOne({
           where: {
             examId: exam.id,
             skillId,
           },
         });
         examSkillStatus.status = EExamSkillStatus.FINISHED;
-        await Repo.ExamSkillStatusRepo.save(examSkillStatus);
+        await this._context.ExamSkillStatusRepo.save(examSkillStatus);
       }
 
       return {
@@ -725,7 +724,7 @@ export default class ExamServices implements IExamService {
         return exam;
       }
       const currentExam = exam.data.exam;
-      const checkIsDone = await Repo.ExamSkillStatusRepo.findOne({
+      const checkIsDone = await this._context.ExamSkillStatusRepo.findOne({
         where: {
           examId: currentExam.id,
           skillId: "speaking",
@@ -744,14 +743,14 @@ export default class ExamServices implements IExamService {
           status: StatusCodes.BAD_REQUEST,
         };
       }
-      const examSpeakingQuestion = await Repo.ExamQuestionRepo.createQueryBuilder("examQuestion")
+      const examSpeakingQuestion = await this._context.ExamQuestionRepo.createQueryBuilder("examQuestion")
         .leftJoinAndSelect("examQuestion.question", "question")
         .where("examQuestion.examId = :examId", { examId: currentExam.id })
         .andWhere("question.skillId = :skillId", { skillId: "speaking" })
         .orderBy("examQuestion.levelId", "ASC")
         .getMany();
 
-      const examSpeakingSubmited = await Repo.ExamResultSpeakingRepo.createQueryBuilder("examResultSpeaking")
+      const examSpeakingSubmited = await this._context.ExamResultSpeakingRepo.createQueryBuilder("examResultSpeaking")
         .innerJoinAndSelect("examResultSpeaking.examQuestion", "examQuestion")
         .where("examQuestion.examId = :examId", { examId: currentExam.id })
         .getMany();
@@ -763,14 +762,14 @@ export default class ExamServices implements IExamService {
         }
       }
       if (!currentExamSpeakingQuestion) {
-        const examSkillStatus = await Repo.ExamSkillStatusRepo.findOne({
+        const examSkillStatus = await this._context.ExamSkillStatusRepo.findOne({
           where: {
             examId: currentExam.id,
             skillId: "speaking",
           },
         });
         examSkillStatus.status = EExamSkillStatus.FINISHED;
-        await Repo.ExamSkillStatusRepo.save(examSkillStatus);
+        await this._context.ExamSkillStatusRepo.save(examSkillStatus);
         return {
           data: null,
           message: "OK",
@@ -814,7 +813,7 @@ export default class ExamServices implements IExamService {
           status: StatusCodes.BAD_REQUEST,
         };
       }
-      const exam = await Repo.ExamRepo.createQueryBuilder("exam")
+      const exam = await this._context.ExamRepo.createQueryBuilder("exam")
         .leftJoinAndSelect("exam.examSkillStatuses", "examSkillStatuses")
         .where("exam.id = :examId", { examId })
         .select([
@@ -889,12 +888,12 @@ export default class ExamServices implements IExamService {
         };
       }
 
-      const currentExam = await Repo.ExamRepo.createQueryBuilder("exam")
+      const currentExam = await this._context.ExamRepo.createQueryBuilder("exam")
         .where("exam.id = :examId", { examId })
         .andWhere("exam.isDeleted = :isDeleted", { isDeleted: false })
         .orderBy("exam.createdAt", "DESC")
         .getOne();
-      const examSkillStatuses = await Repo.ExamSkillStatusRepo.createQueryBuilder("examSkillStatus")
+      const examSkillStatuses = await this._context.ExamSkillStatusRepo.createQueryBuilder("examSkillStatus")
         .innerJoinAndSelect("examSkillStatus.skill", "skill")
         .where("examSkillStatus.examId = :examId", { examId: currentExam.id })
         .orderBy("examSkillStatus.order", "ASC")
@@ -938,7 +937,7 @@ export default class ExamServices implements IExamService {
       }
       let resultOfSkill = null;
       if (skillId === "listening") {
-        const listeningResult = await Repo.ExamQuestionRepo.createQueryBuilder("examQuestion")
+        const listeningResult = await this._context.ExamQuestionRepo.createQueryBuilder("examQuestion")
           .innerJoinAndSelect("examQuestion.question", "questions")
           .innerJoinAndSelect("questions.skill", "skill")
           .innerJoinAndSelect("questions.level", "level")
@@ -1009,7 +1008,7 @@ export default class ExamServices implements IExamService {
         resultOfSkill = result;
       }
       if (skillId === "reading") {
-        const readingResult = await Repo.ExamQuestionRepo.createQueryBuilder("examQuestion")
+        const readingResult = await this._context.ExamQuestionRepo.createQueryBuilder("examQuestion")
           .innerJoinAndSelect("examQuestion.question", "questions")
           .innerJoinAndSelect("questions.skill", "skill")
           .innerJoinAndSelect("questions.level", "level")
@@ -1080,7 +1079,7 @@ export default class ExamServices implements IExamService {
         resultOfSkill = result;
       }
       if (skillId === "writing") {
-        const writingResult = await Repo.ExamQuestionRepo.createQueryBuilder("examQuestion")
+        const writingResult = await this._context.ExamQuestionRepo.createQueryBuilder("examQuestion")
           .innerJoinAndSelect("examQuestion.question", "questions")
           .innerJoinAndSelect("questions.skill", "skill")
           .innerJoinAndSelect("questions.level", "level")
@@ -1128,7 +1127,7 @@ export default class ExamServices implements IExamService {
         resultOfSkill = result;
       }
       if (skillId === "speaking") {
-        const speakingResult = await Repo.ExamQuestionRepo.createQueryBuilder("examQuestion")
+        const speakingResult = await this._context.ExamQuestionRepo.createQueryBuilder("examQuestion")
           .innerJoinAndSelect("examQuestion.question", "questions")
           .innerJoinAndSelect("questions.skill", "skill")
           .innerJoinAndSelect("questions.level", "level")
@@ -1216,7 +1215,7 @@ export default class ExamServices implements IExamService {
           },
         };
       }
-      const exams = await Repo.ExamRepo.createQueryBuilder("exam")
+      const exams = await this._context.ExamRepo.createQueryBuilder("exam")
         .where("exam.userId = :userId", { userId })
         .innerJoinAndSelect("exam.examSkillStatuses", "examSkillStatuses")
         .andWhere("exam.isDeleted = :isDeleted", { isDeleted: false })

@@ -2,17 +2,18 @@ import { ErrorMessages } from "@/constants/ErrorMessages";
 import { IResponseBase } from "@/interfaces/base/IResponseBase";
 import { ILevelDataUpdate } from "@/interfaces/level/ILevelDTO";
 import ILevelService from "@/interfaces/level/ILevelService";
-import { Repo } from "@/repository";
 import { StatusCodes } from "http-status-codes";
+import DatabaseService from "../database/DatabaseService";
 
 export default class LevelService implements ILevelService {
-  constructor() {
-    // Constructor
+  private readonly _context: DatabaseService
+  constructor(DatabaseService: DatabaseService) {
+    this._context = DatabaseService;
   }
 
   async getAllLevels(): Promise<IResponseBase> {
     try {
-      const levels = await Repo.LevelRepo.find({
+      const levels = await this._context.LevelRepo.find({
         order: {
           id: "ASC",
         },
@@ -51,7 +52,7 @@ export default class LevelService implements ILevelService {
           status: StatusCodes.BAD_REQUEST,
         };
       }
-      const level = await Repo.LevelRepo.findOne({
+      const level = await this._context.LevelRepo.findOne({
         where: {
           id: levelId,
         },
@@ -102,7 +103,7 @@ export default class LevelService implements ILevelService {
           status: StatusCodes.BAD_REQUEST,
         };
       }
-      const levels = await Repo.LevelRepo.find({
+      const levels = await this._context.LevelRepo.find({
         where: {
           skillId,
         },
@@ -144,7 +145,7 @@ export default class LevelService implements ILevelService {
           status: StatusCodes.BAD_REQUEST,
         };
       }
-      const level = await Repo.LevelRepo.findOne({
+      const level = await this._context.LevelRepo.findOne({
         where: {
           id: levelId,
         },
@@ -164,7 +165,7 @@ export default class LevelService implements ILevelService {
       level.description = levelData.description;
       level.image = levelData.image;
       level.subQuestionNumber = levelData.subQuestionNumber;
-      await Repo.LevelRepo.save(level);
+      await this._context.LevelRepo.save(level);
       return {
         data: level,
         message: "Update level successfully",

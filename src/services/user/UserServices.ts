@@ -1,21 +1,21 @@
 import { ErrorMessages } from "@/constants/ErrorMessages";
-import { Brackets, ILike } from "typeorm";
+import { User } from "@/entity/User";
+import IRoleService from "@/interfaces/auth/IRoleService";
 import { IResponseBase } from "@/interfaces/base/IResponseBase";
 import IUserService from "@/interfaces/user/IUserService";
-import { Repo } from "@/repository";
-import { StatusCodes } from "http-status-codes";
 import { ICreateUserData, IUpdateUserData } from "@/interfaces/user/UserDTO";
-import { User } from "@/entity/User";
-import { v4 as uuidv4 } from "uuid";
 import Extensions from "@/utils/Extensions";
-import IRoleService from "@/interfaces/auth/IRoleService";
-import RoleService from "../auth/RoleService";
+import { StatusCodes } from "http-status-codes";
+import { Brackets, ILike } from "typeorm";
+import { v4 as uuidv4 } from "uuid";
+import DatabaseService from "../database/DatabaseService";
 
 export default class UserService implements IUserService {
-  private _roleService: IRoleService;
-  constructor() {
-    // constructor code
-    this._roleService = new RoleService();
+  private readonly _roleService: IRoleService;
+  private readonly _context: DatabaseService
+  constructor(DatabaseService: DatabaseService, RoleService: IRoleService) {
+    this._context = DatabaseService;
+    this._roleService = RoleService;
   }
   async getUserByUsername(username: string): Promise<IResponseBase> {
     try {
@@ -31,7 +31,7 @@ export default class UserService implements IUserService {
           },
         };
       }
-      const user = await Repo.UserRepo.createQueryBuilder("user")
+      const user = await this._context.UserRepo.createQueryBuilder("user")
         .innerJoinAndSelect("user.groupRole", "groupRole")
         .where("user.isDeleted = :isDeleted", { isDeleted: false })
         .andWhere("user.username = :username", { username })
@@ -73,7 +73,7 @@ export default class UserService implements IUserService {
 
   async getAllUser(page: number = 1, limit: number = 10, search: string = ""): Promise<IResponseBase> {
     try {
-      const totalCountQuery = Repo.UserRepo.count({
+      const totalCountQuery = this._context.UserRepo.count({
         where: [
           {
             isDeleted: false,
@@ -85,7 +85,7 @@ export default class UserService implements IUserService {
           },
         ],
       });
-      const usersQuery = Repo.UserRepo.createQueryBuilder("user")
+      const usersQuery = this._context.UserRepo.createQueryBuilder("user")
         .innerJoinAndSelect("user.groupRole", "groupRole")
         .where("user.isDeleted = :isDeleted", { isDeleted: false })
         .andWhere(
@@ -131,7 +131,7 @@ export default class UserService implements IUserService {
 
   async getDeletedUsers(page: number = 1, limit: number = 10, search: string = ""): Promise<IResponseBase> {
     try {
-      const [users, totalItem] = await Repo.UserRepo.findAndCount({
+      const [users, totalItem] = await this._context.UserRepo.findAndCount({
         where: [
           {
             isDeleted: true,
@@ -176,7 +176,7 @@ export default class UserService implements IUserService {
 
   async getUserById(userId: string): Promise<IResponseBase> {
     try {
-      const user = await Repo.UserRepo.createQueryBuilder("user")
+      const user = await this._context.UserRepo.createQueryBuilder("user")
         .innerJoinAndSelect("user.groupRole", "groupRole")
         .where("user.isDeleted = :isDeleted", { isDeleted: false })
         .andWhere("user.id = :userId", { userId })
@@ -258,8 +258,8 @@ export default class UserService implements IUserService {
         };
       }
 
-      const user = Repo.UserRepo.create(userData);
-      await Repo.UserRepo.save(user);
+      const user = this._context.UserRepo.create(userData);
+      await this._context.UserRepo.save(user);
 
       const userCreated = await this.getUserById(user.id);
       if (!userCreated.success || !userCreated.data) {
@@ -321,13 +321,13 @@ export default class UserService implements IUserService {
           },
         };
       }
-      const user = await Repo.UserRepo.findOne({
+      const user = await this._context.UserRepo.findOne({
         where: {
           id: userId,
         },
       });
-      const updatedUser = Repo.UserRepo.merge(user, userData);
-      await Repo.UserRepo.save(updatedUser);
+      const updatedUser = this._context.UserRepo.merge(user, userData);
+      await this._context.UserRepo.save(updatedUser);
 
       const userUpdated = await this.getUserById(userId);
       if (!userUpdated.success || !userUpdated.data) {
@@ -366,7 +366,7 @@ export default class UserService implements IUserService {
 
   async deleteUser(userId: string): Promise<IResponseBase> {
     try {
-      const user = await Repo.UserRepo.findOne({
+      const user = await this._context.UserRepo.findOne({
         where: {
           id: userId,
           isDeleted: false,
@@ -385,7 +385,7 @@ export default class UserService implements IUserService {
         };
       }
       user.isDeleted = true;
-      await Repo.UserRepo.save(user);
+      await this._context.UserRepo.save(user);
       return {
         status: StatusCodes.OK,
         success: true,
@@ -412,7 +412,7 @@ export default class UserService implements IUserService {
 
   async restoreUser(userId: string): Promise<IResponseBase> {
     try {
-      const user = await Repo.UserRepo.findOne({
+      const user = await this._context.UserRepo.findOne({
         where: {
           id: userId,
           isDeleted: true,
@@ -431,7 +431,7 @@ export default class UserService implements IUserService {
         };
       }
       user.isDeleted = false;
-      await Repo.UserRepo.save(user);
+      await this._context.UserRepo.save(user);
       return {
         status: StatusCodes.OK,
         success: true,
@@ -458,7 +458,7 @@ export default class UserService implements IUserService {
 
   async deletePermanentlyUser(userId: string): Promise<IResponseBase> {
     try {
-      const user = await Repo.UserRepo.findOne({
+      const user = await this._context.UserRepo.findOne({
         where: {
           id: userId,
         },
@@ -475,7 +475,7 @@ export default class UserService implements IUserService {
           },
         };
       }
-      await Repo.UserRepo.delete(userId);
+      await this._context.UserRepo.delete(userId);
       return {
         status: StatusCodes.OK,
         success: true,

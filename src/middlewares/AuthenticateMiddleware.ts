@@ -1,27 +1,12 @@
-import { NextFunction, RequestHandler } from "express";
-import { StatusCodes } from "http-status-codes";
-import "dotenv/config";
-import { ErrorMessages } from "@/constants/ErrorMessages";
-import JwtService from "@/services/auth/JWTService";
-import { Request, Response } from "express";
 import { ENV } from "@/constants/env";
+import { ErrorMessages } from "@/constants/ErrorMessages";
+import { IJWTService } from "@/interfaces/auth/IJWTService";
+import "dotenv/config";
+import { NextFunction, Request, RequestHandler, Response } from "express";
+import { StatusCodes } from "http-status-codes";
 
-export default class AuthenticationMiddleware {
-  private _jwtService: JwtService;
-  constructor() {
-    this._jwtService = new JwtService();
-  }
-  public authenticate: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
-    const nonSecurePaths = [
-      "/",
-      "/auth/login",
-      "/auth/register",
-      "/auth/get-group-roles",
-      "/provinces/get-provincies",
-      "/member-counts/get-member-counts",
-      "/setup/init-data",
-    ];
-    if (nonSecurePaths.includes(req.path)) return next();
+function AuthenticateMiddleware(JwtService: IJWTService): RequestHandler {
+  return async (req: Request, res: Response, next: NextFunction) => {
     let accessToken = "";
     switch (ENV.AUTH_MODE) {
       case "COOKIE": {
@@ -50,9 +35,9 @@ export default class AuthenticationMiddleware {
       });
     }
     // Decode the token to get the payload
-    const payload: any = this._jwtService.getTokenPayload(accessToken);
-    const isValid: boolean = this._jwtService.verifyAccessToken(accessToken);
-    const isOAuthValid: boolean = !payload?.isCredential ? await this._jwtService.verifyOAuthToken(accessToken) : false;
+    const payload: any = JwtService.getTokenPayload(accessToken);
+    const isValid: boolean = JwtService.verifyAccessToken(accessToken);
+    const isOAuthValid: boolean = !payload?.isCredential ? await JwtService.verifyOAuthToken(accessToken) : false;
     // If the token is not valid, return an 401 error code
     if (!isValid && !isOAuthValid) {
       return res.status(StatusCodes.UNAUTHORIZED).json({
@@ -66,16 +51,6 @@ export default class AuthenticationMiddleware {
         ErrorMessages: ErrorMessages.UNAUTHORIZED,
       });
     }
-    // Check if the user has the required roles
-    // if (roles) {
-    //   const userRoles = payload?.roles;
-    //   const hasRole = roles.some((role) => userRoles.includes(role));
-    //   if (!hasRole) {
-    //     const error = new HttpException(StatusCodes.FORBIDDEN, ErrorMessages.FORBIDDEN);
-    //     return res.status(StatusCodes.FORBIDDEN).json(error.getError());
-    //   }
-    // }
-    // // Attach the user to the request object
     req.user = {
       id: payload?.userId || payload?.userid,
       email: payload?.email,
@@ -84,5 +59,7 @@ export default class AuthenticationMiddleware {
       accessToken: accessToken,
     };
     next();
-  };
+  }
 }
+
+export default AuthenticateMiddleware;
