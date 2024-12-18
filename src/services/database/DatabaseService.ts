@@ -19,6 +19,7 @@ import { Skill } from "@/entity/Skill";
 import { SubQuestion } from "@/entity/SubQuestion";
 import { User } from "@/entity/User";
 import logger from "@/helpers/logger";
+import dataSource from "@/ormconfig";
 import "reflect-metadata";
 import { DataSource, QueryRunner, Repository } from "typeorm";
 
@@ -44,19 +45,7 @@ class DatabaseService {
     public OrganizationRepo: Repository<Organization>
     public ScheduleRepo: Repository<ExamSchedule>
     constructor() {
-        this._dataSource = new DataSource({
-            type: "postgres",
-            host: ENV.DB_HOST || "localhost",
-            port: Number(ENV.DB_PORT) || 5432,
-            username: ENV.DB_USERNAME,
-            password: ENV.DB_PASSWORD,
-            database: ENV.DB_NAME,
-            entities: [__dirname + '/../../**/entity/**/*.{js,ts}'],
-            migrations: [__dirname + '/../../**/migration/**/*.{js,ts}'],
-            migrationsTableName: "migrations",
-            synchronize: true,
-            logging: ["query", "error", "info", "warn"],
-        });
+        this._dataSource = dataSource;
         this.FunctionRepo = this._dataSource.getRepository(Function);
         this.GroupRoleRepo = this._dataSource.getRepository(GroupRole);
         this.PermissionRepo = this._dataSource.getRepository(Permission);
