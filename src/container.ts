@@ -1,6 +1,7 @@
 import AuthService from "@/services/auth/AuthServices";
 import JwtService from "@/services/auth/JWTService";
 import RoleService from "@/services/auth/RoleService";
+import { CategoryService } from "@/services/category/CategoryService";
 import DatabaseService from "@/services/database/DatabaseService";
 import ExamService from "@/services/exam/ExamServices";
 import LevelService from "@/services/level/LevelService";
@@ -23,6 +24,7 @@ container.register({
     AuthService: asClass(AuthService).scoped(),
     RoleService: asClass(RoleService).scoped(),
     UserService: asClass(UserService).scoped(),
+    CategoryService: asClass(CategoryService).scoped(),
     SkillService: asClass(SkillService).scoped(),
     SchuduleService: asClass(ScheduleService).scoped(),
     QuestionService: asClass(QuestionService).scoped(),

@@ -2,7 +2,7 @@ import { IUserLoginData, IUserRegisterData } from "@/interfaces/auth/AuthDto";
 import IAuthService from "@/interfaces/auth/IAuthService";
 import IRoleService from "@/interfaces/auth/IRoleService";
 import AuthenticateMiddleware from "@/middlewares/AuthenticateMiddleware";
-import { before, GET, inject, POST, route } from "awilix-express";
+import { before, GET, inject, POST, PUT, route } from "awilix-express";
 import { Request, Response } from "express";
 
 @route("/auth")
@@ -67,7 +67,7 @@ export class AuthController {
   }
 
   @before(inject((JwtService) => AuthenticateMiddleware(JwtService)))
-  @POST()
+  @PUT()
   @route("/update-my-profile")
   async updateMyProfile(req: Request, res: Response) {
     const userId = req.user.id;
