@@ -1,17 +1,17 @@
 import { ErrorMessages } from "@/constants/ErrorMessages";
-import AppDataSource from "@/data-source";
 import { Answer } from "@/entity/Answer";
 import { Question } from "@/entity/Question";
 import { SubQuestion } from "@/entity/SubQuestion";
 import { IResponseBase } from "@/interfaces/base/IResponseBase";
 import IQuestionService from "@/interfaces/question/IQuestionService";
 import { IQuestionDetail } from "@/interfaces/question/QuestionDTO";
-import { Repo } from "@/repository";
 import { StatusCodes } from "http-status-codes";
+import DatabaseService from "../database/DatabaseService";
 
 export default class QuestionService implements IQuestionService {
-  constructor() {
-    // Constructor
+  private readonly _context: DatabaseService
+  constructor(DatabaseService: DatabaseService) {
+    this._context = DatabaseService;
   }
   private questionFields = [
     "question.id",
@@ -65,7 +65,7 @@ export default class QuestionService implements IQuestionService {
         status: StatusCodes.BAD_REQUEST,
       };
     }
-    const level = await Repo.LevelRepo.findOne({
+    const level = await this._context.LevelRepo.findOne({
       where: {
         id: questionData.levelId,
       },
@@ -164,7 +164,7 @@ export default class QuestionService implements IQuestionService {
   }
 
   async createNewQuestion(questionDatas: IQuestionDetail[], userId: string): Promise<IResponseBase> {
-    const queryRunner = AppDataSource.createQueryRunner();
+    const queryRunner = this._context.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
@@ -263,7 +263,7 @@ export default class QuestionService implements IQuestionService {
       return checkQuestionData;
     }
 
-    const queryRunner = AppDataSource.createQueryRunner();
+    const queryRunner = this._context.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
@@ -355,7 +355,7 @@ export default class QuestionService implements IQuestionService {
           status: StatusCodes.BAD_REQUEST,
         };
       }
-      const questions = await Repo.QuestionRepo.createQueryBuilder("question")
+      const questions = await this._context.QuestionRepo.createQueryBuilder("question")
         .innerJoin("question.category", "category")
         .innerJoin("question.level", "level")
         .innerJoin("question.skill", "skill")
@@ -415,7 +415,7 @@ export default class QuestionService implements IQuestionService {
           status: StatusCodes.BAD_REQUEST,
         };
       }
-      const questions = await Repo.QuestionRepo.createQueryBuilder("question")
+      const questions = await this._context.QuestionRepo.createQueryBuilder("question")
         .innerJoin("question.category", "category")
         .innerJoin("question.level", "level")
         .innerJoin("question.skill", "skill")
@@ -469,7 +469,7 @@ export default class QuestionService implements IQuestionService {
           status: StatusCodes.BAD_REQUEST,
         };
       }
-      const questions = await Repo.QuestionRepo.createQueryBuilder("question")
+      const questions = await this._context.QuestionRepo.createQueryBuilder("question")
         .innerJoin("question.category", "category")
         .innerJoin("question.level", "level")
         .innerJoin("question.skill", "skill")
@@ -528,7 +528,7 @@ export default class QuestionService implements IQuestionService {
           status: StatusCodes.BAD_REQUEST,
         };
       }
-      const questions = await Repo.QuestionRepo.createQueryBuilder("question")
+      const questions = await this._context.QuestionRepo.createQueryBuilder("question")
         .innerJoin("question.category", "category")
         .innerJoin("question.level", "level")
         .innerJoin("question.skill", "skill")
@@ -578,7 +578,7 @@ export default class QuestionService implements IQuestionService {
           status: StatusCodes.BAD_REQUEST,
         };
       }
-      const question = await Repo.QuestionRepo.findOne({
+      const question = await this._context.QuestionRepo.findOne({
         where: {
           id: questionId,
         },
@@ -596,7 +596,7 @@ export default class QuestionService implements IQuestionService {
         };
       }
       question.isDeleted = true;
-      await Repo.QuestionRepo.save(question);
+      await this._context.QuestionRepo.save(question);
 
       return {
         data: question,
@@ -632,7 +632,7 @@ export default class QuestionService implements IQuestionService {
           status: StatusCodes.BAD_REQUEST,
         };
       }
-      const question = await Repo.QuestionRepo.findOne({
+      const question = await this._context.QuestionRepo.findOne({
         where: {
           id: questionId,
         },
@@ -650,7 +650,7 @@ export default class QuestionService implements IQuestionService {
         };
       }
       question.isDeleted = false;
-      await Repo.QuestionRepo.save(question);
+      await this._context.QuestionRepo.save(question);
 
       return {
         data: question,
@@ -686,7 +686,7 @@ export default class QuestionService implements IQuestionService {
           status: StatusCodes.BAD_REQUEST,
         };
       }
-      const question = await Repo.QuestionRepo.findOne({
+      const question = await this._context.QuestionRepo.findOne({
         where: {
           id: questionId,
         },
@@ -704,7 +704,7 @@ export default class QuestionService implements IQuestionService {
         };
       }
       question.isActive = true;
-      await Repo.QuestionRepo.save(question);
+      await this._context.QuestionRepo.save(question);
 
       return {
         data: question,
@@ -740,7 +740,7 @@ export default class QuestionService implements IQuestionService {
           status: StatusCodes.BAD_REQUEST,
         };
       }
-      const question = await Repo.QuestionRepo.findOne({
+      const question = await this._context.QuestionRepo.findOne({
         where: {
           id: questionId,
         },
@@ -758,7 +758,7 @@ export default class QuestionService implements IQuestionService {
         };
       }
       question.isActive = false;
-      await Repo.QuestionRepo.save(question);
+      await this._context.QuestionRepo.save(question);
 
       return {
         data: question,
@@ -794,7 +794,7 @@ export default class QuestionService implements IQuestionService {
           status: StatusCodes.BAD_REQUEST,
         };
       }
-      const question = await Repo.QuestionRepo.findOne({
+      const question = await this._context.QuestionRepo.findOne({
         where: {
           id: questionId,
         },
@@ -811,7 +811,7 @@ export default class QuestionService implements IQuestionService {
           status: StatusCodes.NOT_FOUND,
         };
       }
-      await Repo.QuestionRepo.remove(question);
+      await this._context.QuestionRepo.remove(question);
 
       return {
         data: question,

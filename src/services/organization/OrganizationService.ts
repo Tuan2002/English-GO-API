@@ -1,17 +1,19 @@
 import { ErrorMessages } from "@/constants/ErrorMessages";
 import { IResponseBase } from "@/interfaces/base/IResponseBase";
 import IOrganizationService from "@/interfaces/organization/IOrganizationService";
-import { Repo } from "@/repository";
 import { StatusCodes } from "http-status-codes";
+import { v4 as uuid } from 'uuid';
+import DatabaseService from "../database/DatabaseService";
 
 export default class OrganizationService implements IOrganizationService {
-  constructor() {
-    // Constructor
+  private readonly _context: DatabaseService
+  constructor(DatabaseService: DatabaseService) {
+    this._context = DatabaseService;
   }
 
   async getAllOrganization(): Promise<IResponseBase> {
     try {
-      const organizations = await Repo.OrganizationRepo.find({
+      const organizations = await this._context.OrganizationRepo.find({
         order: {
           createdAt: "ASC",
         },
@@ -50,7 +52,7 @@ export default class OrganizationService implements IOrganizationService {
           status: StatusCodes.BAD_REQUEST,
         };
       }
-      const organization = await Repo.OrganizationRepo.findOne({
+      const organization = await this._context.OrganizationRepo.findOne({
         where: {
           id: organizationId,
         },
@@ -101,10 +103,10 @@ export default class OrganizationService implements IOrganizationService {
           status: StatusCodes.BAD_REQUEST,
         };
       }
-      data.id = Repo.createUUID();
-      const organization = Repo.OrganizationRepo.create(data);
-      await Repo.OrganizationRepo.save(organization);
-      const createdOrganization = await Repo.OrganizationRepo.findOne({
+      data.id = uuid();
+      const organization = this._context.OrganizationRepo.create(data);
+      await this._context.OrganizationRepo.save(organization);
+      const createdOrganization = await this._context.OrganizationRepo.findOne({
         where: {
           id: data.id,
         },
@@ -167,7 +169,7 @@ export default class OrganizationService implements IOrganizationService {
           status: StatusCodes.BAD_REQUEST,
         };
       }
-      const organization = await Repo.OrganizationRepo.findOne({
+      const organization = await this._context.OrganizationRepo.findOne({
         where: {
           id: organizationId,
         },
@@ -186,7 +188,7 @@ export default class OrganizationService implements IOrganizationService {
       }
       organization.name = data.name;
       organization.description = data.description;
-      const organizationUpdated = await Repo.OrganizationRepo.save(organization);
+      const organizationUpdated = await this._context.OrganizationRepo.save(organization);
       if (!organizationUpdated) {
         return {
           data: null,
@@ -233,7 +235,7 @@ export default class OrganizationService implements IOrganizationService {
           status: StatusCodes.BAD_REQUEST,
         };
       }
-      const organization = await Repo.OrganizationRepo.findOne({
+      const organization = await this._context.OrganizationRepo.findOne({
         where: {
           id: organizationId,
         },
@@ -250,7 +252,7 @@ export default class OrganizationService implements IOrganizationService {
           status: StatusCodes.NOT_FOUND,
         };
       }
-      const organizationDeleted = await Repo.OrganizationRepo.remove(organization);
+      const organizationDeleted = await this._context.OrganizationRepo.remove(organization);
       if (!organizationDeleted) {
         return {
           data: null,

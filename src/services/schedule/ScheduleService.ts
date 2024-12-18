@@ -1,15 +1,17 @@
 import { ExamSchedule } from "@/entity/ExamSchedule";
 import { IResponseBase } from "@/interfaces/base/IResponseBase";
 import { IScheduleService } from "@/interfaces/schedule/IScheduleService";
-import { Repo } from "@/repository";
+import { v4 as uuid } from 'uuid';
+import DatabaseService from "../database/DatabaseService";
 
 export class ScheduleService implements IScheduleService {
-  constructor() {
-    // Constructor
+  private readonly _context: DatabaseService
+  constructor(DatabaseService: DatabaseService) {
+    this._context = DatabaseService;
   }
   async getAllSchedule(): Promise<IResponseBase> {
     try {
-      const schedules = await Repo.ScheduleRepo.find({
+      const schedules = await this._context.ScheduleRepo.find({
         order: {
           startDate: "ASC",
         },
@@ -48,7 +50,7 @@ export class ScheduleService implements IScheduleService {
           status: 400,
         };
       }
-      const schedule = await Repo.ScheduleRepo.findOne({
+      const schedule = await this._context.ScheduleRepo.findOne({
         where: {
           id: scheduleId,
         },
@@ -99,7 +101,7 @@ export class ScheduleService implements IScheduleService {
           status: 400,
         };
       }
-      const organization = await Repo.OrganizationRepo.findOne({
+      const organization = await this._context.OrganizationRepo.findOne({
         where: {
           id: data.organizationId,
         },
@@ -117,16 +119,16 @@ export class ScheduleService implements IScheduleService {
         };
       }
       const scheduleData = new ExamSchedule();
-      scheduleData.id = Repo.createUUID();
+      scheduleData.id = uuid();
       scheduleData.examPeriod = data.examPeriod;
       scheduleData.startDate = data.startDate;
       scheduleData.endDate = data.endDate;
       scheduleData.organizationId = data.organizationId;
       scheduleData.description = data.description;
 
-      const schedule = Repo.ScheduleRepo.create(scheduleData);
-      await Repo.ScheduleRepo.save(schedule);
-      const scheduleCreated = await Repo.ScheduleRepo.findOne({
+      const schedule = this._context.ScheduleRepo.create(scheduleData);
+      await this._context.ScheduleRepo.save(schedule);
+      const scheduleCreated = await this._context.ScheduleRepo.findOne({
         where: {
           id: scheduleData.id,
         },
@@ -189,7 +191,7 @@ export class ScheduleService implements IScheduleService {
           status: 400,
         };
       }
-      const organization = await Repo.OrganizationRepo.findOne({
+      const organization = await this._context.OrganizationRepo.findOne({
         where: {
           id: data.organizationId,
         },
@@ -206,7 +208,7 @@ export class ScheduleService implements IScheduleService {
           status: 404,
         };
       }
-      const schedule = await Repo.ScheduleRepo.findOne({
+      const schedule = await this._context.ScheduleRepo.findOne({
         where: {
           id: scheduleId,
         },
@@ -228,8 +230,8 @@ export class ScheduleService implements IScheduleService {
       schedule.endDate = data.endDate;
       schedule.organizationId = data.organizationId;
       schedule.description = data.description;
-      await Repo.ScheduleRepo.save(schedule);
-      const scheduleUpdated = await Repo.ScheduleRepo.findOne({
+      await this._context.ScheduleRepo.save(schedule);
+      const scheduleUpdated = await this._context.ScheduleRepo.findOne({
         where: {
           id: scheduleId,
         },
@@ -280,7 +282,7 @@ export class ScheduleService implements IScheduleService {
           status: 400,
         };
       }
-      const schedule = await Repo.ScheduleRepo.findOne({
+      const schedule = await this._context.ScheduleRepo.findOne({
         where: {
           id: scheduleId,
         },
@@ -297,7 +299,7 @@ export class ScheduleService implements IScheduleService {
           status: 404,
         };
       }
-      await Repo.ScheduleRepo.delete({
+      await this._context.ScheduleRepo.delete({
         id: scheduleId,
       });
       return {

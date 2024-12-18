@@ -1,15 +1,16 @@
 import IRoleService from "@/interfaces/auth/IRoleService";
 import { IResponseBase } from "@/interfaces/base/IResponseBase";
-import { Repo } from "@/repository";
 import { StatusCodes } from "http-status-codes";
+import DatabaseService from "../database/DatabaseService";
 
 export default class RoleService implements IRoleService {
-  constructor() {
-    // constructor code
+  private readonly _context: DatabaseService
+  constructor(DatabaseService: DatabaseService) {
+    this._context = DatabaseService;
   }
   async getUserRoles(groupRoleId: string): Promise<IResponseBase> {
     try {
-      const userRoles = await Repo.GroupRoleRepo.find({
+      const userRoles = await this._context.GroupRoleRepo.find({
         where: {
           id: groupRoleId,
         },
@@ -48,7 +49,7 @@ export default class RoleService implements IRoleService {
 
   async getGroupRole(groupRoleId: string): Promise<IResponseBase> {
     try {
-      const groupRole = await Repo.GroupRoleRepo.findOne({
+      const groupRole = await this._context.GroupRoleRepo.findOne({
         where: {
           id: groupRoleId,
         },
@@ -87,7 +88,7 @@ export default class RoleService implements IRoleService {
 
   async getCurrentUserPermission(roleId: string): Promise<IResponseBase> {
     try {
-      const userPerMissions = await Repo.FunctionRepo.createQueryBuilder("function")
+      const userPerMissions = await this._context.FunctionRepo.createQueryBuilder("function")
         .innerJoin("function.permissions", "permission")
         .where("permission.groupRoleId = :roleId", { roleId })
         .andWhere("permission.isDeleted = :isDeleted", { isDeleted: false })
@@ -119,7 +120,7 @@ export default class RoleService implements IRoleService {
 
   async getAllGroupRoles(): Promise<IResponseBase> {
     try {
-      const groupRoles = await Repo.GroupRoleRepo.find({
+      const groupRoles = await this._context.GroupRoleRepo.find({
         where: {
           isDeleted: false,
         },

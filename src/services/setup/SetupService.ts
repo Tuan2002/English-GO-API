@@ -2,18 +2,49 @@ import EGroupRole from "@/constants/GroupRole";
 import { User } from "@/entity/User";
 import { IResponseBase } from "@/interfaces/base/IResponseBase";
 import { ISetupService } from "@/interfaces/setup/ISetupService";
-import { Repo } from "@/repository";
 import Extensions from "@/utils/Extensions";
+import { v4 as uuid } from "uuid";
+import DatabaseService from "../database/DatabaseService";
 
 export class SetupService implements ISetupService {
-  constructor() {
-    // Constructor
+  private readonly _context: DatabaseService;
+  constructor(DatabaseService: DatabaseService) {
+    this._context = DatabaseService;
   }
-
   async setupService(): Promise<IResponseBase> {
     try {
+      // create group role
+      const groupRoles = await this._context.GroupRoleRepo.find();
+      if (!groupRoles || groupRoles.length === 0) {
+        const newGroupRoles = [
+          {
+            id: EGroupRole.ADMIN,
+            name: "admin",
+            displayName: "Quản trị viên",
+            description: "Quản trị viên hệ thống",
+          },
+          {
+            id: EGroupRole.EXAMINER,
+            name: "examiner",
+            displayName: "Giáo viên chấm bài",
+            description: "Giáo viên chấm bài",
+          },
+          {
+            id: EGroupRole.CONTESTANT,
+            name: "contestant",
+            displayName: "Thí sinh dự thi",
+            description: "Thí sinh tham gia thi thử",
+          },
+        ];
+        await Promise.all(
+          newGroupRoles.map((groupRole) => {
+            const newGroupRole = this._context.GroupRoleRepo.create(groupRole);
+            return this._context.GroupRoleRepo.save(newGroupRole);
+          })
+        );
+      }
       // create admin user
-      const admin = await Repo.UserRepo.findOne({
+      const admin = await this._context.UserRepo.findOne({
         where: {
           groupRoleId: EGroupRole.ADMIN,
         },
@@ -28,13 +59,13 @@ export class SetupService implements ISetupService {
         newAdmin.phoneNumber = "0123456789";
         newAdmin.birthday = "05/08/2003";
         newAdmin.isExternal = false;
-        newAdmin.id = Repo.createUUID();
+        newAdmin.id = uuid();
 
-        await Repo.UserRepo.save(newAdmin);
+        await this._context.UserRepo.save(newAdmin);
       }
 
       // create skills
-      const skills = await Repo.SkillRepo.find();
+      const skills = await this._context.SkillRepo.find();
       if (!skills || skills.length === 0) {
         const newSkills = [
           {
@@ -78,12 +109,12 @@ export class SetupService implements ISetupService {
         ];
         await Promise.all(
           newSkills.map((skill) => {
-            const newSkill = Repo.SkillRepo.create(skill);
-            return Repo.SkillRepo.save(newSkill);
+            const newSkill = this._context.SkillRepo.create(skill);
+            return this._context.SkillRepo.save(newSkill);
           })
         );
       }
-      const levels = await Repo.LevelRepo.find();
+      const levels = await this._context.LevelRepo.find();
       if (!levels || levels.length === 0) {
         const listLevels = [
           {
@@ -205,8 +236,8 @@ export class SetupService implements ISetupService {
         ];
         await Promise.all(
           listLevels.map((level) => {
-            const newLevel = Repo.LevelRepo.create(level);
-            return Repo.LevelRepo.save(newLevel);
+            const newLevel = this._context.LevelRepo.create(level);
+            return this._context.LevelRepo.save(newLevel);
           })
         );
       }

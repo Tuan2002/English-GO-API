@@ -2,17 +2,17 @@ import { ErrorMessages } from "@/constants/ErrorMessages";
 import { IResponseBase } from "@/interfaces/base/IResponseBase";
 import { ISkillDataUpdate } from "@/interfaces/skill/ISkillDTO";
 import ISkillService from "@/interfaces/skill/ISkillService";
-import { Repo } from "@/repository";
 import { StatusCodes } from "http-status-codes";
+import DatabaseService from "../database/DatabaseService";
 
 export default class SkillService implements ISkillService {
-  constructor() {
-    // Constructor
+  private readonly _context: DatabaseService
+  constructor(DatabaseService: DatabaseService) {
+    this._context = DatabaseService;
   }
-
   async getAllSkills(): Promise<IResponseBase> {
     try {
-      const skills = await Repo.SkillRepo.find({
+      const skills = await this._context.SkillRepo.find({
         order: {
           order: "ASC",
         },
@@ -51,7 +51,7 @@ export default class SkillService implements ISkillService {
           status: StatusCodes.BAD_REQUEST,
         };
       }
-      const skill = await Repo.SkillRepo.findOne({
+      const skill = await this._context.SkillRepo.findOne({
         where: {
           id: skillId,
         },
@@ -102,7 +102,7 @@ export default class SkillService implements ISkillService {
           status: StatusCodes.BAD_REQUEST,
         };
       }
-      const skill = await Repo.SkillRepo.findOne({
+      const skill = await this._context.SkillRepo.findOne({
         where: {
           id: skillId,
         },
@@ -121,7 +121,7 @@ export default class SkillService implements ISkillService {
       }
       skill.image = skillData.image;
       skill.description = skillData.description;
-      await Repo.SkillRepo.save(skill);
+      await this._context.SkillRepo.save(skill);
       return {
         data: skill,
         message: "",

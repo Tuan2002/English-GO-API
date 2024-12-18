@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
-import { Skill } from "./Skill";
 import { Level } from "./Level";
 import { Question } from "./Question";
+import { Skill } from "./Skill";
 
 @Entity({ name: "Categories" })
 export class Category {

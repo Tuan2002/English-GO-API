@@ -2,14 +2,17 @@ import { ErrorMessages } from "@/constants/ErrorMessages";
 import { IResponseBase } from "@/interfaces/base/IResponseBase";
 import { ICategoryRequestData } from "@/interfaces/category/ICategoryDTO";
 import ICategoryService from "@/interfaces/category/ICategoryService";
-import { Repo } from "@/repository";
 import { StatusCodes } from "http-status-codes";
-
+import { v4 as uuid } from 'uuid';
+import DatabaseService from "../database/DatabaseService";
 export class CategoryService implements ICategoryService {
-  constructor() {}
+  private readonly _context: DatabaseService
+  constructor(DatabaseService: DatabaseService) {
+    this._context = DatabaseService;
+  }
   async getAllCategories(): Promise<IResponseBase> {
     try {
-      const categories = await Repo.CategoryRepo.find({
+      const categories = await this._context.CategoryRepo.find({
         order: {
           createdAt: "DESC",
         },
@@ -36,7 +39,7 @@ export class CategoryService implements ICategoryService {
   }
   async getCategoryById(id: string): Promise<IResponseBase> {
     try {
-      const category = await Repo.CategoryRepo.findOne({
+      const category = await this._context.CategoryRepo.findOne({
         where: { id },
         order: {
           createdAt: "DESC",
@@ -76,7 +79,7 @@ export class CategoryService implements ICategoryService {
   }
   async getCategoryOfLevel(levelId: string): Promise<IResponseBase> {
     try {
-      const category = await Repo.CategoryRepo.find({
+      const category = await this._context.CategoryRepo.find({
         where: { levelId, isDeleted: false },
         order: {
           createdAt: "DESC",
@@ -104,7 +107,7 @@ export class CategoryService implements ICategoryService {
   }
   async getCategoryOfSkill(skillId: string): Promise<IResponseBase> {
     try {
-      const category = await Repo.CategoryRepo.find({
+      const category = await this._context.CategoryRepo.find({
         where: { skillId },
         order: {
           createdAt: "DESC",
@@ -156,10 +159,10 @@ export class CategoryService implements ICategoryService {
           },
         };
       }
-      dataCreate.id = Repo.createUUID();
-      const category = Repo.CategoryRepo.create(dataCreate);
-      await Repo.CategoryRepo.save(category);
-      const createdCategory = await Repo.CategoryRepo.findOne({
+      dataCreate.id = uuid();
+      const category = this._context.CategoryRepo.create(dataCreate);
+      await this._context.CategoryRepo.save(category);
+      const createdCategory = await this._context.CategoryRepo.findOne({
         where: {
           id: category.id,
         },
@@ -234,9 +237,9 @@ export class CategoryService implements ICategoryService {
           },
         };
       }
-      const category = Repo.CategoryRepo.create(dataUpdate);
-      await Repo.CategoryRepo.save(category);
-      const createdCategory = await Repo.CategoryRepo.findOne({
+      const category = this._context.CategoryRepo.create(dataUpdate);
+      await this._context.CategoryRepo.save(category);
+      const createdCategory = await this._context.CategoryRepo.findOne({
         where: {
           id: category.id,
         },
@@ -287,7 +290,7 @@ export class CategoryService implements ICategoryService {
           },
         };
       }
-      const category = await Repo.CategoryRepo.findOne({
+      const category = await this._context.CategoryRepo.findOne({
         where: {
           id,
         },
@@ -305,7 +308,7 @@ export class CategoryService implements ICategoryService {
         };
       }
       category.isDeleted = true;
-      await Repo.CategoryRepo.save(category);
+      await this._context.CategoryRepo.save(category);
       return {
         status: StatusCodes.OK,
         success: true,
@@ -340,7 +343,7 @@ export class CategoryService implements ICategoryService {
           },
         };
       }
-      const category = await Repo.CategoryRepo.findOne({
+      const category = await this._context.CategoryRepo.findOne({
         where: {
           id,
         },
@@ -357,7 +360,7 @@ export class CategoryService implements ICategoryService {
           },
         };
       }
-      await Repo.CategoryRepo.delete(id);
+      await this._context.CategoryRepo.delete(id);
       return {
         status: StatusCodes.OK,
         success: true,
@@ -392,7 +395,7 @@ export class CategoryService implements ICategoryService {
           },
         };
       }
-      const category = await Repo.CategoryRepo.findOne({
+      const category = await this._context.CategoryRepo.findOne({
         where: {
           id,
         },
@@ -410,7 +413,7 @@ export class CategoryService implements ICategoryService {
         };
       }
       category.isDeleted = false;
-      await Repo.CategoryRepo.save(category);
+      await this._context.CategoryRepo.save(category);
       return {
         status: StatusCodes.OK,
         success: true,
@@ -445,7 +448,7 @@ export class CategoryService implements ICategoryService {
           },
         };
       }
-      const category = await Repo.CategoryRepo.findOne({
+      const category = await this._context.CategoryRepo.findOne({
         where: {
           id,
         },
@@ -463,7 +466,7 @@ export class CategoryService implements ICategoryService {
         };
       }
       category.isActive = true;
-      await Repo.CategoryRepo.save(category);
+      await this._context.CategoryRepo.save(category);
       return {
         status: StatusCodes.OK,
         success: true,
@@ -498,7 +501,7 @@ export class CategoryService implements ICategoryService {
           },
         };
       }
-      const category = await Repo.CategoryRepo.findOne({
+      const category = await this._context.CategoryRepo.findOne({
         where: {
           id,
         },
@@ -516,7 +519,7 @@ export class CategoryService implements ICategoryService {
         };
       }
       category.isActive = false;
-      await Repo.CategoryRepo.save(category);
+      await this._context.CategoryRepo.save(category);
       return {
         status: StatusCodes.OK,
         success: true,
