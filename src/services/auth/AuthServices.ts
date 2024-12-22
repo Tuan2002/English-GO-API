@@ -13,13 +13,13 @@ import axios from "axios";
 import { StatusCodes } from "http-status-codes";
 import { v4 as uuidv4 } from "uuid";
 import DatabaseService from "../database/DatabaseService";
+import logger from "@/helpers/logger";
 
 export default class AuthService implements IAuthService {
-
   private readonly _JwtService!: IJWTService;
   private readonly _RoleService!: IRoleService;
   private readonly _context: DatabaseService;
-  
+
   constructor(JwtService: IJWTService, RoleService: IRoleService, DatabaseService: DatabaseService) {
     this._JwtService = JwtService;
     this._RoleService = RoleService;
@@ -52,7 +52,8 @@ export default class AuthService implements IAuthService {
         data: user,
         error: null,
       };
-    } catch {
+    } catch (error) {
+      logger.error(error?.message);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -92,7 +93,8 @@ export default class AuthService implements IAuthService {
         data: user,
         error: null,
       };
-    } catch {
+    } catch (error) {
+      logger.error(error?.message);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -195,7 +197,8 @@ export default class AuthService implements IAuthService {
         data: loginData,
         error: null,
       };
-    } catch {
+    } catch (error) {
+      logger.error(error?.message);
       return {
         status: 500,
         success: false,
@@ -225,7 +228,8 @@ export default class AuthService implements IAuthService {
         data: isExist,
         error: null,
       };
-    } catch {
+    } catch (error) {
+      logger.error(error?.message);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -314,6 +318,7 @@ export default class AuthService implements IAuthService {
         error: null,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -408,7 +413,7 @@ export default class AuthService implements IAuthService {
         error: null,
       };
     } catch (error: any) {
-      console.log(error);
+      logger.error(error?.message);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -466,7 +471,8 @@ export default class AuthService implements IAuthService {
         data: user,
         error: null,
       };
-    } catch {
+    } catch (error) {
+      logger.error(error?.message);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -576,6 +582,122 @@ export default class AuthService implements IAuthService {
         error: null,
       };
     } catch (error: any) {
+      return {
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+        success: false,
+        message: "Lỗi từ phía server",
+        data: null,
+        error: {
+          message: "Lỗi từ phía server",
+          errorDetail: "Lỗi từ phía server",
+        },
+      };
+    }
+  }
+  async changePassword(userId: string, oldPassword: string, newPassword: string): Promise<IResponseBase> {
+    try {
+      if (!userId) {
+        return {
+          status: StatusCodes.BAD_REQUEST,
+          success: false,
+          message: "Mã người dùng không được để trống",
+          data: null,
+          error: {
+            message: "Bad Request",
+            errorDetail: "Mã người dùng không được để trống",
+          },
+        };
+      }
+      if (!oldPassword) {
+        return {
+          status: StatusCodes.BAD_REQUEST,
+          success: false,
+          message: "Mật khẩu cũ không được để trống",
+          data: null,
+          error: {
+            message: "Bad Request",
+            errorDetail: "Mật khẩu cũ không được để trống",
+          },
+        };
+      }
+      if (!newPassword) {
+        return {
+          status: StatusCodes.BAD_REQUEST,
+          success: false,
+          message: "Mật khẩu mới không được để trống",
+          data: null,
+          error: {
+            message: "Bad Request",
+            errorDetail: "Mật khẩu mới không được để trống",
+          },
+        };
+      }
+      const user = await this._context.UserRepo.findOne({
+        where: {
+          id: userId,
+        },
+      });
+      if (!user) {
+        return {
+          status: StatusCodes.NOT_FOUND,
+          success: false,
+          message: "Không tìm thấy thông tin người dùng",
+          data: null,
+          error: {
+            message: "Not Found",
+            errorDetail: "Không tìm thấy thông tin người dùng",
+          },
+        };
+      }
+      if (user.isDeleted || user.isBlocked) {
+        return {
+          status: StatusCodes.FORBIDDEN,
+          success: false,
+          message: "Tài khoản người dùng không tồn tại hoặc đã bị khoá",
+          data: null,
+          error: {
+            message: "Forbidden",
+            errorDetail: "Tài khoản người dùng không tồn tại hoặc đã bị khoá",
+          },
+        };
+      }
+      const checkPass = await Extensions.comparePassword(oldPassword, user.password);
+      if (!checkPass) {
+        return {
+          status: StatusCodes.UNAUTHORIZED,
+          success: false,
+          message: "Mật khẩu cũ không chính xác",
+          data: null,
+          error: {
+            message: "Unauthorized",
+            errorDetail: "Mật khẩu cũ không chính xác",
+          },
+        };
+      }
+      user.password = Extensions.hashPassword(newPassword);
+      user.isUpdated = true;
+      const updatedUser = await this._context.UserRepo.save(user);
+      if (!updatedUser) {
+        return {
+          status: StatusCodes.INTERNAL_SERVER_ERROR,
+          success: false,
+          message: "Cập nhật mật khẩu thất bại",
+          data: null,
+          error: {
+            message: "Lỗi từ phía server",
+            errorDetail: "Cập nhật mật khẩu thất bại",
+          },
+        };
+      }
+      return {
+        status: StatusCodes.OK,
+        success: true,
+        message: "Cập nhật mật khẩu thành công",
+        data: user,
+        error: null,
+      };
+    } catch (error: any) {
+      logger.error(error?.message);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,

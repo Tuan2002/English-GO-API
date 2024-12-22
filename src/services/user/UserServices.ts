@@ -9,10 +9,11 @@ import { StatusCodes } from "http-status-codes";
 import { Brackets, ILike } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
 import DatabaseService from "../database/DatabaseService";
+import logger from "@/helpers/logger";
 
 export default class UserService implements IUserService {
   private readonly _roleService: IRoleService;
-  private readonly _context: DatabaseService
+  private readonly _context: DatabaseService;
   constructor(DatabaseService: DatabaseService, RoleService: IRoleService) {
     this._context = DatabaseService;
     this._roleService = RoleService;
@@ -58,6 +59,7 @@ export default class UserService implements IUserService {
         error: null,
       };
     } catch (error: any) {
+      logger.error(error?.message);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -116,6 +118,7 @@ export default class UserService implements IUserService {
         error: null,
       };
     } catch (error: any) {
+      logger.error(error?.message);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -161,6 +164,7 @@ export default class UserService implements IUserService {
         error: null,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -206,6 +210,7 @@ export default class UserService implements IUserService {
         error: null,
       };
     } catch (error: any) {
+      logger.error(error?.message);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -283,6 +288,7 @@ export default class UserService implements IUserService {
         error: null,
       };
     } catch (error: any) {
+      logger.error(error?.message);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -351,6 +357,7 @@ export default class UserService implements IUserService {
         error: null,
       };
     } catch (error: any) {
+      logger.error(error?.message);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -397,6 +404,7 @@ export default class UserService implements IUserService {
         error: null,
       };
     } catch (error: any) {
+      logger.error(error?.message);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -443,6 +451,7 @@ export default class UserService implements IUserService {
         error: null,
       };
     } catch (error: any) {
+      logger.error(error?.message);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -487,6 +496,7 @@ export default class UserService implements IUserService {
         error: null,
       };
     } catch (error: any) {
+      logger.error(error?.message);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,

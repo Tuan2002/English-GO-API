@@ -16,6 +16,7 @@ import { RequestStorage } from "@/middlewares";
 import { StatusCodes } from "http-status-codes";
 import { v4 as uuidv4 } from "uuid";
 import DatabaseService from "../database/DatabaseService";
+import logger from "@/helpers/logger";
 
 export default class ExamServices implements IExamService {
   private readonly _levelService: ILevelService;
@@ -109,6 +110,7 @@ export default class ExamServices implements IExamService {
         error: null,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -209,6 +211,7 @@ export default class ExamServices implements IExamService {
       };
       // levelId
     } catch (error) {
+      logger.error(error?.message);
       await queryRunner.rollbackTransaction();
       return {
         data: null,
@@ -241,6 +244,7 @@ export default class ExamServices implements IExamService {
         return exam;
       }
     } catch (error) {
+      logger.error(error?.message);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -377,6 +381,7 @@ export default class ExamServices implements IExamService {
         error: null,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -614,6 +619,7 @@ export default class ExamServices implements IExamService {
         error: null,
       };
     } catch (error) {
+      logger.error(error?.message);
       console.log("error", error);
       queryRunner.rollbackTransaction();
       return {
@@ -704,6 +710,7 @@ export default class ExamServices implements IExamService {
         error: null,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -786,6 +793,7 @@ export default class ExamServices implements IExamService {
         error: null,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -849,6 +857,7 @@ export default class ExamServices implements IExamService {
         error: null,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -1187,6 +1196,7 @@ export default class ExamServices implements IExamService {
         error: null,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -1241,6 +1251,7 @@ export default class ExamServices implements IExamService {
         error: null,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,

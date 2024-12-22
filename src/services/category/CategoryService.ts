@@ -3,10 +3,11 @@ import { IResponseBase } from "@/interfaces/base/IResponseBase";
 import { ICategoryRequestData } from "@/interfaces/category/ICategoryDTO";
 import ICategoryService from "@/interfaces/category/ICategoryService";
 import { StatusCodes } from "http-status-codes";
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid } from "uuid";
 import DatabaseService from "../database/DatabaseService";
+import logger from "@/helpers/logger";
 export class CategoryService implements ICategoryService {
-  private readonly _context: DatabaseService
+  private readonly _context: DatabaseService;
   constructor(DatabaseService: DatabaseService) {
     this._context = DatabaseService;
   }
@@ -25,6 +26,7 @@ export class CategoryService implements ICategoryService {
         error: null,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -65,6 +67,7 @@ export class CategoryService implements ICategoryService {
         error: null,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -93,6 +96,7 @@ export class CategoryService implements ICategoryService {
         error: null,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -121,6 +125,7 @@ export class CategoryService implements ICategoryService {
         error: null,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -187,6 +192,7 @@ export class CategoryService implements ICategoryService {
         error: null,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -264,6 +270,7 @@ export class CategoryService implements ICategoryService {
         error: null,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -317,6 +324,7 @@ export class CategoryService implements ICategoryService {
         error: null,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -369,6 +377,7 @@ export class CategoryService implements ICategoryService {
         error: null,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -422,6 +431,7 @@ export class CategoryService implements ICategoryService {
         error: null,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -475,6 +485,7 @@ export class CategoryService implements ICategoryService {
         error: null,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -528,6 +539,7 @@ export class CategoryService implements ICategoryService {
         error: null,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,

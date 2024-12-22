@@ -1,11 +1,12 @@
 import { ExamSchedule } from "@/entity/ExamSchedule";
 import { IResponseBase } from "@/interfaces/base/IResponseBase";
 import { IScheduleService } from "@/interfaces/schedule/IScheduleService";
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid } from "uuid";
 import DatabaseService from "../database/DatabaseService";
+import logger from "@/helpers/logger";
 
 export class ScheduleService implements IScheduleService {
-  private readonly _context: DatabaseService
+  private readonly _context: DatabaseService;
   constructor(DatabaseService: DatabaseService) {
     this._context = DatabaseService;
   }
@@ -24,6 +25,7 @@ export class ScheduleService implements IScheduleService {
         status: 200,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         data: null,
         message: "Internal server error",
@@ -75,6 +77,7 @@ export class ScheduleService implements IScheduleService {
         status: 200,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         data: null,
         message: "Internal server error",
@@ -153,6 +156,7 @@ export class ScheduleService implements IScheduleService {
         status: 201,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         data: null,
         message: "Internal server error",
@@ -256,6 +260,7 @@ export class ScheduleService implements IScheduleService {
         status: 200,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         data: null,
         message: "Internal server error",
@@ -312,6 +317,7 @@ export class ScheduleService implements IScheduleService {
         status: 200,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         data: null,
         message: "Internal server error",
