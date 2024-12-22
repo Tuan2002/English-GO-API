@@ -8,6 +8,7 @@ export default interface IAuthService {
   getMe(): Promise<IResponseBase>;
   updateMyProfile(userId: string, data: IUpdateProfilePayload): Promise<IResponseBase>;
   registerUserSSO(): Promise<IResponseBase>;
+  changePassword(userId: string, oldPassword: string, newPassword: string): Promise<IResponseBase>;
   // register(email: string, password: string): Promise<string>;
   // logout(): Promise<string>;
   // verifyEmail(token: string): Promise<string>;
