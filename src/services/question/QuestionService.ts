@@ -7,9 +7,10 @@ import IQuestionService from "@/interfaces/question/IQuestionService";
 import { IQuestionDetail } from "@/interfaces/question/QuestionDTO";
 import { StatusCodes } from "http-status-codes";
 import DatabaseService from "../database/DatabaseService";
+import logger from "@/helpers/logger";
 
 export default class QuestionService implements IQuestionService {
-  private readonly _context: DatabaseService
+  private readonly _context: DatabaseService;
   constructor(DatabaseService: DatabaseService) {
     this._context = DatabaseService;
   }
@@ -242,6 +243,7 @@ export default class QuestionService implements IQuestionService {
         status: StatusCodes.CREATED,
       };
     } catch (error) {
+      logger.error(error?.message);
       await queryRunner.rollbackTransaction();
       return {
         data: null,
@@ -326,6 +328,7 @@ export default class QuestionService implements IQuestionService {
         status: StatusCodes.CREATED,
       };
     } catch (error) {
+      logger.error(error?.message);
       await queryRunner.rollbackTransaction();
       return {
         data: null,
@@ -389,6 +392,7 @@ export default class QuestionService implements IQuestionService {
         status: StatusCodes.OK,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -443,6 +447,7 @@ export default class QuestionService implements IQuestionService {
         status: StatusCodes.OK,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -499,6 +504,7 @@ export default class QuestionService implements IQuestionService {
         status: StatusCodes.OK,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -546,6 +552,7 @@ export default class QuestionService implements IQuestionService {
         status: StatusCodes.OK,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -606,6 +613,7 @@ export default class QuestionService implements IQuestionService {
         status: StatusCodes.OK,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -660,6 +668,7 @@ export default class QuestionService implements IQuestionService {
         status: StatusCodes.OK,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -714,6 +723,7 @@ export default class QuestionService implements IQuestionService {
         status: StatusCodes.OK,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -768,6 +778,7 @@ export default class QuestionService implements IQuestionService {
         status: StatusCodes.OK,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -821,6 +832,7 @@ export default class QuestionService implements IQuestionService {
         status: StatusCodes.OK,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,

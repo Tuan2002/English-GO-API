@@ -4,7 +4,6 @@ import QuestionService from "@/services/question/QuestionService";
 import { before, DELETE, GET, inject, POST, PUT, route } from "awilix-express";
 import { Request, Response } from "express";
 
-
 @before(inject((JwtService) => AuthenticateMiddleware(JwtService)))
 @route("/questions")
 export class QuestionController {
@@ -65,7 +64,7 @@ export class QuestionController {
   }
 
   @PUT()
-  @route("/update-question/:questionId")
+  @route("/update-question")
   async updateQuestion(req: Request, res: Response) {
     const questionData = req.body;
     const { id } = req.user;

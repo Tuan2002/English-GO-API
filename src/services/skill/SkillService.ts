@@ -4,9 +4,10 @@ import { ISkillDataUpdate } from "@/interfaces/skill/ISkillDTO";
 import ISkillService from "@/interfaces/skill/ISkillService";
 import { StatusCodes } from "http-status-codes";
 import DatabaseService from "../database/DatabaseService";
+import logger from "@/helpers/logger";
 
 export default class SkillService implements ISkillService {
-  private readonly _context: DatabaseService
+  private readonly _context: DatabaseService;
   constructor(DatabaseService: DatabaseService) {
     this._context = DatabaseService;
   }
@@ -25,6 +26,7 @@ export default class SkillService implements ISkillService {
         status: StatusCodes.OK,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -76,6 +78,7 @@ export default class SkillService implements ISkillService {
         status: StatusCodes.OK,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -130,6 +133,7 @@ export default class SkillService implements ISkillService {
         status: StatusCodes.OK,
       };
     } catch (error) {
+      logger.error(error?.message);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
