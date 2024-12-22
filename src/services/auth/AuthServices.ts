@@ -54,6 +54,7 @@ export default class AuthService implements IAuthService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in AuthService - method register at ${new Date().getTime} with message ${error?.message}`);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -95,6 +96,7 @@ export default class AuthService implements IAuthService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in AuthService - method register at ${new Date().getTime} with message ${error?.message}`);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -199,6 +201,7 @@ export default class AuthService implements IAuthService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in AuthService - method register at ${new Date().getTime} with message ${error?.message}`);
       return {
         status: 500,
         success: false,
@@ -230,6 +233,7 @@ export default class AuthService implements IAuthService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in AuthService - method register at ${new Date().getTime} with message ${error?.message}`);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -319,6 +323,7 @@ export default class AuthService implements IAuthService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in AuthService - method register at ${new Date().getTime} with message ${error?.message}`);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -414,6 +419,7 @@ export default class AuthService implements IAuthService {
       };
     } catch (error: any) {
       logger.error(error?.message);
+      console.log(`Error in AuthService - method register at ${new Date().getTime()} with message ${error?.message}`);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -473,6 +479,7 @@ export default class AuthService implements IAuthService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in AuthService - method getMe() at ${new Date().getTime} with message ${error?.message}`);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -582,6 +589,9 @@ export default class AuthService implements IAuthService {
         error: null,
       };
     } catch (error: any) {
+      logger.error(error?.message);
+      console.log(`Error in AuthService - method updateMyProfile() at ${new Date().getTime()} with message ${error?.message}`);
+
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -698,6 +708,7 @@ export default class AuthService implements IAuthService {
       };
     } catch (error: any) {
       logger.error(error?.message);
+      console.log(`Error in AuthService - method ChangePassword at ${new Date().getTime} with message ${error?.message}`);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,

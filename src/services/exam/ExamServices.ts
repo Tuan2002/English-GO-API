@@ -111,6 +111,8 @@ export default class ExamServices implements IExamService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in ExamService - method getCurrentExam() at ${new Date().getTime()} with message ${error?.message}`);
+
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -212,6 +214,7 @@ export default class ExamServices implements IExamService {
       // levelId
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in ExamService - method startNewExam() at ${new Date().getTime()} with message ${error?.message}`);
       await queryRunner.rollbackTransaction();
       return {
         data: null,
@@ -245,6 +248,7 @@ export default class ExamServices implements IExamService {
       }
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in ExamService - method participateExam() at ${new Date().getTime()} with message ${error?.message}`);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -382,6 +386,7 @@ export default class ExamServices implements IExamService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in ExamService - method continueExam() at ${new Date().getTime()} with message ${error?.message}`);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -620,7 +625,7 @@ export default class ExamServices implements IExamService {
       };
     } catch (error) {
       logger.error(error?.message);
-      console.log("error", error);
+      console.log(`Error in ExamService - method submitSkill() at ${new Date().getTime()} with message ${error?.message}`);
       queryRunner.rollbackTransaction();
       return {
         data: null,
@@ -711,6 +716,9 @@ export default class ExamServices implements IExamService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(
+        `Error in ExamService - method submitSpeakingSkill() at ${new Date().getTime()} with message ${error?.message}`
+      );
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -794,6 +802,9 @@ export default class ExamServices implements IExamService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(
+        `Error in ExamService - method getCurrentSpeakingQuestion() at ${new Date().getTime()} with message ${error?.message}`
+      );
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -858,6 +869,7 @@ export default class ExamServices implements IExamService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in ExamService - method getScoreOfExam() at ${new Date().getTime()} with message ${error?.message}`);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -1197,6 +1209,7 @@ export default class ExamServices implements IExamService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in ExamService - method getResultOfExam() at ${new Date().getTime()} with message ${error?.message}`);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -1252,6 +1265,7 @@ export default class ExamServices implements IExamService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in ExamService - method getMyExams() at ${new Date().getTime()} with message ${error?.message}`);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,

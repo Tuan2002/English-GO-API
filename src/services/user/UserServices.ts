@@ -60,6 +60,7 @@ export default class UserService implements IUserService {
       };
     } catch (error: any) {
       logger.error(error?.message);
+      console.log(`Error in UserService - method getUserByUsername() at ${new Date().getTime()} with message ${error?.message}`);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -119,6 +120,7 @@ export default class UserService implements IUserService {
       };
     } catch (error: any) {
       logger.error(error?.message);
+      console.log(`Error in UserService - method getAllUser() at ${new Date().getTime()} with message ${error?.message}`);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -165,6 +167,7 @@ export default class UserService implements IUserService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in UserService - method getDeletedUsers() at ${new Date().getTime()} with message ${error?.message}`);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -211,6 +214,7 @@ export default class UserService implements IUserService {
       };
     } catch (error: any) {
       logger.error(error?.message);
+      console.log(`Error in UserService - method getUserById() at ${new Date().getTime()} with message ${error?.message}`);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -289,6 +293,7 @@ export default class UserService implements IUserService {
       };
     } catch (error: any) {
       logger.error(error?.message);
+      console.log(`Error in UserService - method createUser() at ${new Date().getTime()} with message ${error?.message}`);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -358,6 +363,7 @@ export default class UserService implements IUserService {
       };
     } catch (error: any) {
       logger.error(error?.message);
+      console.log(`Error in UserService - method updateUser() at ${new Date().getTime()} with message ${error?.message}`);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -405,6 +411,7 @@ export default class UserService implements IUserService {
       };
     } catch (error: any) {
       logger.error(error?.message);
+      console.log(`Error in UserService - method deleteUser() at ${new Date().getTime()} with message ${error?.message}`);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -452,6 +459,7 @@ export default class UserService implements IUserService {
       };
     } catch (error: any) {
       logger.error(error?.message);
+      console.log(`Error in UserService - method restoreUser() at ${new Date().getTime()} with message ${error?.message}`);
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -497,6 +505,9 @@ export default class UserService implements IUserService {
       };
     } catch (error: any) {
       logger.error(error?.message);
+      console.log(
+        `Error in UserService - method deletePermanentlyUser() at ${new Date().getTime()} with message ${error?.message}`
+      );
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,

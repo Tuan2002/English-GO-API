@@ -28,6 +28,7 @@ export default class LevelService implements ILevelService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in LevelService - method getAllLevels() at ${new Date().getTime()} with message ${error?.message}`);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -80,6 +81,7 @@ export default class LevelService implements ILevelService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in LevelService - method getLevelById() at ${new Date().getTime()} with message ${error?.message}`);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -123,6 +125,9 @@ export default class LevelService implements ILevelService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(
+        `Error in LevelService - method getListLevelOfSkillId() at ${new Date().getTime()} with message ${error?.message}`
+      );
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -179,6 +184,8 @@ export default class LevelService implements ILevelService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in LevelService - method updateLevel() at ${new Date().getTime()} with message ${error?.message}`);
+
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,

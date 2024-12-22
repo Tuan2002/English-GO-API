@@ -26,6 +26,8 @@ export class ScheduleService implements IScheduleService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in ScheduleService - method getAllSchedule at ${new Date().getTime()} with message ${error?.message}`);
+
       return {
         data: null,
         message: "Internal server error",
@@ -78,6 +80,7 @@ export class ScheduleService implements IScheduleService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in ScheduleService - method getScheduleById at ${new Date().getTime()} with message ${error?.message}`);
       return {
         data: null,
         message: "Internal server error",
@@ -157,6 +160,7 @@ export class ScheduleService implements IScheduleService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in ScheduleService - method createSchedule at ${new Date().getTime()} with message ${error?.message}`);
       return {
         data: null,
         message: "Internal server error",
@@ -261,6 +265,7 @@ export class ScheduleService implements IScheduleService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in ScheduleService - method updateSchedule at ${new Date().getTime()} with message ${error?.message}`);
       return {
         data: null,
         message: "Internal server error",
@@ -318,6 +323,7 @@ export class ScheduleService implements IScheduleService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in ScheduleService - method deleteSchedule at ${new Date().getTime()} with message ${error?.message}`);
       return {
         data: null,
         message: "Internal server error",

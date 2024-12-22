@@ -28,6 +28,9 @@ export default class OrganizationService implements IOrganizationService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(
+        `Error in Organization - method getAllOrganization() at ${new Date().getTime()} with message ${error?.message}`
+      );
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -80,6 +83,9 @@ export default class OrganizationService implements IOrganizationService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(
+        `Error in Organization - method getOrganizationById() at ${new Date().getTime()} with message ${error?.message}`
+      );
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -135,6 +141,9 @@ export default class OrganizationService implements IOrganizationService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(
+        `Error in Organization - method createOrganization() at ${new Date().getTime()} with message ${error?.message}`
+      );
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -214,6 +223,9 @@ export default class OrganizationService implements IOrganizationService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(
+        `Error in Organization - method updateOrganization() at ${new Date().getTime()} with message ${error?.message}`
+      );
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -281,6 +293,9 @@ export default class OrganizationService implements IOrganizationService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(
+        `Error in Organization - method deleteOrganization() at ${new Date().getTime()} with message ${error?.message}`
+      );
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,

@@ -244,6 +244,10 @@ export default class QuestionService implements IQuestionService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(
+        `Error in QuestionService - method createNewQuestion at ${new Date().getTime()} with message ${error?.message}`
+      );
+
       await queryRunner.rollbackTransaction();
       return {
         data: null,
@@ -329,6 +333,7 @@ export default class QuestionService implements IQuestionService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in QuestionService - method updateQuestion at ${new Date().getTime()} with message ${error?.message}`);
       await queryRunner.rollbackTransaction();
       return {
         data: null,
@@ -393,6 +398,10 @@ export default class QuestionService implements IQuestionService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(
+        `Error in QuestionSerivce - method getQuestionDetail() at ${new Date().getTime()} with message ${error?.message}`
+      );
+
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -448,6 +457,7 @@ export default class QuestionService implements IQuestionService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in QuestionService - method getQuestionById at ${new Date().getTime()} with message ${error?.message}`);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -505,6 +515,9 @@ export default class QuestionService implements IQuestionService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(
+        `Error in QuestionService - method getQuestionByListId at ${new Date().getTime()} with message ${error?.message}`
+      );
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -553,6 +566,9 @@ export default class QuestionService implements IQuestionService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(
+        `Error in QuestionService - method getAllQuestionByCategoryId at ${new Date().getTime()} with message ${error?.message}`
+      );
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -614,6 +630,7 @@ export default class QuestionService implements IQuestionService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in QuestionService - method deleteQuestion at ${new Date().getTime()} with message ${error?.message}`);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -669,6 +686,7 @@ export default class QuestionService implements IQuestionService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in QuestionService - method restoreQuestion at ${new Date().getTime()} with message ${error?.message}`);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -724,6 +742,7 @@ export default class QuestionService implements IQuestionService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in QuestionService - method activeQuestion at ${new Date().getTime()} with message ${error?.message}`);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -779,6 +798,8 @@ export default class QuestionService implements IQuestionService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in QuestionService - method inactiveQuesiton at ${new Date().getTime()} with message ${error?.message}`);
+
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -833,6 +854,9 @@ export default class QuestionService implements IQuestionService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(
+        `Error in QuestionService - method deleteQuestionPermanently at ${new Date().getTime()} with message ${error?.message}`
+      );
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,

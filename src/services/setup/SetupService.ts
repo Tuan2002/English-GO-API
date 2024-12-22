@@ -251,6 +251,7 @@ export class SetupService implements ISetupService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in SetupService - method setupService() at ${new Date().getTime()} with message ${error?.message}`);
       return {
         data: null,
         message: "Internal server error",

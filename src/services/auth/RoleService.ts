@@ -36,6 +36,8 @@ export default class RoleService implements IRoleService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in AuthService - method getUserRoles() at ${new Date().getTime()} with message ${error?.message}`);
+
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -76,6 +78,8 @@ export default class RoleService implements IRoleService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in AuthService - method getGroupRole at ${new Date().getTime()} with message ${error?.message}`);
+
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -109,6 +113,10 @@ export default class RoleService implements IRoleService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(
+        `Error in AuthService - method getCurrentUserPermission() at ${new Date().getTime()} with message ${error?.message}`
+      );
+
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,
@@ -137,6 +145,8 @@ export default class RoleService implements IRoleService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in AuthService - method getAllGroupRoles() at ${new Date().getTime()} with message ${error?.message}`);
+
       return {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         success: false,

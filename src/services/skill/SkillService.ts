@@ -27,6 +27,7 @@ export default class SkillService implements ISkillService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in SkillService - method getAllSkills() at ${new Date().getTime()} with message ${error?.message}`);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -79,6 +80,7 @@ export default class SkillService implements ISkillService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in SkillService - method getSkillById() at ${new Date().getTime()} with message ${error?.message}`);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -134,6 +136,7 @@ export default class SkillService implements ISkillService {
       };
     } catch (error) {
       logger.error(error?.message);
+      console.log(`Error in SkillService - method updateSkill() at ${new Date().getTime()} with message ${error?.message}`);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
