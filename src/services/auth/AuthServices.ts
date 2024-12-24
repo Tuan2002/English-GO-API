@@ -676,11 +676,14 @@ export default class AuthService implements IAuthService {
         return {
           status: StatusCodes.UNAUTHORIZED,
           success: false,
-          message: "Mật khẩu cũ không chính xác",
-          data: null,
+          message: "Mật khẩu hiện tại không chính xác",
+          data: {
+            field: "oldPassword",
+            message: "Mật khẩu hiện tại không chính xác",
+          },
           error: {
-            message: "Unauthorized",
-            errorDetail: "Mật khẩu cũ không chính xác",
+            message: "UNAUTHORIZED,",
+            errorDetail: "Mật khẩu hiện tại không chính xác",
           },
         };
       }

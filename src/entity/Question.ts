@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
 import { Level } from "./Level";
 import { Category } from "./Category";
 import { Skill } from "./Skill";
@@ -61,5 +61,6 @@ export class Question {
   skill!: Skill;
 
   @OneToMany(() => SubQuestion, (subQuestion) => subQuestion.question)
+  @JoinTable()
   subQuestions!: SubQuestion[];
 }

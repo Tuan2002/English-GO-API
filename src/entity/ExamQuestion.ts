@@ -1,11 +1,10 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
 import { Exam } from "./Exam";
-import { Question } from "./Question";
-import { ExamResultWriting } from "./ExamResultWriting";
 import { ExamResultListening } from "./ExamResultListening";
-import { ExamResultSpeaking } from "./ExamResultSpeaking";
 import { ExamResultReading } from "./ExamResultReading";
-import { Level } from "./Level";
+import { ExamResultSpeaking } from "./ExamResultSpeaking";
+import { ExamResultWriting } from "./ExamResultWriting";
+import { Question } from "./Question";
 
 @Entity({ name: "ExamQuestions" })
 export class ExamQuestion {
@@ -25,6 +24,7 @@ export class ExamQuestion {
   exam!: Exam;
 
   @ManyToOne(() => Question, (question) => question.id, { onDelete: "CASCADE" })
+  @JoinTable()
   question!: Question;
 
   @OneToMany(() => ExamResultWriting, (examResultWriting) => examResultWriting.examQuestion)
