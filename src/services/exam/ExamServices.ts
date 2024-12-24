@@ -18,7 +18,6 @@ import { StatusCodes } from "http-status-codes";
 import { In } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
 import DatabaseService from "../database/DatabaseService";
-import logger from "@/helpers/logger";
 
 export default class ExamServices implements IExamService {
   private readonly _levelService: ILevelService;
