@@ -76,8 +76,8 @@ export class AuthController {
   }
 
   @before(inject((JwtService) => AuthenticateMiddleware(JwtService)))
-  @POST()
-  @route("/update-my-profile")
+  @PUT()
+  @route("/change-password")
   async changePassword(req: Request, res: Response) {
     const userId = req.user.id;
     const { oldPassword, newPassword } = req.body;
