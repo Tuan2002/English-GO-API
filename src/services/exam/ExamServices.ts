@@ -7,6 +7,7 @@ import { ExamResultReading } from "@/entity/ExamResultReading";
 import { ExamResultSpeaking } from "@/entity/ExamResultSpeaking";
 import { ExamResultWriting } from "@/entity/ExamResultWriting";
 import { ExamSkillStatus } from "@/entity/ExamSkillStatus";
+import logger from "@/helpers/logger";
 import { IResponseBase } from "@/interfaces/base/IResponseBase";
 import { EExamSkillStatus, ISubmitSkillRequest } from "@/interfaces/exam/IExamDTO";
 import IExamService from "@/interfaces/exam/IExamService";
@@ -14,6 +15,7 @@ import ILevelService from "@/interfaces/level/ILevelService";
 import { ISpeakingQuestionSubmit } from "@/interfaces/question/QuestionDTO";
 import { RequestStorage } from "@/middlewares";
 import { StatusCodes } from "http-status-codes";
+import { In } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
 import DatabaseService from "../database/DatabaseService";
 
@@ -124,8 +126,6 @@ export default class ExamServices implements IExamService {
 
   async startNewExam(userId: string): Promise<IResponseBase> {
     const queryRunner = this._context.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
     try {
       const levels = await this._levelService.getAllLevels();
       if (!levels || !levels.success) {
@@ -158,6 +158,8 @@ export default class ExamServices implements IExamService {
           questionId,
         };
       });
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
       // Mặc định sẽ đóng đề sau 200' từ lúc tạo
       // thêm đề mới vào bảng exam
       const newExam = new Exam();
@@ -176,7 +178,9 @@ export default class ExamServices implements IExamService {
         { name: "writing", totalQuestion: 2 },
         { name: "speaking", totalQuestion: 3 },
       ];
-      listSkills.forEach(async (skill, index) => {
+
+      const skillStatuses = Array<ExamSkillStatus>();
+      listSkills.forEach((skill, index) => {
         const examSkillStatus = new ExamSkillStatus();
         examSkillStatus.examId = examCreated.id;
         examSkillStatus.id = uuidv4();
@@ -187,19 +191,22 @@ export default class ExamServices implements IExamService {
         examSkillStatus.order = index;
         examSkillStatus.totalQuestion = skill.totalQuestion;
         examSkillStatus.status = EExamSkillStatus.NOT_STARTED; // "PENDING" | "COMPLETED" | "MAKING"
-        await queryRunner.manager.save(ExamSkillStatus, examSkillStatus);
+        skillStatuses.push(examSkillStatus);
       });
-
-      // thêm câu hỏi vào bảng exam_question
-      questionAfterRandom.forEach(async (question) => {
+      await queryRunner.manager.insert(ExamSkillStatus, skillStatuses);
+      // Thêm câu hỏi vào bảng exam_question
+      const examQuestions = Array<ExamQuestion>();
+      questionAfterRandom.forEach((question) => {
         const examQuestion = new ExamQuestion();
         examQuestion.examId = examCreated.id;
         examQuestion.id = uuidv4();
         examQuestion.questionId = question.questionId;
         examQuestion.levelId = question.levelId;
-        await queryRunner.manager.save(ExamQuestion, examQuestion);
+        examQuestions.push(examQuestion);
       });
+      await queryRunner.manager.insert(ExamQuestion, examQuestions);
       await queryRunner.commitTransaction();
+      await queryRunner.release();
       return {
         data: examCreated,
         message: "Start with a new exam",
@@ -209,7 +216,9 @@ export default class ExamServices implements IExamService {
       };
       // levelId
     } catch (error) {
+      console.log("Transaction failed at startNewExam", error);
       await queryRunner.rollbackTransaction();
+      await queryRunner.release();
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -220,15 +229,10 @@ export default class ExamServices implements IExamService {
         },
         status: StatusCodes.INTERNAL_SERVER_ERROR,
       };
-    } finally {
-      await queryRunner.release();
     }
   }
 
   async participateExam(userId: string): Promise<IResponseBase> {
-    // const queryRunner = AppDataSource.createQueryRunner();
-    // await queryRunner.connect();
-    // await queryRunner.startTransaction();
 
     try {
       const exam = await this.getCurrentExam(userId);
@@ -241,6 +245,8 @@ export default class ExamServices implements IExamService {
         return exam;
       }
     } catch (error) {
+      console.log("An error occurred at participateExam", error);
+      logger.error("Error at participateExam", error);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -439,48 +445,42 @@ export default class ExamServices implements IExamService {
     }
     const queryRunner = this._context.createQueryRunner();
     await queryRunner.connect();
-    await queryRunner.startTransaction();
 
     try {
+      await queryRunner.startTransaction();
       if (skillId === "listening") {
         let score = 0;
+        const examResultListenings = Array<ExamResultListening>();
 
         // Duyệt tất cả các câu hỏi song song
-        await Promise.all(
-          questions.map(async (question) => {
-            const examQuestion = await this._context.ExamQuestionRepo.findOne({
-              where: {
-                levelId: question.levelId,
-                examId: currentExamData.data.exam.id,
-              },
-            });
-
-            // Duyệt tất cả các sub-questions song song
-            await Promise.all(
-              question.subQuestions.map(async (subquestion) => {
-                if (subquestion.selectedAnswerId) {
-                  const subQuestionScore = await this._context.SubQuesionRepo.findOne({
-                    where: {
-                      id: subquestion.id,
-                    },
-                  });
-
-                  if (subquestion.selectedAnswerId === subQuestionScore.correctAnswer) {
-                    score += 1;
-                  }
-
-                  const examResultListening = new ExamResultListening();
-                  examResultListening.id = uuidv4();
-                  examResultListening.examQuestionId = examQuestion.id;
-                  examResultListening.subQuestionId = subquestion.id;
-                  examResultListening.answerId = subquestion.selectedAnswerId;
-                  await queryRunner.manager.save(ExamResultListening, examResultListening);
-                }
-              })
-            );
-          })
-        );
-
+        const examQuestions = await this._context.ExamQuestionRepo.find({
+          where: {
+            examId: currentExamData.data.exam.id,
+            levelId: In(questions.map((question) => question.levelId)),
+          },
+        });
+        questions.forEach((question) => {
+          const examQuestion = examQuestions.find((examQuestion) => examQuestion.levelId === question.levelId);
+          if (!examQuestion) {
+            return;
+          }
+          // Duyệt tất cả các sub-questions song song
+          question.subQuestions.forEach((subquestion) => {
+            if (subquestion.selectedAnswerId) {
+              const subQuestionScore = question.subQuestions.find((sub) => sub.id === subquestion.id);
+              if (subquestion.selectedAnswerId === subQuestionScore.correctAnswer) {
+                score += 1;
+              }
+              const examResultListening = new ExamResultListening();
+              examResultListening.id = uuidv4();
+              examResultListening.examQuestionId = examQuestion.id;
+              examResultListening.subQuestionId = subquestion.id;
+              examResultListening.answerId = subquestion.selectedAnswerId;
+              examResultListenings.push(examResultListening);
+            }
+          });
+        })
+        await queryRunner.manager.insert(ExamResultListening, examResultListenings)
         // Cập nhật trạng thái và điểm cho kỹ năng
         const examSkillStatus = await this._context.ExamSkillStatusRepo.findOne({
           where: {
@@ -491,49 +491,42 @@ export default class ExamServices implements IExamService {
 
         examSkillStatus.status = EExamSkillStatus.FINISHED;
         examSkillStatus.score = score;
-        await queryRunner.manager.save(ExamSkillStatus, examSkillStatus);
+        await queryRunner.manager.update(ExamSkillStatus, { id: examSkillStatus.id }, examSkillStatus);
       }
       if (skillId === "reading") {
         let score = 0;
+        const examResultReadings = Array<ExamResultReading>();
+        // Duyệt tất cả các câu hỏi song song
+        const examQuestions = await this._context.ExamQuestionRepo.find({
+          where: {
+            examId: currentExamData.data.exam.id,
+            levelId: In(questions.map((question) => question.levelId)),
+          },
+        });
 
-        // Tất cả các promises của câu hỏi chính và sub-questions
-        await Promise.all(
-          questions.map(async (question) => {
-            const examQuestion = await this._context.ExamQuestionRepo.findOne({
-              where: {
-                levelId: question.levelId,
-                examId: currentExamData.data.exam.id,
-              },
-            });
-
-            // Mỗi sub-question là một promise
-            await Promise.all(
-              question.subQuestions.map(async (subquestion) => {
-                if (subquestion.selectedAnswerId) {
-                  const subQuestionScore = await this._context.SubQuesionRepo.findOne({
-                    where: {
-                      id: subquestion.id,
-                    },
-                  });
-
-                  // Kiểm tra nếu câu trả lời đúng thì cộng điểm
-                  if (subquestion.selectedAnswerId === subQuestionScore.correctAnswer) {
-                    score += 1; // Vì các callback chạy song song, cần cẩn thận với race condition
-                  }
-
-                  // Lưu kết quả câu hỏi đã trả lời vào ExamResultReading
-                  const examResultReading = new ExamResultReading();
-                  examResultReading.id = uuidv4();
-                  examResultReading.examQuestionId = examQuestion.id;
-                  examResultReading.subQuestionId = subquestion.id;
-                  examResultReading.answerId = subquestion.selectedAnswerId;
-
-                  await queryRunner.manager.save(ExamResultReading, examResultReading);
-                }
-              })
-            );
-          })
-        );
+        questions.forEach((question) => {
+          const examQuestion = examQuestions.find((examQuestion) => examQuestion.levelId === question.levelId);
+          if (!examQuestion) {
+            return;
+          }
+          // Duyệt tất cả các sub-questions song song
+          question.subQuestions.forEach((subquestion) => {
+            if (subquestion.selectedAnswerId) {
+              const subQuestionScore = question.subQuestions.find((sub) => sub.id === subquestion.id);
+              if (subquestion.selectedAnswerId === subQuestionScore.correctAnswer) {
+                console.log("subquestion.selectedAnswerId", subquestion.selectedAnswerId);
+                score += 1;
+              }
+              const examResultReading = new ExamResultReading();
+              examResultReading.id = uuidv4();
+              examResultReading.examQuestionId = examQuestion.id;
+              examResultReading.subQuestionId = subquestion.id;
+              examResultReading.answerId = subquestion.selectedAnswerId;
+              examResultReadings.push(examResultReading);
+            }
+          });
+        })
+        await queryRunner.manager.insert(ExamResultReading, examResultReadings)
 
         // Sau khi tất cả các câu hỏi và sub-questions đã được xử lý
         const examSkillStatus = await this._context.ExamSkillStatusRepo.findOne({
@@ -542,28 +535,33 @@ export default class ExamServices implements IExamService {
             skillId,
           },
         });
-
         examSkillStatus.status = EExamSkillStatus.FINISHED;
         examSkillStatus.score = score;
-        await queryRunner.manager.save(ExamSkillStatus, examSkillStatus);
+        console.log("examSkillStatus: =>>>>>>>>>>>>>>", examSkillStatus);
+        console.log("Score: =>>>>>>>>>>>>>", score);
+        await queryRunner.manager.update(ExamSkillStatus, { id: examSkillStatus.id }, examSkillStatus);
       }
 
       if (skillId === "writing") {
-        // do something
+        const examResultWritings = Array<ExamResultWriting>();
+        const examQuestions = await this._context.ExamQuestionRepo.find({
+          where: {
+            examId: currentExamData.data.exam.id,
+            levelId: In(questions.map((question) => question.levelId)),
+          },
+        });
         questions.forEach(async (question) => {
-          const examQuestion = await this._context.ExamQuestionRepo.findOne({
-            where: {
-              levelId: question.levelId,
-              examId: currentExamData.data.exam.id,
-            },
-          });
+          const examQuestion = examQuestions.find((examQuestion) => examQuestion.levelId === question.levelId);
+          if (!examQuestion) {
+            return;
+          }
           const examResultWriting = new ExamResultWriting();
           examResultWriting.id = uuidv4();
           examResultWriting.examQuestionId = examQuestion.id;
-          examResultWriting.data = question.questionData ?? "";
-          examResultWriting.feedback = "";
-          await queryRunner.manager.save(ExamResultWriting, examResultWriting);
+          examResultWriting.data = question.questionData;
+          examResultWritings.push(examResultWriting);
         });
+        await queryRunner.manager.insert(ExamResultWriting, examResultWritings);
         const examSkillStatus = await this._context.ExamSkillStatusRepo.findOne({
           where: {
             examId: currentExamData.data.exam.id,
@@ -571,31 +569,29 @@ export default class ExamServices implements IExamService {
           },
         });
         examSkillStatus.status = EExamSkillStatus.FINISHED;
-        await queryRunner.manager.save(ExamSkillStatus, examSkillStatus);
+        await queryRunner.manager.update(ExamSkillStatus, { id: examSkillStatus.id }, examSkillStatus);
       }
       if (skillId === "speaking") {
-        // do something
-        questions.forEach(async (question) => {
-          const examQuestion = await this._context.ExamQuestionRepo.findOne({
-            where: {
-              levelId: question.levelId,
-              examId: currentExamData.data.exam.id,
-            },
-          });
-          const checkIsSubmitted = await this._context.ExamResultSpeakingRepo.findOne({
-            where: {
-              examQuestionId: examQuestion.id,
-            },
-          });
-          if (!checkIsSubmitted) {
-            const examResultSpeaking = new ExamResultSpeaking();
-            examResultSpeaking.id = uuidv4();
-            examResultSpeaking.examQuestionId = examQuestion.id;
-            examResultSpeaking.data = question.questionData;
-            examResultSpeaking.feedback = "";
-            await queryRunner.manager.save(ExamResultSpeaking, examResultSpeaking);
-          }
+
+        const examResultSpeakings = Array<ExamResultSpeaking>();
+        const examQuestions = await this._context.ExamQuestionRepo.find({
+          where: {
+            examId: currentExamData.data.exam.id,
+            levelId: In(questions.map((question) => question.levelId)),
+          },
         });
+        questions.forEach(async (question) => {
+          const examQuestion = examQuestions.find((examQuestion) => examQuestion.levelId === question.levelId);
+          if (!examQuestion) {
+            return;
+          }
+          const examResultSpeaking = new ExamResultSpeaking();
+          examResultSpeaking.id = uuidv4();
+          examResultSpeaking.examQuestionId = examQuestion.id;
+          examResultSpeaking.data = question.questionData;
+          examResultSpeakings.push(examResultSpeaking);
+        });
+        await queryRunner.manager.insert(ExamResultSpeaking, examResultSpeakings);
         const examSkillStatus = await this._context.ExamSkillStatusRepo.findOne({
           where: {
             examId: currentExamData.data.exam.id,
@@ -603,9 +599,10 @@ export default class ExamServices implements IExamService {
           },
         });
         examSkillStatus.status = EExamSkillStatus.FINISHED;
-        await queryRunner.manager.save(ExamSkillStatus, examSkillStatus);
+        await queryRunner.manager.update(ExamSkillStatus, { id: examSkillStatus.id }, examSkillStatus);
       }
       await queryRunner.commitTransaction();
+      await queryRunner.release();
       return {
         data: null,
         message: "Submit successfully",
@@ -615,7 +612,7 @@ export default class ExamServices implements IExamService {
       };
     } catch (error) {
       console.log("error", error);
-      queryRunner.rollbackTransaction();
+      await queryRunner.rollbackTransaction();
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
