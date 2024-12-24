@@ -7,7 +7,6 @@ import { Request, Response } from "express";
 
 @route("/auth")
 export class AuthController {
-
   private readonly _authService: IAuthService;
   private readonly _roleService: IRoleService;
 
@@ -73,6 +72,16 @@ export class AuthController {
     const userId = req.user.id;
     const payload = req.body;
     const response = await this._authService.updateMyProfile(userId, payload);
+    res.status(response.status).json(response);
+  }
+
+  @before(inject((JwtService) => AuthenticateMiddleware(JwtService)))
+  @PUT()
+  @route("/change-password")
+  async changePassword(req: Request, res: Response) {
+    const userId = req.user.id;
+    const { oldPassword, newPassword } = req.body;
+    const response = await this._authService.changePassword(userId, oldPassword, newPassword);
     res.status(response.status).json(response);
   }
 }

@@ -5,6 +5,7 @@ import { ISetupService } from "@/interfaces/setup/ISetupService";
 import Extensions from "@/utils/Extensions";
 import { v4 as uuid } from "uuid";
 import DatabaseService from "../database/DatabaseService";
+import logger from "@/helpers/logger";
 
 export class SetupService implements ISetupService {
   private readonly _context: DatabaseService;
@@ -249,6 +250,8 @@ export class SetupService implements ISetupService {
         status: 200,
       };
     } catch (error) {
+      logger.error(error?.message);
+      console.log(`Error in SetupService - method setupService() at ${new Date().getTime()} with message ${error?.message}`);
       return {
         data: null,
         message: "Internal server error",

@@ -4,9 +4,10 @@ import { ILevelDataUpdate } from "@/interfaces/level/ILevelDTO";
 import ILevelService from "@/interfaces/level/ILevelService";
 import { StatusCodes } from "http-status-codes";
 import DatabaseService from "../database/DatabaseService";
+import logger from "@/helpers/logger";
 
 export default class LevelService implements ILevelService {
-  private readonly _context: DatabaseService
+  private readonly _context: DatabaseService;
   constructor(DatabaseService: DatabaseService) {
     this._context = DatabaseService;
   }
@@ -26,6 +27,8 @@ export default class LevelService implements ILevelService {
         status: StatusCodes.OK,
       };
     } catch (error) {
+      logger.error(error?.message);
+      console.log(`Error in LevelService - method getAllLevels() at ${new Date().getTime()} with message ${error?.message}`);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -77,6 +80,8 @@ export default class LevelService implements ILevelService {
         status: StatusCodes.OK,
       };
     } catch (error) {
+      logger.error(error?.message);
+      console.log(`Error in LevelService - method getLevelById() at ${new Date().getTime()} with message ${error?.message}`);
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -119,6 +124,10 @@ export default class LevelService implements ILevelService {
         status: StatusCodes.OK,
       };
     } catch (error) {
+      logger.error(error?.message);
+      console.log(
+        `Error in LevelService - method getListLevelOfSkillId() at ${new Date().getTime()} with message ${error?.message}`
+      );
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -173,7 +182,10 @@ export default class LevelService implements ILevelService {
         error: null,
         status: StatusCodes.OK,
       };
-    } catch (error: any) {
+    } catch (error) {
+      logger.error(error?.message);
+      console.log(`Error in LevelService - method updateLevel() at ${new Date().getTime()} with message ${error?.message}`);
+
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
