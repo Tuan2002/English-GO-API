@@ -458,6 +458,8 @@ export default class ExamServices implements IExamService {
             examId: currentExamData.data.exam.id,
             levelId: In(questions.map((question) => question.levelId)),
           },
+          relations: ["question", "question.subQuestions"],
+          select: ["id", "examId", "levelId", "question"],
         });
         questions.forEach((question) => {
           const examQuestion = examQuestions.find((examQuestion) => examQuestion.levelId === question.levelId);
@@ -467,7 +469,7 @@ export default class ExamServices implements IExamService {
           // Duyệt tất cả các sub-questions song song
           question.subQuestions.forEach((subquestion) => {
             if (subquestion.selectedAnswerId) {
-              const subQuestionScore = question.subQuestions.find((sub) => sub.id === subquestion.id);
+              const subQuestionScore = examQuestion.question.subQuestions.find((sub) => sub.id === subquestion.id);
               if (subquestion.selectedAnswerId === subQuestionScore.correctAnswer) {
                 score += 1;
               }
@@ -488,7 +490,7 @@ export default class ExamServices implements IExamService {
             skillId,
           },
         });
-
+        
         examSkillStatus.status = EExamSkillStatus.FINISHED;
         examSkillStatus.score = score;
         await queryRunner.manager.update(ExamSkillStatus, { id: examSkillStatus.id }, examSkillStatus);
@@ -502,6 +504,8 @@ export default class ExamServices implements IExamService {
             examId: currentExamData.data.exam.id,
             levelId: In(questions.map((question) => question.levelId)),
           },
+          relations: ["question", "question.subQuestions"],
+          select: ["id", "examId", "levelId", "question"],
         });
 
         questions.forEach((question) => {
@@ -512,7 +516,7 @@ export default class ExamServices implements IExamService {
           // Duyệt tất cả các sub-questions song song
           question.subQuestions.forEach((subquestion) => {
             if (subquestion.selectedAnswerId) {
-              const subQuestionScore = question.subQuestions.find((sub) => sub.id === subquestion.id);
+              const subQuestionScore = examQuestion.question.subQuestions.find((sub) => sub.id === subquestion.id);
               if (subquestion.selectedAnswerId === subQuestionScore.correctAnswer) {
                 console.log("subquestion.selectedAnswerId", subquestion.selectedAnswerId);
                 score += 1;
@@ -549,6 +553,7 @@ export default class ExamServices implements IExamService {
             examId: currentExamData.data.exam.id,
             levelId: In(questions.map((question) => question.levelId)),
           },
+          select: ["id", "examId", "levelId"],
         });
         questions.forEach(async (question) => {
           const examQuestion = examQuestions.find((examQuestion) => examQuestion.levelId === question.levelId);
@@ -579,6 +584,7 @@ export default class ExamServices implements IExamService {
             examId: currentExamData.data.exam.id,
             levelId: In(questions.map((question) => question.levelId)),
           },
+          select: ["id", "examId", "levelId"],
         });
         questions.forEach(async (question) => {
           const examQuestion = examQuestions.find((examQuestion) => examQuestion.levelId === question.levelId);
