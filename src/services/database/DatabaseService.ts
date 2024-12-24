@@ -72,7 +72,6 @@ class DatabaseService {
             logger.error(`Database connection failed at: ${new Date().toISOString()}: ${error}`);
         });
     }
-
     public createQueryRunner(): QueryRunner {
         return this._dataSource.createQueryRunner();
     }
