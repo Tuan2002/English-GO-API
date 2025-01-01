@@ -14,6 +14,7 @@ export default class OrganizationService implements IOrganizationService {
 
   async getAllOrganization(): Promise<IResponseBase> {
     try {
+      console.log("OrganizationService -> getAllOrganization -> this._context.OrganizationRepo", this._context.OrganizationRepo);
       const organizations = await this._context.OrganizationRepo.find({
         order: {
           createdAt: "ASC",
