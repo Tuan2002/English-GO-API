@@ -1,6 +1,7 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
 import { ExamQuestion } from "./ExamQuestion";
 import { ExamSkillStatus } from "./ExamSkillStatus";
+import { User } from "./User";
 
 @Entity({ name: "Exams" })
 export class Exam {
@@ -45,4 +46,8 @@ export class Exam {
 
   @OneToMany(() => ExamSkillStatus, (examSkillStatus) => examSkillStatus.exam)
   examSkillStatuses!: ExamSkillStatus[];
+
+  @ManyToOne(() => User, (user) => user.id, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "userId" })
+  user!: User;
 }

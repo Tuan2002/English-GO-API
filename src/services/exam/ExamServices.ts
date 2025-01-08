@@ -18,6 +18,7 @@ import { StatusCodes } from "http-status-codes";
 import { In } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
 import DatabaseService from "../database/DatabaseService";
+import { IPaginationBase, IPaginationResponse } from "@/interfaces/base/IPaginationBase";
 
 export default class ExamServices implements IExamService {
   private readonly _levelService: ILevelService;
@@ -165,10 +166,11 @@ export default class ExamServices implements IExamService {
       await queryRunner.startTransaction();
       // Mặc định sẽ đóng đề sau 200' từ lúc tạo
       // thêm đề mới vào bảng exam
+      const randomNumber = Math.floor(Math.random() * 999999) + 100000;
       const newExam = new Exam();
       newExam.userId = userId;
       newExam.id = uuidv4();
-      newExam.examCode = "EXAMPRO";
+      newExam.examCode = "EXAMPRO-" + randomNumber;
       newExam.startTime = new Date().getTime().toString();
       newExam.endTime = (new Date().getTime() + 200 * 60 * 1000).toString();
       const examCreated = await queryRunner.manager.save(Exam, newExam);
@@ -237,7 +239,6 @@ export default class ExamServices implements IExamService {
   }
 
   async participateExam(userId: string): Promise<IResponseBase> {
-
     try {
       const exam = await this.getCurrentExam(userId);
       if (!exam || !exam.success || !exam.data) {
@@ -487,8 +488,8 @@ export default class ExamServices implements IExamService {
               examResultListenings.push(examResultListening);
             }
           });
-        })
-        await queryRunner.manager.insert(ExamResultListening, examResultListenings)
+        });
+        await queryRunner.manager.insert(ExamResultListening, examResultListenings);
         // Cập nhật trạng thái và điểm cho kỹ năng
         const examSkillStatus = await this._context.ExamSkillStatusRepo.findOne({
           where: {
@@ -496,7 +497,7 @@ export default class ExamServices implements IExamService {
             skillId,
           },
         });
-        
+
         examSkillStatus.status = EExamSkillStatus.FINISHED;
         examSkillStatus.score = score;
         await queryRunner.manager.update(ExamSkillStatus, { id: examSkillStatus.id }, examSkillStatus);
@@ -535,8 +536,8 @@ export default class ExamServices implements IExamService {
               examResultReadings.push(examResultReading);
             }
           });
-        })
-        await queryRunner.manager.insert(ExamResultReading, examResultReadings)
+        });
+        await queryRunner.manager.insert(ExamResultReading, examResultReadings);
 
         // Sau khi tất cả các câu hỏi và sub-questions đã được xử lý
         const examSkillStatus = await this._context.ExamSkillStatusRepo.findOne({
@@ -583,7 +584,6 @@ export default class ExamServices implements IExamService {
         await queryRunner.manager.update(ExamSkillStatus, { id: examSkillStatus.id }, examSkillStatus);
       }
       if (skillId === "speaking") {
-
         const examResultSpeakings = Array<ExamResultSpeaking>();
         const examQuestions = await this._context.ExamQuestionRepo.find({
           where: {
@@ -1259,6 +1259,112 @@ export default class ExamServices implements IExamService {
       return {
         data: exams,
         message: "Get my exams successfully",
+        success: true,
+        status: StatusCodes.OK,
+        error: null,
+      };
+    } catch (error) {
+      logger.error(error?.message);
+      console.log(`Error in ExamService - method getMyExams() at ${new Date().getTime()} with message ${error?.message}`);
+      return {
+        data: null,
+        message: ErrorMessages.INTERNAL_SERVER_ERROR,
+        success: false,
+        error: {
+          message: error.message,
+          errorDetail: error.message,
+        },
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+      };
+    }
+  }
+  async getListExams(pagination: IPaginationBase, userIds: string[] = []): Promise<IResponseBase> {
+    try {
+      let { page, limit } = pagination;
+      if (!page || page < 1) page = 1;
+      if (!limit || limit < 5) limit = 5;
+
+      let totalCountQuery = this._context.ExamRepo.count({
+        where: {
+          isDeleted: false,
+        },
+      });
+      let examQuery = this._context.ExamRepo.createQueryBuilder("exam")
+        .andWhere("exam.isDeleted = :isDeleted", { isDeleted: false })
+        .orderBy("exam.createdAt", "DESC")
+        .select(["exam.id", "exam.isDeleted", "exam.createdAt"])
+        .skip(Number((page - 1) * limit))
+        .take(limit)
+        .getMany();
+      if (userIds && userIds.length > 0) {
+        totalCountQuery = this._context.ExamRepo.count({
+          where: {
+            userId: In(userIds),
+            isDeleted: false,
+          },
+        });
+        examQuery = this._context.ExamRepo.createQueryBuilder("exam")
+          .where("exam.userId IN (:...userIds)", { userIds })
+          .leftJoinAndSelect("exam.examSkillStatuses", "examSkillStatuses")
+          .andWhere("exam.isDeleted = :isDeleted", { isDeleted: false })
+          .orderBy("exam.createdAt", "DESC")
+          .select(["exam.id", "exam.isDeleted", "exam.createdAt"])
+          .skip(Number((page - 1) * limit))
+          .take(limit)
+          .getMany();
+      }
+      const [totalItem, exams] = await Promise.all([totalCountQuery, examQuery]);
+
+      const examIds = exams?.map((exam) => exam.id);
+      if (examIds.length === 0) {
+        return {
+          data: {
+            items: [],
+            currentPage: page,
+            limit,
+            totalItems: totalItem,
+            totalPages: Math.ceil(totalItem / limit),
+          },
+          message: "Get list exams successfully",
+          success: true,
+          status: StatusCodes.OK,
+          error: null,
+        };
+      }
+      const examDatas = await this._context.ExamRepo.createQueryBuilder("exam")
+        .where("exam.id IN (:...examIds)", { examIds })
+        .innerJoinAndSelect("exam.examSkillStatuses", "examSkillStatuses")
+        .innerJoinAndSelect("exam.user", "user")
+        .andWhere("exam.isDeleted = :isDeleted", { isDeleted: false })
+        .orderBy("exam.createdAt", "DESC")
+        .select([
+          "exam.id",
+          "exam.examCode",
+          "exam.startTime",
+          "exam.endTime",
+          "exam.isDone",
+          "examSkillStatuses.skillId",
+          "examSkillStatuses.status",
+          "examSkillStatuses.score",
+          "examSkillStatuses.order",
+          "examSkillStatuses.totalQuestion",
+          "user.id",
+          "user.username",
+          "user.fullName",
+          "user.email",
+          "user.avatar",
+        ])
+        .getMany();
+      const dataResponse: IPaginationResponse = {
+        items: examDatas,
+        currentPage: page,
+        limit,
+        totalItems: totalItem,
+        totalPages: Math.ceil(totalItem / limit),
+      };
+      return {
+        data: dataResponse,
+        message: "Get list exams successfully",
         success: true,
         status: StatusCodes.OK,
         error: null,

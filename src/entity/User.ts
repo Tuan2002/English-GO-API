@@ -1,5 +1,6 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, UpdateDateColumn } from "typeorm";
 import { GroupRole } from "./GroupRole";
+import { Exam } from "./Exam";
 
 enum EGenderStatus {
   FEMALE = "F",
@@ -63,4 +64,7 @@ export class User {
   @ManyToOne(() => GroupRole, (groupRole) => groupRole.id, { onDelete: "CASCADE" })
   @JoinColumn({ name: "groupRoleId" })
   groupRole!: GroupRole;
+
+  @OneToMany(() => Exam, (exam) => exam.user)
+  exams!: Exam[];
 }

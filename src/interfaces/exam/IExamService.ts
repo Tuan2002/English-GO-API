@@ -1,5 +1,6 @@
+import { IPaginationBase } from "../base/IPaginationBase";
 import { IResponseBase } from "../base/IResponseBase";
-import { IQuestionDetail, ISpeakingQuestionSubmit } from "../question/QuestionDTO";
+import { ISpeakingQuestionSubmit } from "../question/QuestionDTO";
 import { ISubmitSkillRequest } from "./IExamDTO";
 
 export default interface IExamService {
@@ -13,4 +14,5 @@ export default interface IExamService {
   getScoreOfExam(examId: string): Promise<IResponseBase>;
   getResultOfExam(examId: string, skillId: string): Promise<IResponseBase>;
   getMyExams(): Promise<IResponseBase>;
+  getListExams(pagination: IPaginationBase, listUserId: string[]): Promise<IResponseBase>;
 }
