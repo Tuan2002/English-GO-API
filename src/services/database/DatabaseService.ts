@@ -9,6 +9,7 @@ import { ExamResultSpeaking } from "@/entity/ExamResultSpeaking";
 import { ExamResultWriting } from "@/entity/ExamResultWriting";
 import { ExamSchedule } from "@/entity/ExamSchedule";
 import { ExamSkillStatus } from "@/entity/ExamSkillStatus";
+import { Feedback } from "@/entity/Feedback";
 import { Function } from "@/entity/Function";
 import { GroupRole } from "@/entity/GroupRole";
 import { Level } from "@/entity/Level";
@@ -44,6 +45,7 @@ class DatabaseService {
   public ExamResultSpeakingRepo: Repository<ExamResultSpeaking>;
   public OrganizationRepo: Repository<Organization>;
   public ScheduleRepo: Repository<ExamSchedule>;
+  public FeedbackRepo: Repository<Feedback>;
   constructor() {
     this._dataSource = dataSource;
     this.FunctionRepo = this._dataSource.getRepository(Function);
@@ -65,6 +67,7 @@ class DatabaseService {
     this.ExamResultSpeakingRepo = this._dataSource.getRepository(ExamResultSpeaking);
     this.OrganizationRepo = this._dataSource.getRepository(Organization);
     this.ScheduleRepo = this._dataSource.getRepository(ExamSchedule);
+    this.FeedbackRepo = this._dataSource.getRepository(Feedback);
     this._dataSource
       .initialize()
       .then(() => {
