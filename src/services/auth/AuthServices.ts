@@ -179,6 +179,7 @@ export default class AuthService implements IAuthService {
 
       const token = this._JwtService.generateAccessToken(tokenPayload);
       setAccessTokenToCookie(token.token);
+      await this._context.UserRepo.save({ ...user.data, lastLogin: new Date().toISOString() });
       const loginData: IUserLoginResponse = {
         accessToken: token,
         userInfo: {
@@ -225,6 +226,9 @@ export default class AuthService implements IAuthService {
           id: userId,
         },
       });
+      if (isExist) {
+        await this._context.UserRepo.update({ id: userId }, { lastLogin: new Date().toISOString() });
+      }
       return {
         status: StatusCodes.OK,
         success: isExist,
@@ -269,6 +273,7 @@ export default class AuthService implements IAuthService {
         },
       });
       if (user) {
+        await this._context.UserRepo.save({ ...user, lastLogin: new Date().toISOString() });
         return {
           status: StatusCodes.OK,
           success: false,

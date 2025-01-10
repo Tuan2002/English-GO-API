@@ -1,4 +1,5 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, UpdateDateColumn } from "typeorm";
+import { Exam } from "./Exam";
 import { GroupRole } from "./GroupRole";
 
 enum EGenderStatus {
@@ -42,6 +43,9 @@ export class User {
   @Column({ type: "varchar", length: 1000, nullable: true })
   banner?: string;
 
+  @Column({ type: "varchar", length: 255, nullable: true })
+  lastLogin?: string;
+
   @Column({ type: "boolean", nullable: true })
   isExternal?: boolean;
 
@@ -63,4 +67,7 @@ export class User {
   @ManyToOne(() => GroupRole, (groupRole) => groupRole.id, { onDelete: "CASCADE" })
   @JoinColumn({ name: "groupRoleId" })
   groupRole!: GroupRole;
+
+  @OneToMany(() => Exam, (exam) => exam.user)
+  exams: Exam[] | null;
 }

@@ -11,28 +11,30 @@ import { ScheduleService } from "@/services/schedule/ScheduleService";
 import { SetupService } from "@/services/setup/SetupService";
 import SkillService from "@/services/skill/SkillService";
 import UserService from "@/services/user/UserServices";
+import FeedbackService from "@/services/feedback/FeedbackService";
 import { asClass, createContainer, InjectionMode } from "awilix";
 import "dotenv/config";
 const container = createContainer({
-    injectionMode: InjectionMode.CLASSIC
+  injectionMode: InjectionMode.CLASSIC,
 });
 // Register the services
 container.register({
-    // Register the Services
-    DatabaseService: asClass(DatabaseService).singleton(),
-    JwtService: asClass(JwtService).singleton(),
-    AuthService: asClass(AuthService).scoped(),
-    RoleService: asClass(RoleService).scoped(),
-    UserService: asClass(UserService).scoped(),
-    CategoryService: asClass(CategoryService).scoped(),
-    SkillService: asClass(SkillService).scoped(),
-    SchuduleService: asClass(ScheduleService).scoped(),
-    QuestionService: asClass(QuestionService).scoped(),
-    OrganizationService: asClass(OrganizationService).scoped(),
-    LevelService: asClass(LevelService).scoped(),
-    ExamService: asClass(ExamService).scoped(),
-    SetupService: asClass(SetupService).scoped()
+  // Register the Services
+  DatabaseService: asClass(DatabaseService).singleton(),
+  JwtService: asClass(JwtService).singleton(),
+  AuthService: asClass(AuthService).scoped(),
+  RoleService: asClass(RoleService).scoped(),
+  UserService: asClass(UserService).scoped(),
+  CategoryService: asClass(CategoryService).scoped(),
+  SkillService: asClass(SkillService).scoped(),
+  ScheduleService: asClass(ScheduleService).scoped(),
+  QuestionService: asClass(QuestionService).scoped(),
+  OrganizationService: asClass(OrganizationService).scoped(),
+  LevelService: asClass(LevelService).scoped(),
+  FeedbackService: asClass(FeedbackService).scoped(),
+  ExamService: asClass(ExamService).scoped(),
+  SetupService: asClass(SetupService).scoped(),
 });
 container.resolve("JwtService");
-container.resolve("DatabaseService")
-export default container
+container.resolve("DatabaseService");
+export default container;

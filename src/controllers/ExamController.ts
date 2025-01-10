@@ -1,8 +1,8 @@
+import { IPaginationBase } from "@/interfaces/base/IPaginationBase";
 import IExamService from "@/interfaces/exam/IExamService";
 import AuthenticateMiddleware from "@/middlewares/AuthenticateMiddleware";
 import { before, GET, inject, POST, route } from "awilix-express";
 import { Request, Response } from "express";
-
 
 @before(inject((JwtService) => AuthenticateMiddleware(JwtService)))
 @route("/exams")
@@ -90,6 +90,19 @@ export class ExamController {
   @route("/my-exams")
   async getMyExams(req: Request, res: Response) {
     const response = await this._examService.getMyExams();
+    return res.status(response.status).json(response);
+  }
+
+  @POST()
+  @route("/get-all-exams")
+  async getAllExams(req: Request, res: Response) {
+    const { page, limit } = req.query;
+    const paginationData: IPaginationBase = {
+      page: Number(page ?? "1"),
+      limit: Number(limit ?? "10"),
+    };
+    const listUserId = req.body.userIds as string[];
+    const response = await this._examService.getListExams(paginationData, listUserId);
     return res.status(response.status).json(response);
   }
 }
