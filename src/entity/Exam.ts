@@ -8,8 +8,8 @@ export class Exam {
   @PrimaryColumn({ type: "varchar", length: 255, nullable: false })
   id!: string;
 
-  @Column({ type: "varchar", length: 1000, nullable: false })
-  userId!: string;
+  @Column({ type: "varchar", length: 1000, nullable: true })
+  userId: string;
 
   @Column({ type: "varchar", length: 100, nullable: false })
   examCode!: string;
@@ -47,7 +47,7 @@ export class Exam {
   @OneToMany(() => ExamSkillStatus, (examSkillStatus) => examSkillStatus.exam)
   examSkillStatuses!: ExamSkillStatus[];
 
-  @ManyToOne(() => User, (user) => user.id, { onDelete: "CASCADE" })
+  @ManyToOne(() => User, (user) => user.id, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   @JoinColumn({ name: "userId" })
-  user!: User;
+  user: User;
 }

@@ -43,6 +43,9 @@ export class User {
   @Column({ type: "varchar", length: 1000, nullable: true })
   banner?: string;
 
+  @Column({ type: "varchar", length: 255, nullable: true })
+  lastLogin?: string;
+
   @Column({ type: "boolean", nullable: true })
   isExternal?: boolean;
 
