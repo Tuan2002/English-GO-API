@@ -9,7 +9,7 @@ export class Exam {
   id!: string;
 
   @Column({ type: "varchar", length: 1000, nullable: true })
-  userId: string;
+  userId!: string | null
 
   @Column({ type: "varchar", length: 100, nullable: false })
   examCode!: string;
@@ -49,5 +49,5 @@ export class Exam {
 
   @ManyToOne(() => User, (user) => user.id, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   @JoinColumn({ name: "userId" })
-  user: User;
+  user!: User | null;
 }

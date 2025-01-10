@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, UpdateDateColumn } from "typeorm";
-import { GroupRole } from "./GroupRole";
 import { Exam } from "./Exam";
+import { GroupRole } from "./GroupRole";
 
 enum EGenderStatus {
   FEMALE = "F",
@@ -69,5 +69,5 @@ export class User {
   groupRole!: GroupRole;
 
   @OneToMany(() => Exam, (exam) => exam.user)
-  exams!: Exam[];
+  exams: Exam[] | null;
 }
