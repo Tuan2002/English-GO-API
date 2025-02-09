@@ -1,6 +1,17 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, UpdateDateColumn } from "typeorm";
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryColumn,
+  UpdateDateColumn,
+} from "typeorm";
 import { Exam } from "./Exam";
 import { GroupRole } from "./GroupRole";
+import { ExaminerIntroduction } from "./ExaminerIntroduction";
 
 enum EGenderStatus {
   FEMALE = "F",
@@ -70,4 +81,7 @@ export class User {
 
   @OneToMany(() => Exam, (exam) => exam.user)
   exams: Exam[] | null;
+
+  @OneToOne(() => ExaminerIntroduction, (examinerIntroduction) => examinerIntroduction.user)
+  examinerIntroduction: ExaminerIntroduction | null;
 }

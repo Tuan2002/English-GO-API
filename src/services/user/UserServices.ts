@@ -10,6 +10,8 @@ import { Brackets, ILike } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
 import DatabaseService from "../database/DatabaseService";
 import logger from "@/helpers/logger";
+import { GroupRole } from "@/entity/GroupRole";
+import EGroupRole from "@/constants/GroupRole";
 
 export default class UserService implements IUserService {
   private readonly _roleService: IRoleService;
@@ -333,9 +335,7 @@ export default class UserService implements IUserService {
         };
       }
       const user = await this._context.UserRepo.findOne({
-        where: {
-          id: userId,
-        },
+        where: {},
       });
       const updatedUser = this._context.UserRepo.merge(user, userData);
       await this._context.UserRepo.save(updatedUser);
@@ -352,6 +352,26 @@ export default class UserService implements IUserService {
             errorDetail: "Không tìm thấy thông tin người dùng hoặc người dùng đã bị xoá",
           },
         };
+      }
+
+      if (data.groupRoleId === EGroupRole.EXAMINER) {
+        const getExaminerIntroduction = await this._context.ExaminerIntroductionRepo.findOne({
+          where: {
+            userId: userId,
+          },
+        });
+        if (!getExaminerIntroduction) {
+          const examinerIntroduction = this._context.ExaminerIntroductionRepo.create({
+            id: userId,
+            userId: userId,
+            description: "",
+            introduction: "",
+            workPlace: "",
+            workAddress: "",
+            banner: "",
+          });
+          await this._context.ExaminerIntroductionRepo.save(examinerIntroduction);
+        }
       }
 
       return {

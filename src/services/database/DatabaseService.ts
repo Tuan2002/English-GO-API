@@ -2,6 +2,7 @@ import { ENV } from "@/constants/env";
 import { Answer } from "@/entity/Answer";
 import { Category } from "@/entity/Category";
 import { Exam } from "@/entity/Exam";
+import { ExaminerIntroduction } from "@/entity/ExaminerIntroduction";
 import { ExamQuestion } from "@/entity/ExamQuestion";
 import { ExamResultListening } from "@/entity/ExamResultListening";
 import { ExamResultReading } from "@/entity/ExamResultReading";
@@ -46,6 +47,7 @@ class DatabaseService {
   public OrganizationRepo: Repository<Organization>;
   public ScheduleRepo: Repository<ExamSchedule>;
   public FeedbackRepo: Repository<Feedback>;
+  public ExaminerIntroductionRepo: Repository<ExaminerIntroduction>;
   constructor() {
     this._dataSource = dataSource;
     this.FunctionRepo = this._dataSource.getRepository(Function);
@@ -68,6 +70,7 @@ class DatabaseService {
     this.OrganizationRepo = this._dataSource.getRepository(Organization);
     this.ScheduleRepo = this._dataSource.getRepository(ExamSchedule);
     this.FeedbackRepo = this._dataSource.getRepository(Feedback);
+    this.ExaminerIntroductionRepo = this._dataSource.getRepository(ExaminerIntroduction);
     this._dataSource
       .initialize()
       .then(() => {

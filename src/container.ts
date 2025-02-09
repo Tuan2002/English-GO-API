@@ -12,6 +12,7 @@ import { SetupService } from "@/services/setup/SetupService";
 import SkillService from "@/services/skill/SkillService";
 import UserService from "@/services/user/UserServices";
 import FeedbackService from "@/services/feedback/FeedbackService";
+import ExaminerIntroductionService from "@/services/examinerIntroduction/ExaminerIntroductionService";
 import { asClass, createContainer, InjectionMode } from "awilix";
 import "dotenv/config";
 const container = createContainer({
@@ -34,6 +35,7 @@ container.register({
   FeedbackService: asClass(FeedbackService).scoped(),
   ExamService: asClass(ExamService).scoped(),
   SetupService: asClass(SetupService).scoped(),
+  ExaminerIntroductionService: asClass(ExaminerIntroductionService).scoped(),
 });
 container.resolve("JwtService");
 container.resolve("DatabaseService");
