@@ -9,15 +9,13 @@
   createdBy: string;
   updatedBy: string;
 }
-2. thuocTinhMacDinh {
-  id: string;
-  name: string;
-  type: string;
-}
 2. thuoctinh {
   id: string;
-  name: string;
+  code: string;
   type: string;
+  displayName: string;
+  note: string;
+  isDefault: boolean;
   loaiDichVuId: string;
 }
 example: 
