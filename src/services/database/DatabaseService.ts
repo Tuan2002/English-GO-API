@@ -1,6 +1,7 @@
 import { ENV } from "@/constants/env";
 import { Answer } from "@/entity/Answer";
 import { Category } from "@/entity/Category";
+import { Evaluate } from "@/entity/Evaluate";
 import { Exam } from "@/entity/Exam";
 import { ExaminerIntroduction } from "@/entity/ExaminerIntroduction";
 import { ExamQuestion } from "@/entity/ExamQuestion";
@@ -56,6 +57,7 @@ class DatabaseService {
   public PlanDetailRepo: Repository<PlanDetail>;
   public PlanAttributeRepo: Repository<PlanAttribute>;
   public PlanTypeRepo: Repository<PlanType>;
+  public EvaluateRepo: Repository<Evaluate>;
   constructor() {
     this._dataSource = dataSource;
     this.FunctionRepo = this._dataSource.getRepository(Function);
@@ -83,6 +85,7 @@ class DatabaseService {
     this.PlanDetailRepo = this._dataSource.getRepository(PlanDetail);
     this.PlanAttributeRepo = this._dataSource.getRepository(PlanAttribute);
     this.PlanTypeRepo = this._dataSource.getRepository(PlanType);
+    this.EvaluateRepo = this._dataSource.getRepository(Evaluate);
 
     this._dataSource
       .initialize()

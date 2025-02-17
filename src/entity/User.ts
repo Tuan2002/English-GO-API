@@ -9,9 +9,10 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { Evaluate } from "./Evaluate";
 import { Exam } from "./Exam";
-import { GroupRole } from "./GroupRole";
 import { ExaminerIntroduction } from "./ExaminerIntroduction";
+import { GroupRole } from "./GroupRole";
 
 enum EGenderStatus {
   FEMALE = "F",
@@ -84,4 +85,7 @@ export class User {
 
   @OneToOne(() => ExaminerIntroduction, (examinerIntroduction) => examinerIntroduction.user)
   examinerIntroduction: ExaminerIntroduction | null;
+
+  @OneToMany(() => Evaluate, (evaluate) => evaluate.user)
+  evaluates: Evaluate[] | null;
 }

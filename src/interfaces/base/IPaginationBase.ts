@@ -2,7 +2,7 @@ export interface IPaginationBase {
   page: number;
   limit: number;
   search?: {
-    [key: string]: string | number;
+    [key: string]: string | number | undefined | boolean;
   };
 }
 
