@@ -1,5 +1,17 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, UpdateDateColumn } from "typeorm";
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryColumn,
+  UpdateDateColumn,
+} from "typeorm";
+import { Evaluate } from "./Evaluate";
 import { Exam } from "./Exam";
+import { ExaminerIntroduction } from "./ExaminerIntroduction";
 import { GroupRole } from "./GroupRole";
 
 enum EGenderStatus {
@@ -70,4 +82,10 @@ export class User {
 
   @OneToMany(() => Exam, (exam) => exam.user)
   exams: Exam[] | null;
+
+  @OneToOne(() => ExaminerIntroduction, (examinerIntroduction) => examinerIntroduction.user)
+  examinerIntroduction: ExaminerIntroduction | null;
+
+  @OneToMany(() => Evaluate, (evaluate) => evaluate.user)
+  evaluates: Evaluate[] | null;
 }

@@ -1,7 +1,9 @@
 import { ENV } from "@/constants/env";
 import { Answer } from "@/entity/Answer";
 import { Category } from "@/entity/Category";
+import { Evaluate } from "@/entity/Evaluate";
 import { Exam } from "@/entity/Exam";
+import { ExaminerIntroduction } from "@/entity/ExaminerIntroduction";
 import { ExamQuestion } from "@/entity/ExamQuestion";
 import { ExamResultListening } from "@/entity/ExamResultListening";
 import { ExamResultReading } from "@/entity/ExamResultReading";
@@ -15,6 +17,10 @@ import { GroupRole } from "@/entity/GroupRole";
 import { Level } from "@/entity/Level";
 import { Organization } from "@/entity/Organization";
 import { Permission } from "@/entity/Permission";
+import { Plan } from "@/entity/Plan";
+import { PlanAttribute } from "@/entity/PlanAttribute";
+import { PlanDetail } from "@/entity/PlanDetail";
+import { PlanType } from "@/entity/PlanType";
 import { Question } from "@/entity/Question";
 import { Skill } from "@/entity/Skill";
 import { SubQuestion } from "@/entity/SubQuestion";
@@ -46,6 +52,12 @@ class DatabaseService {
   public OrganizationRepo: Repository<Organization>;
   public ScheduleRepo: Repository<ExamSchedule>;
   public FeedbackRepo: Repository<Feedback>;
+  public ExaminerIntroductionRepo: Repository<ExaminerIntroduction>;
+  public PlanRepo: Repository<Plan>;
+  public PlanDetailRepo: Repository<PlanDetail>;
+  public PlanAttributeRepo: Repository<PlanAttribute>;
+  public PlanTypeRepo: Repository<PlanType>;
+  public EvaluateRepo: Repository<Evaluate>;
   constructor() {
     this._dataSource = dataSource;
     this.FunctionRepo = this._dataSource.getRepository(Function);
@@ -68,6 +80,13 @@ class DatabaseService {
     this.OrganizationRepo = this._dataSource.getRepository(Organization);
     this.ScheduleRepo = this._dataSource.getRepository(ExamSchedule);
     this.FeedbackRepo = this._dataSource.getRepository(Feedback);
+    this.ExaminerIntroductionRepo = this._dataSource.getRepository(ExaminerIntroduction);
+    this.PlanRepo = this._dataSource.getRepository(Plan);
+    this.PlanDetailRepo = this._dataSource.getRepository(PlanDetail);
+    this.PlanAttributeRepo = this._dataSource.getRepository(PlanAttribute);
+    this.PlanTypeRepo = this._dataSource.getRepository(PlanType);
+    this.EvaluateRepo = this._dataSource.getRepository(Evaluate);
+
     this._dataSource
       .initialize()
       .then(() => {
