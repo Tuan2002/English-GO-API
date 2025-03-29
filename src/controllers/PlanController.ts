@@ -79,4 +79,52 @@ export class PlanController {
     const response = await this._planService.deletePlanType(id);
     return res.status(response.status).json(response);
   }
+
+  @GET()
+  @route("/get-plan-type/:id")
+  async getPlanTypeById(req: Request, res: Response) {
+    const { id } = req.params;
+    const response = await this._planService.getPlanTypeById(id);
+    return res.status(response.status).json(response);
+  }
+
+  @GET()
+  @route("/get-plan-attribute/:id")
+  async getPlanAttributeById(req: Request, res: Response) {
+    const { id } = req.params;
+    const response = await this._planService.getPlanAttributeById(id);
+    return res.status(response.status).json(response);
+  }
+
+  @GET()
+  @route("/get-plan-attribute-by-type/:typeId")
+  async getPlanAttributeByType(req: Request, res: Response) {
+    const { typeId } = req.params;
+    const response = await this._planService.getPlanAttributeByType(typeId);
+    return res.status(response.status).json(response);
+  }
+
+  @GET()
+  @route("/get-plan-by-type/:typeId")
+  async getPlanByType(req: Request, res: Response) {
+    const { typeId } = req.params;
+    const response = await this._planService.getPlanByType(typeId);
+    return res.status(response.status).json(response);
+  }
+
+  @GET()
+  @route("/get-plan-detail/:planId")
+  async getPlanDetail(req: Request, res: Response) {
+    const { planId } = req.params;
+    const response = await this._planService.getPlanDetail(planId);
+    return res.status(response.status).json(response);
+  }
+
+  @POST()
+  @route("/create-new-plan")
+  async createNewPlan(req: Request, res: Response) {
+    const data = req.body;
+    const response = await this._planService.createNewPlan(data);
+    return res.status(response.status).json(response);
+  }
 }

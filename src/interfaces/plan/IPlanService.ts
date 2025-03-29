@@ -1,5 +1,11 @@
 import { IResponseBase } from "../base/IResponseBase";
-import { IAddNewPlanAttributeDTO, ICreateNewPlanTypeDTO, IUpdatePlanAttributeDTO, IUpdatePlanTypeDTO } from "./IPlanDTO";
+import {
+  IAddNewPlanAttributeDTO,
+  ICreateNewPlanDTO,
+  ICreateNewPlanTypeDTO,
+  IUpdatePlanAttributeDTO,
+  IUpdatePlanTypeDTO,
+} from "./IPlanDTO";
 
 export default interface IPlanService {
   getAllPlanTypes(): Promise<IResponseBase>;
@@ -10,4 +16,10 @@ export default interface IPlanService {
   deletePlanAttribute(id: string): Promise<IResponseBase>;
   updatePlanType(data: IUpdatePlanTypeDTO): Promise<IResponseBase>;
   deletePlanType(id: string): Promise<IResponseBase>;
+  getPlanTypeById(id: string): Promise<IResponseBase>;
+  getPlanAttributeById(id: string): Promise<IResponseBase>;
+  getPlanAttributeByType(typeId: string): Promise<IResponseBase>;
+  getPlanByType(typeId: string): Promise<IResponseBase>;
+  getPlanDetail(planId: string): Promise<IResponseBase>;
+  createNewPlan(newPlanData: ICreateNewPlanDTO): Promise<IResponseBase>;
 }

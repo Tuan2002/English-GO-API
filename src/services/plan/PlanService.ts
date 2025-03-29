@@ -1,12 +1,17 @@
+import { LocalStorage } from "@/constants/LocalStorage";
+import { Plan } from "@/entity/Plan";
+import { PlanDetail } from "@/entity/PlanDetail";
 import logger from "@/helpers/logger";
 import { IResponseBase } from "@/interfaces/base/IResponseBase";
 import {
   IAddNewPlanAttributeDTO,
+  ICreateNewPlanDTO,
   ICreateNewPlanTypeDTO,
   IUpdatePlanAttributeDTO,
   IUpdatePlanTypeDTO,
 } from "@/interfaces/plan/IPlanDTO";
 import IPlanService from "@/interfaces/plan/IPlanService";
+import { RequestStorage } from "@/middlewares";
 import { StatusCodes } from "http-status-codes";
 import { IsNull } from "typeorm";
 import { v4 as uuid } from "uuid";
@@ -93,6 +98,7 @@ export default class PlanService implements IPlanService {
       };
     }
   }
+
   async createPlanAttributes(dataAddNew: IAddNewPlanAttributeDTO): Promise<IResponseBase> {
     const { planAttributes } = dataAddNew;
     if (!planAttributes || planAttributes.length === 0) {
@@ -393,6 +399,7 @@ export default class PlanService implements IPlanService {
       };
     }
   }
+
   async deletePlanAttribute(attributeId: string): Promise<IResponseBase> {
     try {
       if (!attributeId) {
@@ -487,6 +494,309 @@ export default class PlanService implements IPlanService {
         success: true,
         status: StatusCodes.BAD_REQUEST,
       };
+    }
+  }
+
+  async getPlanTypeById(typeId: string): Promise<IResponseBase> {
+    try {
+      if (!typeId) {
+        return {
+          data: null,
+          error: null,
+          message: "Vui lòng kiểm tra lại dữ liệu của bạn",
+          success: false,
+          status: StatusCodes.BAD_REQUEST,
+        };
+      }
+      const planType = await this._context.PlanTypeRepo.findOne({
+        where: {
+          id: typeId,
+        },
+      });
+      if (!planType) {
+        return {
+          data: null,
+          error: null,
+          message: "Loại dịch vụ không tồn tại",
+          success: false,
+          status: StatusCodes.BAD_REQUEST,
+        };
+      }
+      return {
+        data: planType,
+        error: null,
+        message: "Lấy thông tin loại dịch vụ thành công",
+        success: true,
+        status: StatusCodes.OK,
+      };
+    } catch (error) {
+      logger.error(error.message);
+      console.log(`Error in Feedback - method sendFeedback() at ${new Date().getTime()} with message ${error.message}`);
+      return {
+        data: null,
+        error: null,
+        message: "Hệ thống đang gặp sự cố, vui lòng thử lại sau",
+        success: true,
+        status: StatusCodes.BAD_REQUEST,
+      };
+    }
+  }
+
+  async getPlanAttributeById(attributeId: string): Promise<IResponseBase> {
+    try {
+      if (!attributeId) {
+        return {
+          data: null,
+          error: null,
+          message: "Vui lòng kiểm tra lại dữ liệu của bạn",
+          success: false,
+          status: StatusCodes.BAD_REQUEST,
+        };
+      }
+      const planAttribute = await this._context.PlanAttributeRepo.findOne({
+        where: {
+          id: attributeId,
+        },
+      });
+      if (!planAttribute) {
+        return {
+          data: null,
+          error: null,
+          message: "Thuộc tính dịch vụ không tồn tại",
+          success: false,
+          status: StatusCodes.BAD_REQUEST,
+        };
+      }
+      return {
+        data: planAttribute,
+        error: null,
+        message: "Lấy thông tin thuộc tính dịch vụ thành công",
+        success: true,
+        status: StatusCodes.OK,
+      };
+    } catch (error) {
+      logger.error(error.message);
+      console.log(`Error in Feedback - method sendFeedback() at ${new Date().getTime()} with message ${error.message}`);
+      return {
+        data: null,
+        error: null,
+        message: "Hệ thống đang gặp sự cố, vui lòng thử lại sau",
+        success: true,
+        status: StatusCodes.BAD_REQUEST,
+      };
+    }
+  }
+
+  async getPlanByType(typeId: string): Promise<IResponseBase> {
+    try {
+      if (!typeId) {
+        return {
+          data: null,
+          error: null,
+          message: "Vui lòng kiểm tra lại dữ liệu của bạn",
+          success: false,
+          status: StatusCodes.BAD_REQUEST,
+        };
+      }
+      const planAttributes = await this._context.PlanAttributeRepo.find({
+        where: {
+          planTypeId: typeId,
+        },
+      });
+      return {
+        data: planAttributes,
+        error: null,
+        message: "Lấy danh sách dịch vụ thành công",
+        success: true,
+        status: StatusCodes.OK,
+      };
+    } catch (error) {
+      logger.error(error.message);
+      console.log(`Error in Feedback - method sendFeedback() at ${new Date().getTime()} with message ${error.message}`);
+      return {
+        data: null,
+        error: null,
+        message: "Hệ thống đang gặp sự cố, vui lòng thử lại sau",
+        success: true,
+        status: StatusCodes.BAD_REQUEST,
+      };
+    }
+  }
+
+  async getPlanAttributeByType(typeId: string): Promise<IResponseBase> {
+    try {
+      if (!typeId) {
+        return {
+          data: null,
+          error: null,
+          message: "Vui lòng kiểm tra lại dữ liệu của bạn",
+          success: false,
+          status: StatusCodes.BAD_REQUEST,
+        };
+      }
+      const planAttributes = await this._context.PlanAttributeRepo.find({
+        where: {
+          planTypeId: typeId,
+        },
+      });
+      return {
+        data: planAttributes,
+        error: null,
+        message: "Lấy danh sách thuộc tính dịch vụ thành công",
+        success: true,
+        status: StatusCodes.OK,
+      };
+    } catch (error) {
+      logger.error(error.message);
+      console.log(`Error in Feedback - method sendFeedback() at ${new Date().getTime()} with message ${error.message}`);
+      return {
+        data: null,
+        error: null,
+        message: "Hệ thống đang gặp sự cố, vui lòng thử lại sau",
+        success: true,
+        status: StatusCodes.BAD_REQUEST,
+      };
+    }
+  }
+
+  async getPlanDetail(planId: string): Promise<IResponseBase> {
+    try {
+      if (!planId) {
+        return {
+          data: null,
+          error: null,
+          message: "Không tìm thấy mã dịch vụ của bạn",
+          success: false,
+          status: StatusCodes.BAD_REQUEST,
+        };
+      }
+      const plan = await this._context.PlanRepo.createQueryBuilder("plan")
+        .leftJoinAndSelect("plan.planType", "planType")
+        .leftJoinAndSelect("plan.planAttributes", "planAttributes")
+        .leftJoinAndSelect("plan.planDetails", "planDetails")
+        .where("plan.id = :planId", { planId })
+        .getOne();
+      if (!plan) {
+        return {
+          data: null,
+          error: null,
+          message: "Dịch vụ không tồn tại",
+          success: false,
+          status: StatusCodes.BAD_REQUEST,
+        };
+      }
+      return {
+        data: plan,
+        error: null,
+        message: "Lấy thông tin dịch vụ thành công",
+        success: true,
+        status: StatusCodes.OK,
+      };
+    } catch (error) {
+      logger.error(error.message);
+      console.log(`Error in Feedback - method sendFeedback() at ${new Date().getTime()} with message ${error.message}`);
+      return {
+        data: null,
+        error: null,
+        message: "Hệ thống đang gặp sự cố, vui lòng thử lại sau",
+        success: true,
+        status: StatusCodes.BAD_REQUEST,
+      };
+    }
+  }
+
+  async createNewPlan(newPlanData: ICreateNewPlanDTO): Promise<IResponseBase> {
+    const request = RequestStorage.getStore()?.get(LocalStorage.REQUEST_STORE);
+    const userId = request?.user.id;
+    if (!userId) {
+      return {
+        status: StatusCodes.UNAUTHORIZED,
+        success: false,
+        message: "Bạn không có quyền truy cập",
+        data: null,
+        error: {
+          message: "Unauthorized",
+          errorDetail: "Bạn không có quyền truy cập",
+        },
+      };
+    }
+    if (!newPlanData.planTypeId) {
+      return {
+        data: null,
+        error: null,
+        message: "Không tìm thấy mã loại dịch vụ của bạn",
+        success: false,
+        status: StatusCodes.BAD_REQUEST,
+      };
+    }
+    const checkPlanAttributeDetail = newPlanData.planAttributeDetails.some((planAttributeDetail) => {
+      return !planAttributeDetail.attributeId || !planAttributeDetail.value;
+    });
+    if (checkPlanAttributeDetail) {
+      return {
+        data: null,
+        error: null,
+        message: "Vui lòng kiểm tra lại thông tin dịch vụ của bạn",
+        success: false,
+        status: StatusCodes.BAD_REQUEST,
+      };
+    }
+    const planType = await this._context.PlanTypeRepo.findOne({
+      where: {
+        id: newPlanData.planTypeId,
+      },
+    });
+    if (!planType) {
+      return {
+        data: null,
+        error: null,
+        message: "Loại dịch vụ không tồn tại",
+        success: false,
+        status: StatusCodes.BAD_REQUEST,
+      };
+    }
+    const queryRunner = this._context.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const plan = new Plan();
+      plan.id = uuid();
+      plan.planTypeId = newPlanData.planTypeId;
+      plan.createdAt = new Date();
+      plan.updatedAt = new Date();
+      plan.createdBy = userId;
+      plan.updatedBy = userId;
+
+      const planAttributeDetail = newPlanData.planAttributeDetails.map((planAttributeDetail) => {
+        const planAttribute = new PlanDetail();
+        planAttribute.id = uuid();
+        planAttribute.attributeId = planAttributeDetail.attributeId;
+        planAttribute.planId = plan.id;
+        planAttribute.value = planAttributeDetail.value;
+        planAttribute.note = planAttributeDetail.note;
+        planAttribute.createdAt = new Date();
+        planAttribute.updatedAt = new Date();
+        return planAttribute;
+      });
+      await this._context.PlanRepo.save(plan);
+      await this._context.PlanDetailRepo.save(planAttributeDetail);
+
+      await queryRunner.commitTransaction();
+      const createdPlan = await this.getPlanDetail(plan.id);
+      return createdPlan;
+    } catch (error) {
+      logger.error(error.message);
+      console.log(`Error in Feedback - method sendFeedback() at ${new Date().getTime()} with message ${error.message}`);
+      await queryRunner.rollbackTransaction();
+      return {
+        data: null,
+        error: null,
+        message: "Hệ thống đang gặp sự cố, vui lòng thử lại sau",
+        success: true,
+        status: StatusCodes.BAD_REQUEST,
+      };
+    } finally {
+      await queryRunner.release();
     }
   }
 }
