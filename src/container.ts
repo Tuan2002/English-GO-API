@@ -15,8 +15,10 @@ import SkillService from "@/services/skill/SkillService";
 import UserService from "@/services/user/UserServices";
 import { asClass, createContainer, InjectionMode } from "awilix";
 import "dotenv/config";
+import RedisService from "./services/database/RedisService";
 import EvaluateService from "./services/evaluate/EvaluateService";
 import PlanService from "./services/plan/PlanService";
+import { TrackingService } from "./services/tracking/TrackingService";
 const container = createContainer({
   injectionMode: InjectionMode.CLASSIC,
 });
@@ -24,7 +26,9 @@ const container = createContainer({
 container.register({
   // Register the Services
   DatabaseService: asClass(DatabaseService).singleton(),
+  RedisService: asClass(RedisService).singleton(),
   JwtService: asClass(JwtService).singleton(),
+  TrackingService: asClass(TrackingService).scoped(),
   AuthService: asClass(AuthService).scoped(),
   RoleService: asClass(RoleService).scoped(),
   UserService: asClass(UserService).scoped(),
@@ -43,4 +47,5 @@ container.register({
 });
 container.resolve("JwtService");
 container.resolve("DatabaseService");
+container.resolve("RedisService");
 export default container;
