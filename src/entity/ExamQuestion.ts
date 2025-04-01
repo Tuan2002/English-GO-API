@@ -4,6 +4,7 @@ import { ExamResultListening } from "./ExamResultListening";
 import { ExamResultReading } from "./ExamResultReading";
 import { ExamResultSpeaking } from "./ExamResultSpeaking";
 import { ExamResultWriting } from "./ExamResultWriting";
+import { GradeFeedback } from "./GradeFeedback";
 import { Question } from "./Question";
 
 @Entity({ name: "ExamQuestions" })
@@ -38,4 +39,7 @@ export class ExamQuestion {
 
   @OneToMany(() => ExamResultReading, (examResultReading) => examResultReading.examQuestion)
   examResultReadings!: ExamResultReading[];
+
+  @OneToMany(() => GradeFeedback, (gradeFeedback) => gradeFeedback.examQuestion)
+  gradeFeedbacks!: GradeFeedback[];
 }

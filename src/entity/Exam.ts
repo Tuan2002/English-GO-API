@@ -9,7 +9,7 @@ export class Exam {
   id!: string;
 
   @Column({ type: "varchar", length: 1000, nullable: true })
-  userId!: string | null
+  userId!: string | null;
 
   @Column({ type: "varchar", length: 100, nullable: false })
   examCode!: string;
@@ -28,6 +28,18 @@ export class Exam {
 
   @Column({ type: "boolean", nullable: false, default: false })
   isDone!: boolean;
+
+  @Column({ type: "boolean", nullable: true, default: false })
+  isGradedWritingWithAI?: boolean;
+
+  @Column({ type: "boolean", nullable: true, default: false })
+  isGradedSpeakingWithAI?: boolean;
+
+  @Column({ type: "boolean", nullable: true, default: false })
+  isGradedWritingWithPerson?: boolean;
+
+  @Column({ type: "boolean", nullable: true, default: false })
+  isGradedSpeakingWithPerson?: boolean;
 
   @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   createdAt!: Date;

@@ -1,7 +1,7 @@
 import IGradeService from "@/interfaces/grade/IGradeService";
 import AuthenticateMiddleware from "@/middlewares/AuthenticateMiddleware";
 import GradeService from "@/services/grade/GradeService";
-import { before, inject, POST, route } from "awilix-express";
+import { before, GET, inject, POST, route } from "awilix-express";
 import { Request, Response } from "express";
 
 @before(inject((JwtService) => AuthenticateMiddleware(JwtService)))
@@ -31,6 +31,17 @@ export class GradeController {
       examId,
       levelId,
     });
+    return res.status(response.status).json(response);
+  }
+
+  @GET()
+  @route("/grading-feedback-with-ai/:examId")
+  async getGradingFeedbackWithAI(req: Request, res: Response) {
+    const { examId } = req.params;
+    const { skill } = req.query;
+    console.log("examId", examId);
+    console.log("skill", skill);
+    const response = await this._gradeService.getGradingFeedbackWithAI(examId as string, skill as string);
     return res.status(response.status).json(response);
   }
 }
