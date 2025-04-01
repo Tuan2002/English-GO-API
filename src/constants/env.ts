@@ -15,4 +15,7 @@ export const ENV = {
 
   PASSWORD_SALT: process.env.PASSWORD_SALT || 10,
   AUTH_MODE: process.env.AUTH_MODE || "HEADER",
+
+  GEMINI_API_URL: process.env.GEMINI_API_URL || "",
+  GEMINI_API_KEY: process.env.GEMINI_API_KEY || "",
 };

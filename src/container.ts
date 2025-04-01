@@ -17,6 +17,7 @@ import { asClass, createContainer, InjectionMode } from "awilix";
 import "dotenv/config";
 import RedisService from "./services/database/RedisService";
 import EvaluateService from "./services/evaluate/EvaluateService";
+import GradeService from "./services/grade/GradeService";
 import PlanService from "./services/plan/PlanService";
 import { TrackingService } from "./services/tracking/TrackingService";
 const container = createContainer({
@@ -44,6 +45,7 @@ container.register({
   ExaminerIntroductionService: asClass(ExaminerIntroductionService).scoped(),
   PlanService: asClass(PlanService).scoped(),
   EvaluateService: asClass(EvaluateService).scoped(),
+  GradeService: asClass(GradeService).scoped(),
 });
 container.resolve("JwtService");
 container.resolve("DatabaseService");

@@ -13,6 +13,7 @@ import { ExamSchedule } from "@/entity/ExamSchedule";
 import { ExamSkillStatus } from "@/entity/ExamSkillStatus";
 import { Feedback } from "@/entity/Feedback";
 import { Function } from "@/entity/Function";
+import { GradeFeedback } from "@/entity/GradeFeedback";
 import { GroupRole } from "@/entity/GroupRole";
 import { Level } from "@/entity/Level";
 import { Organization } from "@/entity/Organization";
@@ -58,6 +59,7 @@ class DatabaseService {
   public PlanAttributeRepo: Repository<PlanAttribute>;
   public PlanTypeRepo: Repository<PlanType>;
   public EvaluateRepo: Repository<Evaluate>;
+  public GradeFeedbackRepo: Repository<GradeFeedback>; // Assuming you have a GradeFeedback entity
   constructor() {
     this._dataSource = dataSource;
     this.FunctionRepo = this._dataSource.getRepository(Function);
@@ -86,6 +88,7 @@ class DatabaseService {
     this.PlanAttributeRepo = this._dataSource.getRepository(PlanAttribute);
     this.PlanTypeRepo = this._dataSource.getRepository(PlanType);
     this.EvaluateRepo = this._dataSource.getRepository(Evaluate);
+    this.GradeFeedbackRepo = this._dataSource.getRepository(GradeFeedback);
 
     this._dataSource
       .initialize()
