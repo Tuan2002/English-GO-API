@@ -6,7 +6,6 @@ import FeedbackService from "@/services/feedback/FeedbackService";
 import { before, GET, inject, POST, route } from "awilix-express";
 import { Request, Response } from "express";
 
-@before(inject((JwtService) => AuthenticateMiddleware(JwtService)))
 @route("/feedbacks")
 export class FeedbackController {
   private _feedbackService: IFeedbackService;
@@ -27,6 +26,7 @@ export class FeedbackController {
   }
 
   @POST()
+  @before(inject((JwtService) => AuthenticateMiddleware(JwtService)))
   @route("/send-feedback")
   async sendFeedback(req: Request, res: Response) {
     const data = req.body as ISendFeedbackDTO;
