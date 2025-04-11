@@ -6,11 +6,10 @@ import EvaluateService from "@/services/evaluate/EvaluateService";
 import { before, GET, inject, POST, PUT, route } from "awilix-express";
 import { Request, Response } from "express";
 
-@before(inject((JwtService) => AuthenticateMiddleware(JwtService)))
 @route("/evaluates")
 export class EvaluateController {
   private _evaluateService: IEvaluateService;
-
+  
   constructor(EvaluateService: EvaluateService) {
     this._evaluateService = EvaluateService;
   }
@@ -28,12 +27,13 @@ export class EvaluateController {
         isShow: isShow as string,
       },
     };
-
+    
     const levels = await this._evaluateService.getEvaluates(paginationData);
     return res.status(levels.status).json(levels);
   }
-
+  
   @POST()
+  @before(inject((JwtService) => AuthenticateMiddleware(JwtService)))
   @route("/send-evaluate")
   async sendEvaluate(req: Request, res: Response) {
     const data = req.body as ISendEvaluateDTO;
