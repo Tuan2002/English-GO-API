@@ -20,6 +20,13 @@ export class ExaminerIntroductionController {
     return res.status(introduction.status).json(introduction);
   }
 
+  @GET()
+  @route("/get-all-examiners")
+  async getAllExaminers(req: Request, res: Response) {
+    const introduction = await this._examinerIntroduction.getAllExaminerIntroduction();
+    return res.status(introduction.status).json(introduction);
+  }
+
   @PUT()
   @route("/update-my-introduction")
   async updateMyIntroduction(req: Request, res: Response) {

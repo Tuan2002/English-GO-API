@@ -1,6 +1,14 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryColumn,
+} from "typeorm";
 import { ExamQuestion } from "./ExamQuestion";
 import { ExamSkillStatus } from "./ExamSkillStatus";
+import { RegisterGradeExam } from "./RegisterGradeExam";
 import { User } from "./User";
 
 @Entity({ name: "Exams" })
@@ -44,7 +52,11 @@ export class Exam {
   @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   createdAt!: Date;
 
-  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP", onUpdate: "CURRENT_TIMESTAMP" })
+  @Column({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    onUpdate: "CURRENT_TIMESTAMP",
+  })
   updatedAt!: Date;
 
   @Column({ type: "varchar", length: 255, nullable: true })
@@ -59,7 +71,16 @@ export class Exam {
   @OneToMany(() => ExamSkillStatus, (examSkillStatus) => examSkillStatus.exam)
   examSkillStatuses!: ExamSkillStatus[];
 
-  @ManyToOne(() => User, (user) => user.id, { onDelete: "CASCADE", onUpdate: "CASCADE" })
+  @ManyToOne(() => User, (user) => user.id, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   @JoinColumn({ name: "userId" })
   user!: User | null;
+
+  @OneToMany(
+    () => RegisterGradeExam,
+    (registerGradeExam) => registerGradeExam.exam
+  )
+  registerGradeExams!: RegisterGradeExam[];
 }

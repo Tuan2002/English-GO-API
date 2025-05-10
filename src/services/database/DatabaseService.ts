@@ -23,6 +23,7 @@ import { PlanAttribute } from "@/entity/PlanAttribute";
 import { PlanDetail } from "@/entity/PlanDetail";
 import { PlanType } from "@/entity/PlanType";
 import { Question } from "@/entity/Question";
+import { RegisterGradeExam } from "@/entity/RegisterGradeExam";
 import { Skill } from "@/entity/Skill";
 import { SubQuestion } from "@/entity/SubQuestion";
 import { User } from "@/entity/User";
@@ -60,6 +61,7 @@ class DatabaseService {
   public PlanTypeRepo: Repository<PlanType>;
   public EvaluateRepo: Repository<Evaluate>;
   public GradeFeedbackRepo: Repository<GradeFeedback>; // Assuming you have a GradeFeedback entity
+  public RegisterGradeExamRepo: Repository<RegisterGradeExam>;
   constructor() {
     this._dataSource = dataSource;
     this.FunctionRepo = this._dataSource.getRepository(Function);
@@ -89,6 +91,7 @@ class DatabaseService {
     this.PlanTypeRepo = this._dataSource.getRepository(PlanType);
     this.EvaluateRepo = this._dataSource.getRepository(Evaluate);
     this.GradeFeedbackRepo = this._dataSource.getRepository(GradeFeedback);
+    this.RegisterGradeExamRepo = this._dataSource.getRepository(RegisterGradeExam);
 
     this._dataSource
       .initialize()

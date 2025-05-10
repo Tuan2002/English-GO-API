@@ -9,7 +9,10 @@ import { ExamResultWriting } from "@/entity/ExamResultWriting";
 import { ExamSkillStatus } from "@/entity/ExamSkillStatus";
 import logger from "@/helpers/logger";
 import { IResponseBase } from "@/interfaces/base/IResponseBase";
-import { EExamSkillStatus, ISubmitSkillRequest } from "@/interfaces/exam/IExamDTO";
+import {
+  EExamSkillStatus,
+  ISubmitSkillRequest,
+} from "@/interfaces/exam/IExamDTO";
 import IExamService from "@/interfaces/exam/IExamService";
 import ILevelService from "@/interfaces/level/ILevelService";
 import { ISpeakingQuestionSubmit } from "@/interfaces/question/QuestionDTO";
@@ -18,7 +21,11 @@ import { StatusCodes } from "http-status-codes";
 import { In } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
 import DatabaseService from "../database/DatabaseService";
-import { IPaginationBase, IPaginationResponse } from "@/interfaces/base/IPaginationBase";
+import {
+  IPaginationBase,
+  IPaginationResponse,
+} from "@/interfaces/base/IPaginationBase";
+import EXAM_SKILLS from "@/constants/ExamSkills";
 
 export default class ExamServices implements IExamService {
   private readonly _levelService: ILevelService;
@@ -34,22 +41,25 @@ export default class ExamServices implements IExamService {
         .andWhere("exam.isDeleted = :isDeleted", { isDeleted: false })
         .orderBy("exam.createdAt", "DESC")
         .getOne();
-      const examSkillStatuses = await this._context.ExamSkillStatusRepo.createQueryBuilder("examSkillStatus")
-        .innerJoinAndSelect("examSkillStatus.skill", "skill")
-        .where("examSkillStatus.examId = :examId", { examId: lastExam.id })
-        .orderBy("examSkillStatus.order", "ASC")
-        .select([
-          "examSkillStatus.id",
-          "examSkillStatus.examId",
-          "examSkillStatus.skillId",
-          "examSkillStatus.startTime",
-          "examSkillStatus.endTime",
-          "examSkillStatus.status",
-          "examSkillStatus.order",
-          "skill.name",
-          "skill.expiredTime",
-        ])
-        .getMany();
+      const examSkillStatuses =
+        await this._context.ExamSkillStatusRepo.createQueryBuilder(
+          "examSkillStatus"
+        )
+          .innerJoinAndSelect("examSkillStatus.skill", "skill")
+          .where("examSkillStatus.examId = :examId", { examId: lastExam.id })
+          .orderBy("examSkillStatus.order", "ASC")
+          .select([
+            "examSkillStatus.id",
+            "examSkillStatus.examId",
+            "examSkillStatus.skillId",
+            "examSkillStatus.startTime",
+            "examSkillStatus.endTime",
+            "examSkillStatus.status",
+            "examSkillStatus.order",
+            "skill.name",
+            "skill.expiredTime",
+          ])
+          .getMany();
       if (!examSkillStatuses || examSkillStatuses.length === 0) {
         return {
           data: null,
@@ -66,9 +76,13 @@ export default class ExamServices implements IExamService {
       let isDone = true;
       for (let i = 0; i < examSkillStatuses.length; i++) {
         const expiredTimeOfThisExamSkill = new Date(
-          parseInt(examSkillStatuses[i].startTime) + examSkillStatuses[i].skill.expiredTime * 60 * 1000
+          parseInt(examSkillStatuses[i].startTime) +
+            examSkillStatuses[i].skill.expiredTime * 60 * 1000
         ).getTime();
-        if (examSkillStatuses[i].status === EExamSkillStatus.IN_PROGRESS && expiredTimeOfThisExamSkill > new Date().getTime()) {
+        if (
+          examSkillStatuses[i].status === EExamSkillStatus.IN_PROGRESS &&
+          expiredTimeOfThisExamSkill > new Date().getTime()
+        ) {
           currentSkill = examSkillStatuses[i].skillId;
           isDone = false;
           break;
@@ -104,7 +118,9 @@ export default class ExamServices implements IExamService {
       return {
         data: {
           exam: lastExam,
-          currentSkill: examSkillStatuses.find((examSkillStatus) => examSkillStatus.skillId === currentSkill),
+          currentSkill: examSkillStatuses.find(
+            (examSkillStatus) => examSkillStatus.skillId === currentSkill
+          ),
         },
         message: "Continue with the last exam",
         success: true,
@@ -113,7 +129,11 @@ export default class ExamServices implements IExamService {
       };
     } catch (error) {
       logger.error(error?.message);
-      console.log(`Error in ExamService - method getCurrentExam() at ${new Date().getTime()} with message ${error?.message}`);
+      console.log(
+        `Error in ExamService - method getCurrentExam() at ${new Date().getTime()} with message ${
+          error?.message
+        }`
+      );
 
       return {
         data: null,
@@ -135,12 +155,16 @@ export default class ExamServices implements IExamService {
       if (!levels || !levels.success) {
         return levels;
       }
-      const groupedQuestions = await this._context.QuestionRepo.createQueryBuilder("question")
-        .where("question.isActive = :isActive", { isActive: true })
-        .andWhere("question.isDeleted = :isDeleted", { isDeleted: false })
-        .groupBy("question.levelId")
-        .select(["question.levelId as levelId", "JSON_AGG(question.id) as questionIds"])
-        .getRawMany();
+      const groupedQuestions =
+        await this._context.QuestionRepo.createQueryBuilder("question")
+          .where("question.isActive = :isActive", { isActive: true })
+          .andWhere("question.isDeleted = :isDeleted", { isDeleted: false })
+          .groupBy("question.levelId")
+          .select([
+            "question.levelId as levelId",
+            "JSON_AGG(question.id) as questionIds",
+          ])
+          .getRawMany();
 
       if (!groupedQuestions || groupedQuestions.length === 0) {
         return {
@@ -156,7 +180,10 @@ export default class ExamServices implements IExamService {
       }
       const questionAfterRandom = groupedQuestions.map((groupedQuestion) => {
         const questionLength = groupedQuestion.questionids.length;
-        const questionId = groupedQuestion.questionids[Math.floor(Math.random() * questionLength)];
+        const questionId =
+          groupedQuestion.questionids[
+            Math.floor(Math.random() * questionLength)
+          ];
         return {
           levelId: groupedQuestion.levelid,
           questionId,
@@ -176,12 +203,12 @@ export default class ExamServices implements IExamService {
       const examCreated = await queryRunner.manager.save(Exam, newExam);
 
       // Thêm các kĩ năng vào bảng examSkillStatuses
-      // const skills = ["listening", "reading", "writing", "speaking"];
+      // const skills = [EXAM_SKILLS.LISTENING, EXAM_SKILLS.READING, EXAM_SKILLS.WRITING, EXAM_SKILLS.SPEAKING];
       const listSkills = [
-        { name: "listening", totalQuestion: 35 },
-        { name: "reading", totalQuestion: 40 },
-        { name: "writing", totalQuestion: 2 },
-        { name: "speaking", totalQuestion: 3 },
+        { name: EXAM_SKILLS.LISTENING, totalQuestion: 35 },
+        { name: EXAM_SKILLS.READING, totalQuestion: 40 },
+        { name: EXAM_SKILLS.WRITING, totalQuestion: 2 },
+        { name: EXAM_SKILLS.SPEAKING, totalQuestion: 3 },
       ];
 
       const skillStatuses = Array<ExamSkillStatus>();
@@ -190,7 +217,10 @@ export default class ExamServices implements IExamService {
         examSkillStatus.examId = examCreated.id;
         examSkillStatus.id = uuidv4();
         examSkillStatus.startTime = new Date().getTime().toString();
-        examSkillStatus.endTime = (new Date().getTime() + 50 * 60 * 1000).toString();
+        examSkillStatus.endTime = (
+          new Date().getTime() +
+          50 * 60 * 1000
+        ).toString();
         examSkillStatus.skillId = skill.name;
         examSkillStatus.score = 0;
         examSkillStatus.order = index;
@@ -222,7 +252,11 @@ export default class ExamServices implements IExamService {
       // levelId
     } catch (error) {
       logger.error(error?.message);
-      console.log(`Error in ExamService - method startNewExam() at ${new Date().getTime()} with message ${error?.message}`);
+      console.log(
+        `Error in ExamService - method startNewExam() at ${new Date().getTime()} with message ${
+          error?.message
+        }`
+      );
       await queryRunner.rollbackTransaction();
       await queryRunner.release();
       return {
@@ -251,7 +285,11 @@ export default class ExamServices implements IExamService {
       }
     } catch (error) {
       logger.error(error?.message);
-      console.log(`Error in ExamService - method participateExam() at ${new Date().getTime()} with message ${error?.message}`);
+      console.log(
+        `Error in ExamService - method participateExam() at ${new Date().getTime()} with message ${
+          error?.message
+        }`
+      );
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -272,22 +310,25 @@ export default class ExamServices implements IExamService {
         return exam;
       }
       const currentExam = exam.data.exam;
-      const examSkillStatuses = await this._context.ExamSkillStatusRepo.createQueryBuilder("examSkillStatus")
-        .innerJoinAndSelect("examSkillStatus.skill", "skill")
-        .where("examSkillStatus.examId = :examId", { examId: currentExam.id })
-        .orderBy("examSkillStatus.order", "ASC")
-        .select([
-          "examSkillStatus.id",
-          "examSkillStatus.examId",
-          "examSkillStatus.skillId",
-          "examSkillStatus.startTime",
-          "examSkillStatus.endTime",
-          "examSkillStatus.status",
-          "examSkillStatus.order",
-          "skill.name",
-          "skill.expiredTime",
-        ])
-        .getMany();
+      const examSkillStatuses =
+        await this._context.ExamSkillStatusRepo.createQueryBuilder(
+          "examSkillStatus"
+        )
+          .innerJoinAndSelect("examSkillStatus.skill", "skill")
+          .where("examSkillStatus.examId = :examId", { examId: currentExam.id })
+          .orderBy("examSkillStatus.order", "ASC")
+          .select([
+            "examSkillStatus.id",
+            "examSkillStatus.examId",
+            "examSkillStatus.skillId",
+            "examSkillStatus.startTime",
+            "examSkillStatus.endTime",
+            "examSkillStatus.status",
+            "examSkillStatus.order",
+            "skill.name",
+            "skill.expiredTime",
+          ])
+          .getMany();
       if (!examSkillStatuses || examSkillStatuses.length === 0) {
         return {
           data: null,
@@ -304,9 +345,13 @@ export default class ExamServices implements IExamService {
       let isDone = true;
       for (let i = 0; i < examSkillStatuses.length; i++) {
         const expiredTimeOfThisExamSkill = new Date(
-          parseInt(examSkillStatuses[i].startTime) + examSkillStatuses[i].skill.expiredTime * 60 * 1000
+          parseInt(examSkillStatuses[i].startTime) +
+            examSkillStatuses[i].skill.expiredTime * 60 * 1000
         ).getTime();
-        if (examSkillStatuses[i].status === EExamSkillStatus.IN_PROGRESS && expiredTimeOfThisExamSkill > new Date().getTime()) {
+        if (
+          examSkillStatuses[i].status === EExamSkillStatus.IN_PROGRESS &&
+          expiredTimeOfThisExamSkill > new Date().getTime()
+        ) {
           currentSkill = examSkillStatuses[i].skillId;
           isDone = false;
           break;
@@ -330,51 +375,60 @@ export default class ExamServices implements IExamService {
         };
       }
 
-      const currentSkillData = examSkillStatuses.find((examSkillStatus) => examSkillStatus.skillId === currentSkill);
-      if (currentSkillData && currentSkillData.status === EExamSkillStatus.NOT_STARTED) {
+      const currentSkillData = examSkillStatuses.find(
+        (examSkillStatus) => examSkillStatus.skillId === currentSkill
+      );
+      if (
+        currentSkillData &&
+        currentSkillData.status === EExamSkillStatus.NOT_STARTED
+      ) {
         currentSkillData.status = EExamSkillStatus.IN_PROGRESS;
         currentSkillData.startTime = new Date().getTime().toString();
-        currentSkillData.endTime = (new Date().getTime() + currentSkillData.skill.expiredTime * 60 * 1000).toString();
+        currentSkillData.endTime = (
+          new Date().getTime() +
+          currentSkillData.skill.expiredTime * 60 * 1000
+        ).toString();
         await this._context.ExamSkillStatusRepo.save(currentSkillData);
       }
 
-      const listQuestionOfCurrentExamSkill = await this._context.ExamQuestionRepo.createQueryBuilder("examQuestion")
-        .innerJoinAndSelect("examQuestion.question", "questions")
-        .innerJoinAndSelect("questions.skill", "skill")
-        .innerJoinAndSelect("questions.level", "level")
-        .leftJoinAndSelect("questions.subQuestions", "subQuestions")
-        .leftJoinAndSelect("subQuestions.answers", "answers")
-        .where("examQuestion.examId = :examId", { examId: currentExam.id })
-        .andWhere("questions.skillId = :skillId", { skillId: currentSkill })
-        .select([
-          "examQuestion.id",
-          "examQuestion.examId",
-          "examQuestion.questionId",
-          "questions.id",
-          "questions.levelId",
-          "questions.questionContent",
-          "questions.questionNote",
-          "questions.description",
-          "questions.attachedFile",
-          "skill.id",
-          "skill.name",
-          "skill.displayName",
-          "level.id",
-          "level.displayName",
-          "level.description",
-          "level.subQuestionNumber",
-          "level.description",
-          "subQuestions.id",
-          "subQuestions.content",
-          "subQuestions.order",
-          "answers.id",
-          "answers.answerContent",
-          "answers.order",
-        ])
-        .orderBy("questions.levelId", "ASC")
-        .addOrderBy("subQuestions.order", "ASC")
-        .addOrderBy("answers.order", "ASC")
-        .getMany();
+      const listQuestionOfCurrentExamSkill =
+        await this._context.ExamQuestionRepo.createQueryBuilder("examQuestion")
+          .innerJoinAndSelect("examQuestion.question", "questions")
+          .innerJoinAndSelect("questions.skill", "skill")
+          .innerJoinAndSelect("questions.level", "level")
+          .leftJoinAndSelect("questions.subQuestions", "subQuestions")
+          .leftJoinAndSelect("subQuestions.answers", "answers")
+          .where("examQuestion.examId = :examId", { examId: currentExam.id })
+          .andWhere("questions.skillId = :skillId", { skillId: currentSkill })
+          .select([
+            "examQuestion.id",
+            "examQuestion.examId",
+            "examQuestion.questionId",
+            "questions.id",
+            "questions.levelId",
+            "questions.questionContent",
+            "questions.questionNote",
+            "questions.description",
+            "questions.attachedFile",
+            "skill.id",
+            "skill.name",
+            "skill.displayName",
+            "level.id",
+            "level.displayName",
+            "level.description",
+            "level.subQuestionNumber",
+            "level.description",
+            "subQuestions.id",
+            "subQuestions.content",
+            "subQuestions.order",
+            "answers.id",
+            "answers.answerContent",
+            "answers.order",
+          ])
+          .orderBy("questions.levelId", "ASC")
+          .addOrderBy("subQuestions.order", "ASC")
+          .addOrderBy("answers.order", "ASC")
+          .getMany();
 
       return {
         data: {
@@ -389,7 +443,11 @@ export default class ExamServices implements IExamService {
       };
     } catch (error) {
       logger.error(error?.message);
-      console.log(`Error in ExamService - method continueExam() at ${new Date().getTime()} with message ${error?.message}`);
+      console.log(
+        `Error in ExamService - method continueExam() at ${new Date().getTime()} with message ${
+          error?.message
+        }`
+      );
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -403,7 +461,10 @@ export default class ExamServices implements IExamService {
     }
   }
 
-  async submitSkill(userId: string, data: ISubmitSkillRequest): Promise<IResponseBase> {
+  async submitSkill(
+    userId: string,
+    data: ISubmitSkillRequest
+  ): Promise<IResponseBase> {
     const currentExamData = await this.getCurrentExam(userId);
     if (!currentExamData || !currentExamData.success || !currentExamData.data) {
       return currentExamData;
@@ -455,7 +516,7 @@ export default class ExamServices implements IExamService {
 
     try {
       await queryRunner.startTransaction();
-      if (skillId === "listening") {
+      if (skillId === EXAM_SKILLS.LISTENING) {
         let score = 0;
         const examResultListenings = Array<ExamResultListening>();
 
@@ -469,15 +530,21 @@ export default class ExamServices implements IExamService {
           select: ["id", "examId", "levelId", "question"],
         });
         questions.forEach((question) => {
-          const examQuestion = examQuestions.find((examQuestion) => examQuestion.levelId === question.levelId);
+          const examQuestion = examQuestions.find(
+            (examQuestion) => examQuestion.levelId === question.levelId
+          );
           if (!examQuestion) {
             return;
           }
           // Duyệt tất cả các sub-questions song song
           question.subQuestions.forEach((subquestion) => {
             if (subquestion.selectedAnswerId) {
-              const subQuestionScore = examQuestion.question.subQuestions.find((sub) => sub.id === subquestion.id);
-              if (subquestion.selectedAnswerId === subQuestionScore.correctAnswer) {
+              const subQuestionScore = examQuestion.question.subQuestions.find(
+                (sub) => sub.id === subquestion.id
+              );
+              if (
+                subquestion.selectedAnswerId === subQuestionScore.correctAnswer
+              ) {
                 score += 1;
               }
               const examResultListening = new ExamResultListening();
@@ -489,20 +556,29 @@ export default class ExamServices implements IExamService {
             }
           });
         });
-        await queryRunner.manager.insert(ExamResultListening, examResultListenings);
+        await queryRunner.manager.insert(
+          ExamResultListening,
+          examResultListenings
+        );
         // Cập nhật trạng thái và điểm cho kỹ năng
-        const examSkillStatus = await this._context.ExamSkillStatusRepo.findOne({
-          where: {
-            examId: currentExamData.data.exam.id,
-            skillId,
-          },
-        });
+        const examSkillStatus = await this._context.ExamSkillStatusRepo.findOne(
+          {
+            where: {
+              examId: currentExamData.data.exam.id,
+              skillId,
+            },
+          }
+        );
 
         examSkillStatus.status = EExamSkillStatus.FINISHED;
         examSkillStatus.score = score;
-        await queryRunner.manager.update(ExamSkillStatus, { id: examSkillStatus.id }, examSkillStatus);
+        await queryRunner.manager.update(
+          ExamSkillStatus,
+          { id: examSkillStatus.id },
+          examSkillStatus
+        );
       }
-      if (skillId === "reading") {
+      if (skillId === EXAM_SKILLS.READING) {
         let score = 0;
         const examResultReadings = Array<ExamResultReading>();
         // Duyệt tất cả các câu hỏi song song
@@ -516,16 +592,25 @@ export default class ExamServices implements IExamService {
         });
 
         questions.forEach((question) => {
-          const examQuestion = examQuestions.find((examQuestion) => examQuestion.levelId === question.levelId);
+          const examQuestion = examQuestions.find(
+            (examQuestion) => examQuestion.levelId === question.levelId
+          );
           if (!examQuestion) {
             return;
           }
           // Duyệt tất cả các sub-questions song song
           question.subQuestions.forEach((subquestion) => {
             if (subquestion.selectedAnswerId) {
-              const subQuestionScore = examQuestion.question.subQuestions.find((sub) => sub.id === subquestion.id);
-              if (subquestion.selectedAnswerId === subQuestionScore.correctAnswer) {
-                console.log("subquestion.selectedAnswerId", subquestion.selectedAnswerId);
+              const subQuestionScore = examQuestion.question.subQuestions.find(
+                (sub) => sub.id === subquestion.id
+              );
+              if (
+                subquestion.selectedAnswerId === subQuestionScore.correctAnswer
+              ) {
+                console.log(
+                  "subquestion.selectedAnswerId",
+                  subquestion.selectedAnswerId
+                );
                 score += 1;
               }
               const examResultReading = new ExamResultReading();
@@ -540,20 +625,26 @@ export default class ExamServices implements IExamService {
         await queryRunner.manager.insert(ExamResultReading, examResultReadings);
 
         // Sau khi tất cả các câu hỏi và sub-questions đã được xử lý
-        const examSkillStatus = await this._context.ExamSkillStatusRepo.findOne({
-          where: {
-            examId: currentExamData.data.exam.id,
-            skillId,
-          },
-        });
+        const examSkillStatus = await this._context.ExamSkillStatusRepo.findOne(
+          {
+            where: {
+              examId: currentExamData.data.exam.id,
+              skillId,
+            },
+          }
+        );
         examSkillStatus.status = EExamSkillStatus.FINISHED;
         examSkillStatus.score = score;
         console.log("examSkillStatus: =>>>>>>>>>>>>>>", examSkillStatus);
         console.log("Score: =>>>>>>>>>>>>>", score);
-        await queryRunner.manager.update(ExamSkillStatus, { id: examSkillStatus.id }, examSkillStatus);
+        await queryRunner.manager.update(
+          ExamSkillStatus,
+          { id: examSkillStatus.id },
+          examSkillStatus
+        );
       }
 
-      if (skillId === "writing") {
+      if (skillId === EXAM_SKILLS.WRITING) {
         const examResultWritings = Array<ExamResultWriting>();
         const examQuestions = await this._context.ExamQuestionRepo.find({
           where: {
@@ -563,7 +654,9 @@ export default class ExamServices implements IExamService {
           select: ["id", "examId", "levelId"],
         });
         questions.forEach(async (question) => {
-          const examQuestion = examQuestions.find((examQuestion) => examQuestion.levelId === question.levelId);
+          const examQuestion = examQuestions.find(
+            (examQuestion) => examQuestion.levelId === question.levelId
+          );
           if (!examQuestion) {
             return;
           }
@@ -574,16 +667,22 @@ export default class ExamServices implements IExamService {
           examResultWritings.push(examResultWriting);
         });
         await queryRunner.manager.insert(ExamResultWriting, examResultWritings);
-        const examSkillStatus = await this._context.ExamSkillStatusRepo.findOne({
-          where: {
-            examId: currentExamData.data.exam.id,
-            skillId,
-          },
-        });
+        const examSkillStatus = await this._context.ExamSkillStatusRepo.findOne(
+          {
+            where: {
+              examId: currentExamData.data.exam.id,
+              skillId,
+            },
+          }
+        );
         examSkillStatus.status = EExamSkillStatus.FINISHED;
-        await queryRunner.manager.update(ExamSkillStatus, { id: examSkillStatus.id }, examSkillStatus);
+        await queryRunner.manager.update(
+          ExamSkillStatus,
+          { id: examSkillStatus.id },
+          examSkillStatus
+        );
       }
-      if (skillId === "speaking") {
+      if (skillId === EXAM_SKILLS.SPEAKING) {
         const examResultSpeakings = Array<ExamResultSpeaking>();
         const examQuestions = await this._context.ExamQuestionRepo.find({
           where: {
@@ -593,7 +692,9 @@ export default class ExamServices implements IExamService {
           select: ["id", "examId", "levelId"],
         });
         questions.forEach(async (question) => {
-          const examQuestion = examQuestions.find((examQuestion) => examQuestion.levelId === question.levelId);
+          const examQuestion = examQuestions.find(
+            (examQuestion) => examQuestion.levelId === question.levelId
+          );
           if (!examQuestion) {
             return;
           }
@@ -603,15 +704,24 @@ export default class ExamServices implements IExamService {
           examResultSpeaking.data = question.questionData;
           examResultSpeakings.push(examResultSpeaking);
         });
-        await queryRunner.manager.insert(ExamResultSpeaking, examResultSpeakings);
-        const examSkillStatus = await this._context.ExamSkillStatusRepo.findOne({
-          where: {
-            examId: currentExamData.data.exam.id,
-            skillId,
-          },
-        });
+        await queryRunner.manager.insert(
+          ExamResultSpeaking,
+          examResultSpeakings
+        );
+        const examSkillStatus = await this._context.ExamSkillStatusRepo.findOne(
+          {
+            where: {
+              examId: currentExamData.data.exam.id,
+              skillId,
+            },
+          }
+        );
         examSkillStatus.status = EExamSkillStatus.FINISHED;
-        await queryRunner.manager.update(ExamSkillStatus, { id: examSkillStatus.id }, examSkillStatus);
+        await queryRunner.manager.update(
+          ExamSkillStatus,
+          { id: examSkillStatus.id },
+          examSkillStatus
+        );
       }
       await queryRunner.commitTransaction();
       await queryRunner.release();
@@ -624,7 +734,11 @@ export default class ExamServices implements IExamService {
       };
     } catch (error) {
       logger.error(error?.message);
-      console.log(`Error in ExamService - method submitSkill() at ${new Date().getTime()} with message ${error?.message}`);
+      console.log(
+        `Error in ExamService - method submitSkill() at ${new Date().getTime()} with message ${
+          error?.message
+        }`
+      );
       queryRunner.rollbackTransaction();
       await queryRunner.release();
       return {
@@ -639,13 +753,21 @@ export default class ExamServices implements IExamService {
       };
     }
   }
-  async submitSpeakingSkill(userId: string, data: ISpeakingQuestionSubmit): Promise<IResponseBase> {
+
+  async submitSpeakingSkill(
+    userId: string,
+    data: ISpeakingQuestionSubmit
+  ): Promise<IResponseBase> {
     try {
       const currentExamData = await this.getCurrentExam(userId);
-      if (!currentExamData || !currentExamData.success || !currentExamData.data) {
+      if (
+        !currentExamData ||
+        !currentExamData.success ||
+        !currentExamData.data
+      ) {
         return currentExamData;
       }
-      const skillId = "speaking";
+      const skillId = EXAM_SKILLS.SPEAKING;
       const exam = currentExamData.data.exam;
 
       const examQuestion = await this._context.ExamQuestionRepo.findOne({
@@ -667,11 +789,12 @@ export default class ExamServices implements IExamService {
         };
       }
 
-      const checkIsSubmitted = await this._context.ExamResultSpeakingRepo.findOne({
-        where: {
-          examQuestionId: examQuestion.id,
-        },
-      });
+      const checkIsSubmitted =
+        await this._context.ExamResultSpeakingRepo.findOne({
+          where: {
+            examQuestionId: examQuestion.id,
+          },
+        });
       if (checkIsSubmitted) {
         return {
           data: null,
@@ -690,19 +813,26 @@ export default class ExamServices implements IExamService {
       examResultSpeaking.examQuestionId = examQuestion.id;
       examResultSpeaking.data = data.answer;
       examResultSpeaking.feedback = "";
-      const submited = await this._context.ExamResultSpeakingRepo.save(examResultSpeaking);
+      const submited = await this._context.ExamResultSpeakingRepo.save(
+        examResultSpeaking
+      );
 
-      const checkIsDone = await this._context.ExamResultSpeakingRepo.createQueryBuilder("examResultSpeaking")
-        .innerJoinAndSelect("examResultSpeaking.examQuestion", "examQuestion")
-        .where("examQuestion.examId = :examId", { examId: exam.id })
-        .getMany();
+      const checkIsDone =
+        await this._context.ExamResultSpeakingRepo.createQueryBuilder(
+          "examResultSpeaking"
+        )
+          .innerJoinAndSelect("examResultSpeaking.examQuestion", "examQuestion")
+          .where("examQuestion.examId = :examId", { examId: exam.id })
+          .getMany();
       if (checkIsDone.length === 3) {
-        const examSkillStatus = await this._context.ExamSkillStatusRepo.findOne({
-          where: {
-            examId: exam.id,
-            skillId,
-          },
-        });
+        const examSkillStatus = await this._context.ExamSkillStatusRepo.findOne(
+          {
+            where: {
+              examId: exam.id,
+              skillId,
+            },
+          }
+        );
         examSkillStatus.status = EExamSkillStatus.FINISHED;
         await this._context.ExamSkillStatusRepo.save(examSkillStatus);
       }
@@ -717,7 +847,9 @@ export default class ExamServices implements IExamService {
     } catch (error) {
       logger.error(error?.message);
       console.log(
-        `Error in ExamService - method submitSpeakingSkill() at ${new Date().getTime()} with message ${error?.message}`
+        `Error in ExamService - method submitSpeakingSkill() at ${new Date().getTime()} with message ${
+          error?.message
+        }`
       );
       return {
         data: null,
@@ -742,7 +874,7 @@ export default class ExamServices implements IExamService {
       const checkIsDone = await this._context.ExamSkillStatusRepo.findOne({
         where: {
           examId: currentExam.id,
-          skillId: "speaking",
+          skillId: EXAM_SKILLS.SPEAKING,
           status: EExamSkillStatus.FINISHED,
         },
       });
@@ -758,31 +890,44 @@ export default class ExamServices implements IExamService {
           status: StatusCodes.BAD_REQUEST,
         };
       }
-      const examSpeakingQuestion = await this._context.ExamQuestionRepo.createQueryBuilder("examQuestion")
-        .leftJoinAndSelect("examQuestion.question", "question")
-        .where("examQuestion.examId = :examId", { examId: currentExam.id })
-        .andWhere("question.skillId = :skillId", { skillId: "speaking" })
-        .orderBy("examQuestion.levelId", "ASC")
-        .getMany();
+      const examSpeakingQuestion =
+        await this._context.ExamQuestionRepo.createQueryBuilder("examQuestion")
+          .leftJoinAndSelect("examQuestion.question", "question")
+          .where("examQuestion.examId = :examId", { examId: currentExam.id })
+          .andWhere("question.skillId = :skillId", {
+            skillId: EXAM_SKILLS.SPEAKING,
+          })
+          .orderBy("examQuestion.levelId", "ASC")
+          .getMany();
 
-      const examSpeakingSubmited = await this._context.ExamResultSpeakingRepo.createQueryBuilder("examResultSpeaking")
-        .innerJoinAndSelect("examResultSpeaking.examQuestion", "examQuestion")
-        .where("examQuestion.examId = :examId", { examId: currentExam.id })
-        .getMany();
+      const examSpeakingSubmited =
+        await this._context.ExamResultSpeakingRepo.createQueryBuilder(
+          "examResultSpeaking"
+        )
+          .innerJoinAndSelect("examResultSpeaking.examQuestion", "examQuestion")
+          .where("examQuestion.examId = :examId", { examId: currentExam.id })
+          .getMany();
       let currentExamSpeakingQuestion = null;
       for (let i = 0; i < examSpeakingQuestion.length; i++) {
-        if (!examSpeakingSubmited.find((submitted) => submitted.examQuestionId === examSpeakingQuestion[i].id)) {
+        if (
+          !examSpeakingSubmited.find(
+            (submitted) =>
+              submitted.examQuestionId === examSpeakingQuestion[i].id
+          )
+        ) {
           currentExamSpeakingQuestion = examSpeakingQuestion[i];
           break;
         }
       }
       if (!currentExamSpeakingQuestion) {
-        const examSkillStatus = await this._context.ExamSkillStatusRepo.findOne({
-          where: {
-            examId: currentExam.id,
-            skillId: "speaking",
-          },
-        });
+        const examSkillStatus = await this._context.ExamSkillStatusRepo.findOne(
+          {
+            where: {
+              examId: currentExam.id,
+              skillId: EXAM_SKILLS.SPEAKING,
+            },
+          }
+        );
         examSkillStatus.status = EExamSkillStatus.FINISHED;
         await this._context.ExamSkillStatusRepo.save(examSkillStatus);
         return {
@@ -803,7 +948,9 @@ export default class ExamServices implements IExamService {
     } catch (error) {
       logger.error(error?.message);
       console.log(
-        `Error in ExamService - method getCurrentSpeakingQuestion() at ${new Date().getTime()} with message ${error?.message}`
+        `Error in ExamService - method getCurrentSpeakingQuestion() at ${new Date().getTime()} with message ${
+          error?.message
+        }`
       );
       return {
         data: null,
@@ -869,7 +1016,11 @@ export default class ExamServices implements IExamService {
       };
     } catch (error) {
       logger.error(error?.message);
-      console.log(`Error in ExamService - method getScoreOfExam() at ${new Date().getTime()} with message ${error?.message}`);
+      console.log(
+        `Error in ExamService - method getScoreOfExam() at ${new Date().getTime()} with message ${
+          error?.message
+        }`
+      );
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -882,7 +1033,11 @@ export default class ExamServices implements IExamService {
       };
     }
   }
-  async getResultOfExam(examId: string, skillId: string = "listening"): Promise<IResponseBase> {
+
+  async getResultOfExam(
+    examId: string,
+    skillId: string = EXAM_SKILLS.LISTENING
+  ): Promise<IResponseBase> {
     try {
       if (!examId) {
         return {
@@ -909,27 +1064,32 @@ export default class ExamServices implements IExamService {
         };
       }
 
-      const currentExam = await this._context.ExamRepo.createQueryBuilder("exam")
+      const currentExam = await this._context.ExamRepo.createQueryBuilder(
+        "exam"
+      )
         .where("exam.id = :examId", { examId })
         .andWhere("exam.isDeleted = :isDeleted", { isDeleted: false })
         .orderBy("exam.createdAt", "DESC")
         .getOne();
-      const examSkillStatuses = await this._context.ExamSkillStatusRepo.createQueryBuilder("examSkillStatus")
-        .innerJoinAndSelect("examSkillStatus.skill", "skill")
-        .where("examSkillStatus.examId = :examId", { examId: currentExam.id })
-        .orderBy("examSkillStatus.order", "ASC")
-        .select([
-          "examSkillStatus.id",
-          "examSkillStatus.examId",
-          "examSkillStatus.skillId",
-          "examSkillStatus.startTime",
-          "examSkillStatus.endTime",
-          "examSkillStatus.status",
-          "examSkillStatus.order",
-          "skill.name",
-          "skill.expiredTime",
-        ])
-        .getMany();
+      const examSkillStatuses =
+        await this._context.ExamSkillStatusRepo.createQueryBuilder(
+          "examSkillStatus"
+        )
+          .innerJoinAndSelect("examSkillStatus.skill", "skill")
+          .where("examSkillStatus.examId = :examId", { examId: currentExam.id })
+          .orderBy("examSkillStatus.order", "ASC")
+          .select([
+            "examSkillStatus.id",
+            "examSkillStatus.examId",
+            "examSkillStatus.skillId",
+            "examSkillStatus.startTime",
+            "examSkillStatus.endTime",
+            "examSkillStatus.status",
+            "examSkillStatus.order",
+            "skill.name",
+            "skill.expiredTime",
+          ])
+          .getMany();
       if (!examSkillStatuses || examSkillStatuses.length === 0) {
         return {
           data: null,
@@ -943,7 +1103,9 @@ export default class ExamServices implements IExamService {
         };
       }
 
-      const currentSkillData = examSkillStatuses.find((examSkillStatus) => examSkillStatus.skillId === skillId);
+      const currentSkillData = examSkillStatuses.find(
+        (examSkillStatus) => examSkillStatus.skillId === skillId
+      );
       if (!currentSkillData) {
         return {
           data: null,
@@ -957,52 +1119,57 @@ export default class ExamServices implements IExamService {
         };
       }
       let resultOfSkill = null;
-      if (skillId === "listening") {
-        const listeningResult = await this._context.ExamQuestionRepo.createQueryBuilder("examQuestion")
-          .innerJoinAndSelect("examQuestion.question", "questions")
-          .innerJoinAndSelect("questions.skill", "skill")
-          .innerJoinAndSelect("questions.level", "level")
-          .leftJoinAndSelect("questions.subQuestions", "subQuestions")
-          .leftJoinAndSelect("subQuestions.answers", "answers")
-          .leftJoinAndSelect("examQuestion.examResultListenings", "results")
-          .where("examQuestion.examId = :examId", { examId: currentExam.id })
-          .andWhere("questions.skillId = :skillId", { skillId })
-          .select([
-            "examQuestion.id",
-            "examQuestion.examId",
-            "examQuestion.questionId",
-            "questions.id",
-            "questions.levelId",
-            "questions.questionContent",
-            "questions.questionNote",
-            "questions.description",
-            "questions.attachedFile",
-            "skill.id",
-            "skill.name",
-            "skill.displayName",
-            "level.id",
-            "level.displayName",
-            "level.description",
-            "level.subQuestionNumber",
-            "subQuestions.id",
-            "subQuestions.content",
-            "subQuestions.order",
-            "subQuestions.correctAnswer",
-            "answers.id",
-            "answers.answerContent",
-            "answers.order",
-            "answers.isCorrect",
-            "results",
-          ])
-          .orderBy("questions.levelId", "ASC")
-          .addOrderBy("subQuestions.order", "ASC")
-          .addOrderBy("answers.order", "ASC")
-          .getMany();
+      if (skillId === EXAM_SKILLS.LISTENING) {
+        const listeningResult =
+          await this._context.ExamQuestionRepo.createQueryBuilder(
+            "examQuestion"
+          )
+            .innerJoinAndSelect("examQuestion.question", "questions")
+            .innerJoinAndSelect("questions.skill", "skill")
+            .innerJoinAndSelect("questions.level", "level")
+            .leftJoinAndSelect("questions.subQuestions", "subQuestions")
+            .leftJoinAndSelect("subQuestions.answers", "answers")
+            .leftJoinAndSelect("examQuestion.examResultListenings", "results")
+            .where("examQuestion.examId = :examId", { examId: currentExam.id })
+            .andWhere("questions.skillId = :skillId", { skillId })
+            .select([
+              "examQuestion.id",
+              "examQuestion.examId",
+              "examQuestion.questionId",
+              "questions.id",
+              "questions.levelId",
+              "questions.questionContent",
+              "questions.questionNote",
+              "questions.description",
+              "questions.attachedFile",
+              "skill.id",
+              "skill.name",
+              "skill.displayName",
+              "level.id",
+              "level.displayName",
+              "level.description",
+              "level.subQuestionNumber",
+              "subQuestions.id",
+              "subQuestions.content",
+              "subQuestions.order",
+              "subQuestions.correctAnswer",
+              "answers.id",
+              "answers.answerContent",
+              "answers.order",
+              "answers.isCorrect",
+              "results",
+            ])
+            .orderBy("questions.levelId", "ASC")
+            .addOrderBy("subQuestions.order", "ASC")
+            .addOrderBy("answers.order", "ASC")
+            .getMany();
         const result = listeningResult.map((result) => {
           const newResult = {
             ...result,
             results: result.question.subQuestions.map((subquestion) => {
-              const subQuestionResult = result.examResultListenings.find((result) => result.subQuestionId === subquestion.id);
+              const subQuestionResult = result.examResultListenings.find(
+                (result) => result.subQuestionId === subquestion.id
+              );
               if (subQuestionResult) {
                 return {
                   id: subQuestionResult.id,
@@ -1028,52 +1195,57 @@ export default class ExamServices implements IExamService {
         });
         resultOfSkill = result;
       }
-      if (skillId === "reading") {
-        const readingResult = await this._context.ExamQuestionRepo.createQueryBuilder("examQuestion")
-          .innerJoinAndSelect("examQuestion.question", "questions")
-          .innerJoinAndSelect("questions.skill", "skill")
-          .innerJoinAndSelect("questions.level", "level")
-          .leftJoinAndSelect("questions.subQuestions", "subQuestions")
-          .leftJoinAndSelect("subQuestions.answers", "answers")
-          .leftJoinAndSelect("examQuestion.examResultReadings", "results") // Dùng alias "results" thay vì "examResultListenings"
-          .where("examQuestion.examId = :examId", { examId: currentExam.id })
-          .andWhere("questions.skillId = :skillId", { skillId })
-          .select([
-            "examQuestion.id",
-            "examQuestion.examId",
-            "examQuestion.questionId",
-            "questions.id",
-            "questions.levelId",
-            "questions.questionContent",
-            "questions.questionNote",
-            "questions.description",
-            "questions.attachedFile",
-            "skill.id",
-            "skill.name",
-            "skill.displayName",
-            "level.id",
-            "level.displayName",
-            "level.description",
-            "level.subQuestionNumber",
-            "subQuestions.id",
-            "subQuestions.content",
-            "subQuestions.order",
-            "subQuestions.correctAnswer",
-            "answers.id",
-            "answers.answerContent",
-            "answers.order",
-            "answers.isCorrect",
-            "results",
-          ])
-          .orderBy("questions.levelId", "ASC")
-          .addOrderBy("subQuestions.order", "ASC")
-          .addOrderBy("answers.order", "ASC")
-          .getMany();
+      if (skillId === EXAM_SKILLS.READING) {
+        const readingResult =
+          await this._context.ExamQuestionRepo.createQueryBuilder(
+            "examQuestion"
+          )
+            .innerJoinAndSelect("examQuestion.question", "questions")
+            .innerJoinAndSelect("questions.skill", "skill")
+            .innerJoinAndSelect("questions.level", "level")
+            .leftJoinAndSelect("questions.subQuestions", "subQuestions")
+            .leftJoinAndSelect("subQuestions.answers", "answers")
+            .leftJoinAndSelect("examQuestion.examResultReadings", "results") // Dùng alias "results" thay vì "examResultListenings"
+            .where("examQuestion.examId = :examId", { examId: currentExam.id })
+            .andWhere("questions.skillId = :skillId", { skillId })
+            .select([
+              "examQuestion.id",
+              "examQuestion.examId",
+              "examQuestion.questionId",
+              "questions.id",
+              "questions.levelId",
+              "questions.questionContent",
+              "questions.questionNote",
+              "questions.description",
+              "questions.attachedFile",
+              "skill.id",
+              "skill.name",
+              "skill.displayName",
+              "level.id",
+              "level.displayName",
+              "level.description",
+              "level.subQuestionNumber",
+              "subQuestions.id",
+              "subQuestions.content",
+              "subQuestions.order",
+              "subQuestions.correctAnswer",
+              "answers.id",
+              "answers.answerContent",
+              "answers.order",
+              "answers.isCorrect",
+              "results",
+            ])
+            .orderBy("questions.levelId", "ASC")
+            .addOrderBy("subQuestions.order", "ASC")
+            .addOrderBy("answers.order", "ASC")
+            .getMany();
         const result = readingResult.map((result) => {
           const newResult = {
             ...result,
             results: result.question.subQuestions.map((subquestion) => {
-              const subQuestionResult = result.examResultReadings.find((result) => result.subQuestionId === subquestion.id);
+              const subQuestionResult = result.examResultReadings.find(
+                (result) => result.subQuestionId === subquestion.id
+              );
               if (subQuestionResult) {
                 return {
                   id: subQuestionResult.id,
@@ -1099,35 +1271,38 @@ export default class ExamServices implements IExamService {
         });
         resultOfSkill = result;
       }
-      if (skillId === "writing") {
-        const writingResult = await this._context.ExamQuestionRepo.createQueryBuilder("examQuestion")
-          .innerJoinAndSelect("examQuestion.question", "questions")
-          .innerJoinAndSelect("questions.skill", "skill")
-          .innerJoinAndSelect("questions.level", "level")
-          .leftJoinAndSelect("examQuestion.examResultWritings", "results")
-          .where("examQuestion.examId = :examId", { examId: currentExam.id })
-          .andWhere("questions.skillId = :skillId", { skillId })
-          .select([
-            "examQuestion.id",
-            "examQuestion.examId",
-            "examQuestion.questionId",
-            "questions.id",
-            "questions.levelId",
-            "questions.questionContent",
-            "questions.questionNote",
-            "questions.description",
-            "questions.attachedFile",
-            "skill.id",
-            "skill.name",
-            "skill.displayName",
-            "level.id",
-            "level.displayName",
-            "level.description",
-            "level.subQuestionNumber",
-            "results",
-          ])
-          .orderBy("questions.levelId", "ASC")
-          .getMany();
+      if (skillId === EXAM_SKILLS.WRITING) {
+        const writingResult =
+          await this._context.ExamQuestionRepo.createQueryBuilder(
+            "examQuestion"
+          )
+            .innerJoinAndSelect("examQuestion.question", "questions")
+            .innerJoinAndSelect("questions.skill", "skill")
+            .innerJoinAndSelect("questions.level", "level")
+            .leftJoinAndSelect("examQuestion.examResultWritings", "results")
+            .where("examQuestion.examId = :examId", { examId: currentExam.id })
+            .andWhere("questions.skillId = :skillId", { skillId })
+            .select([
+              "examQuestion.id",
+              "examQuestion.examId",
+              "examQuestion.questionId",
+              "questions.id",
+              "questions.levelId",
+              "questions.questionContent",
+              "questions.questionNote",
+              "questions.description",
+              "questions.attachedFile",
+              "skill.id",
+              "skill.name",
+              "skill.displayName",
+              "level.id",
+              "level.displayName",
+              "level.description",
+              "level.subQuestionNumber",
+              "results",
+            ])
+            .orderBy("questions.levelId", "ASC")
+            .getMany();
         const result = writingResult.map((result) => {
           const newResult = {
             ...result,
@@ -1147,35 +1322,38 @@ export default class ExamServices implements IExamService {
         });
         resultOfSkill = result;
       }
-      if (skillId === "speaking") {
-        const speakingResult = await this._context.ExamQuestionRepo.createQueryBuilder("examQuestion")
-          .innerJoinAndSelect("examQuestion.question", "questions")
-          .innerJoinAndSelect("questions.skill", "skill")
-          .innerJoinAndSelect("questions.level", "level")
-          .leftJoinAndSelect("examQuestion.examResultSpeakings", "results") // Dùng alias "results" thay vì "examResultListenings"
-          .where("examQuestion.examId = :examId", { examId: currentExam.id })
-          .andWhere("questions.skillId = :skillId", { skillId })
-          .select([
-            "examQuestion.id",
-            "examQuestion.examId",
-            "examQuestion.questionId",
-            "questions.id",
-            "questions.levelId",
-            "questions.questionContent",
-            "questions.questionNote",
-            "questions.description",
-            "questions.attachedFile",
-            "skill.id",
-            "skill.name",
-            "skill.displayName",
-            "level.id",
-            "level.displayName",
-            "level.description",
-            "level.subQuestionNumber",
-            "results",
-          ])
-          .orderBy("questions.levelId", "ASC")
-          .getMany();
+      if (skillId === EXAM_SKILLS.SPEAKING) {
+        const speakingResult =
+          await this._context.ExamQuestionRepo.createQueryBuilder(
+            "examQuestion"
+          )
+            .innerJoinAndSelect("examQuestion.question", "questions")
+            .innerJoinAndSelect("questions.skill", "skill")
+            .innerJoinAndSelect("questions.level", "level")
+            .leftJoinAndSelect("examQuestion.examResultSpeakings", "results") // Dùng alias "results" thay vì "examResultListenings"
+            .where("examQuestion.examId = :examId", { examId: currentExam.id })
+            .andWhere("questions.skillId = :skillId", { skillId })
+            .select([
+              "examQuestion.id",
+              "examQuestion.examId",
+              "examQuestion.questionId",
+              "questions.id",
+              "questions.levelId",
+              "questions.questionContent",
+              "questions.questionNote",
+              "questions.description",
+              "questions.attachedFile",
+              "skill.id",
+              "skill.name",
+              "skill.displayName",
+              "level.id",
+              "level.displayName",
+              "level.description",
+              "level.subQuestionNumber",
+              "results",
+            ])
+            .orderBy("questions.levelId", "ASC")
+            .getMany();
         const result = speakingResult.map((result) => {
           const newResult = {
             ...result,
@@ -1209,7 +1387,11 @@ export default class ExamServices implements IExamService {
       };
     } catch (error) {
       logger.error(error?.message);
-      console.log(`Error in ExamService - method getResultOfExam() at ${new Date().getTime()} with message ${error?.message}`);
+      console.log(
+        `Error in ExamService - method getResultOfExam() at ${new Date().getTime()} with message ${
+          error?.message
+        }`
+      );
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -1222,9 +1404,12 @@ export default class ExamServices implements IExamService {
       };
     }
   }
+
   async getMyExams(): Promise<IResponseBase> {
     try {
-      const request = RequestStorage.getStore()?.get(LocalStorage.REQUEST_STORE);
+      const request = RequestStorage.getStore()?.get(
+        LocalStorage.REQUEST_STORE
+      );
       const userId = request?.user.id;
       if (!userId) {
         return {
@@ -1241,6 +1426,7 @@ export default class ExamServices implements IExamService {
       const exams = await this._context.ExamRepo.createQueryBuilder("exam")
         .where("exam.userId = :userId", { userId })
         .innerJoinAndSelect("exam.examSkillStatuses", "examSkillStatuses")
+        .innerJoinAndSelect("exam.registerGradeExams", "registerGradeExams")
         .andWhere("exam.isDeleted = :isDeleted", { isDeleted: false })
         .orderBy("exam.createdAt", "DESC")
         .select([
@@ -1249,11 +1435,17 @@ export default class ExamServices implements IExamService {
           "exam.startTime",
           "exam.endTime",
           "exam.isDone",
+          "exam.isGradedWritingWithPerson",
+          "exam.isGradedSpeakingWithPerson",
           "examSkillStatuses.skillId",
           "examSkillStatuses.status",
           "examSkillStatuses.score",
           "examSkillStatuses.order",
           "examSkillStatuses.totalQuestion",
+          "registerGradeExams.id",
+          "registerGradeExams.examId",
+          "registerGradeExams.skillId",
+          "registerGradeExams.status",
         ])
         .getMany();
       return {
@@ -1265,7 +1457,11 @@ export default class ExamServices implements IExamService {
       };
     } catch (error) {
       logger.error(error?.message);
-      console.log(`Error in ExamService - method getMyExams() at ${new Date().getTime()} with message ${error?.message}`);
+      console.log(
+        `Error in ExamService - method getMyExams() at ${new Date().getTime()} with message ${
+          error?.message
+        }`
+      );
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
@@ -1278,7 +1474,11 @@ export default class ExamServices implements IExamService {
       };
     }
   }
-  async getListExams(pagination: IPaginationBase, userIds: string[] = []): Promise<IResponseBase> {
+
+  async getListExams(
+    pagination: IPaginationBase,
+    userIds: string[] = []
+  ): Promise<IResponseBase> {
     try {
       let { page, limit } = pagination;
       if (!page || page < 1) page = 1;
@@ -1313,7 +1513,10 @@ export default class ExamServices implements IExamService {
           .take(limit)
           .getMany();
       }
-      const [totalItem, exams] = await Promise.all([totalCountQuery, examQuery]);
+      const [totalItem, exams] = await Promise.all([
+        totalCountQuery,
+        examQuery,
+      ]);
 
       const examIds = exams?.map((exam) => exam.id);
       if (examIds.length === 0) {
@@ -1343,6 +1546,8 @@ export default class ExamServices implements IExamService {
           "exam.startTime",
           "exam.endTime",
           "exam.isDone",
+          "exam.isGradedWritingWithPerson",
+          "exam.isGradedSpeakingWithPerson",
           "examSkillStatuses.skillId",
           "examSkillStatuses.status",
           "examSkillStatuses.score",
@@ -1371,7 +1576,11 @@ export default class ExamServices implements IExamService {
       };
     } catch (error) {
       logger.error(error?.message);
-      console.log(`Error in ExamService - method getMyExams() at ${new Date().getTime()} with message ${error?.message}`);
+      console.log(
+        `Error in ExamService - method getMyExams() at ${new Date().getTime()} with message ${
+          error?.message
+        }`
+      );
       return {
         data: null,
         message: ErrorMessages.INTERNAL_SERVER_ERROR,
