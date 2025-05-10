@@ -1,17 +1,62 @@
-import IExaminerIntroductionService from "@/interfaces/examinerIntroduction/IExaminerIntroductionService";
-import DatabaseService from "../database/DatabaseService";
-import { IResponseBase } from "@/interfaces/base/IResponseBase";
-import logger from "@/helpers/logger";
-import { StatusCodes } from "http-status-codes";
-import { RequestStorage } from "@/middlewares";
+import EGroupRole from "@/constants/GroupRole";
 import { LocalStorage } from "@/constants/LocalStorage";
-import { IUpdateExaminerIntroductionDTO } from "@/interfaces/examinerIntroduction/IExaminerIntroductionDTO";
 import { ExaminerIntroduction } from "@/entity/ExaminerIntroduction";
+import logger from "@/helpers/logger";
+import { IResponseBase } from "@/interfaces/base/IResponseBase";
+import { IUpdateExaminerIntroductionDTO } from "@/interfaces/examinerIntroduction/IExaminerIntroductionDTO";
+import IExaminerIntroductionService from "@/interfaces/examinerIntroduction/IExaminerIntroductionService";
+import { RequestStorage } from "@/middlewares";
+import { StatusCodes } from "http-status-codes";
+import DatabaseService from "../database/DatabaseService";
 
 export default class ExaminerIntroductionService implements IExaminerIntroductionService {
   private readonly _context: DatabaseService;
   constructor(DatabaseService: DatabaseService) {
     this._context = DatabaseService;
+  }
+  async getAllExaminerIntroduction(): Promise<IResponseBase> {
+    try {
+      const userWithExaminerIntroduction = await this._context.UserRepo.createQueryBuilder("user")
+        .leftJoinAndSelect("user.examinerIntroduction", "examinerIntroduction")
+        .where("user.groupRoleId = :groupRoleId", { groupRoleId: EGroupRole.EXAMINER })
+        .select([
+          "user.id",
+          "user.email",
+          "user.username",
+          "user.fullName",
+          "user.phoneNumber",
+          "user.birthday",
+          "user.gender",
+          "user.avatar",
+          "examinerIntroduction.banner",
+          "examinerIntroduction.description",
+          "examinerIntroduction.introduction",
+          "examinerIntroduction.workPlace",
+          "examinerIntroduction.workAddress",
+        ])
+        .getMany();
+      return {
+        data: userWithExaminerIntroduction,
+        error: null,
+        message: "Lấy danh sách giáo viên thành công",
+        success: true,
+        status: StatusCodes.OK,
+      };
+    } catch (error) {
+      logger.error(error.message);
+      console.log(
+        `Error in Examiner Introduction - method getAllExaminerIntroduction() at ${new Date().getTime()} with message ${
+          error.message
+        }`
+      );
+      return {
+        data: null,
+        error: null,
+        message: "Hệ thống đang gặp sự cố, vui lòng thử lại sau",
+        success: true,
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+      };
+    }
   }
   async getExaminerIntroduction(): Promise<IResponseBase> {
     try {
@@ -22,7 +67,7 @@ export default class ExaminerIntroductionService implements IExaminerIntroductio
           data: null,
           error: null,
           message: "Không tìm thấy thông tin giáo viên",
-          success: true,
+          success: false,
           status: StatusCodes.BAD_REQUEST,
         };
       }
@@ -34,7 +79,7 @@ export default class ExaminerIntroductionService implements IExaminerIntroductio
           data: null,
           error: null,
           message: "Không tìm thấy thông tin giáo viên",
-          success: true,
+          success: false,
           status: StatusCodes.BAD_REQUEST,
         };
       }
@@ -47,7 +92,11 @@ export default class ExaminerIntroductionService implements IExaminerIntroductio
       };
     } catch (error) {
       logger.error(error.message);
-      console.log(`Error in Feedback - method sendFeedback() at ${new Date().getTime()} with message ${error.message}`);
+      console.log(
+        `Error in Examiner Introduction - method getExaminerIntroduction() at ${new Date().getTime()} with message ${
+          error.message
+        }`
+      );
       return {
         data: null,
         error: null,
@@ -64,19 +113,21 @@ export default class ExaminerIntroductionService implements IExaminerIntroductio
           data: null,
           error: null,
           message: "Dữ liệu không hợp lệ",
-          success: true,
+          success: false,
           status: StatusCodes.BAD_REQUEST,
         };
       }
+      console.log("dataUpdata", dataUpdata);
       if (!dataUpdata.userId) {
         return {
           data: null,
           error: null,
           message: "Không tìm thấy thông tin giáo viên",
-          success: true,
+          success: false,
           status: StatusCodes.BAD_REQUEST,
         };
       }
+
       const examinerIntroduction = await this._context.ExaminerIntroductionRepo.findOne({
         where: { userId: dataUpdata.userId },
       });
@@ -104,7 +155,11 @@ export default class ExaminerIntroductionService implements IExaminerIntroductio
       };
     } catch (error) {
       logger.error(error.message);
-      console.log(`Error in Feedback - method sendFeedback() at ${new Date().getTime()} with message ${error.message}`);
+      console.log(
+        `Error in Examiner Introduction - method updateExaminerIntroduction() at ${new Date().getTime()} with message ${
+          error.message
+        }`
+      );
       return {
         data: null,
         error: null,

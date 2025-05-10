@@ -13,6 +13,7 @@ import { Evaluate } from "./Evaluate";
 import { Exam } from "./Exam";
 import { ExaminerIntroduction } from "./ExaminerIntroduction";
 import { GroupRole } from "./GroupRole";
+import { RegisterGradeExam } from "./RegisterGradeExam";
 
 enum EGenderStatus {
   FEMALE = "F",
@@ -88,4 +89,10 @@ export class User {
 
   @OneToMany(() => Evaluate, (evaluate) => evaluate.user)
   evaluates: Evaluate[] | null;
+
+  @OneToMany(() => RegisterGradeExam, (registerGradeExam) => registerGradeExam.contestant)
+  contestantRegisterGradeExams: RegisterGradeExam[];
+
+  @OneToMany(() => RegisterGradeExam, (registerGradeExam) => registerGradeExam.examiner)
+  examinerRegisterGradeExams: RegisterGradeExam[];
 }

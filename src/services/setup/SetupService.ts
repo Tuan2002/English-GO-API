@@ -6,6 +6,7 @@ import Extensions from "@/utils/Extensions";
 import { v4 as uuid } from "uuid";
 import DatabaseService from "../database/DatabaseService";
 import logger from "@/helpers/logger";
+import EXAM_SKILLS from "@/constants/ExamSkills";
 
 export class SetupService implements ISetupService {
   private readonly _context: DatabaseService;
@@ -70,9 +71,9 @@ export class SetupService implements ISetupService {
       if (!skills || skills.length === 0) {
         const newSkills = [
           {
-            id: "listening",
-            name: "Listening",
-            displayName: "Listening",
+            id: EXAM_SKILLS.LISTENING,
+            name: EXAM_SKILLS.LISTENING,
+            displayName: EXAM_SKILLS.LISTENING,
             description:
               "You will listen to a number of different recordings and you will have to answer questions based on what you hear. There will be time for you to read the questions and check your work.",
             image: "https://res.cloudinary.com/domgx4abl/image/upload/v1728354158/f8glkjhqfh3zqxhpjtej.png",
@@ -80,27 +81,27 @@ export class SetupService implements ISetupService {
             expiredTime: 47,
           },
           {
-            id: "reading",
-            name: "Reading",
-            displayName: "Reading",
+            id: EXAM_SKILLS.READING,
+            name: EXAM_SKILLS.READING,
+            displayName: EXAM_SKILLS.READING,
             description: "In this section, you will read several passages. Each one is followed by several questions about it.",
             image: "https://res.cloudinary.com/domgx4abl/image/upload/v1728354170/porws3ag9kdwg4pyyw5f.png",
             order: 2,
             expiredTime: 60,
           },
           {
-            id: "writing",
-            name: "Writing",
-            displayName: "Writing",
+            id: EXAM_SKILLS.WRITING,
+            name: EXAM_SKILLS.WRITING,
+            displayName: EXAM_SKILLS.WRITING,
             description: "You have to 60 minutes to completed two task of writing skill.",
             image: "https://res.cloudinary.com/domgx4abl/image/upload/v1728354194/ruenzkglapqvxtkmdz7y.png",
             order: 3,
             expiredTime: 60,
           },
           {
-            id: "speaking",
-            name: "Speaking",
-            displayName: "Speaking",
+            id: EXAM_SKILLS.SPEAKING,
+            name: EXAM_SKILLS.SPEAKING,
+            displayName: EXAM_SKILLS.SPEAKING,
             description:
               "There are three part in this level with three question. For each question in this level will have 1 minute for you to prepare.",
             image: "https://res.cloudinary.com/domgx4abl/image/upload/v1728354184/p0rvqerqzdnqlc7gclgt.png",
@@ -120,7 +121,7 @@ export class SetupService implements ISetupService {
         const listLevels = [
           {
             id: "listening-part-1",
-            skillId: "listening",
+            skillId: EXAM_SKILLS.LISTENING,
             name: "Part 1",
             displayName: "Part 1",
             description:
@@ -130,7 +131,7 @@ export class SetupService implements ISetupService {
           },
           {
             id: "listening-part-2",
-            skillId: "listening",
+            skillId: EXAM_SKILLS.LISTENING,
             name: "Part 2",
             displayName: "Part 2",
             description:
@@ -140,7 +141,7 @@ export class SetupService implements ISetupService {
           },
           {
             id: "listening-part-3",
-            skillId: "listening",
+            skillId: EXAM_SKILLS.LISTENING,
             name: "Part 3",
             displayName: "Part 3",
             description:
@@ -150,7 +151,7 @@ export class SetupService implements ISetupService {
           },
           {
             id: "reading-part-1",
-            skillId: "reading",
+            skillId: EXAM_SKILLS.READING,
             name: "Part 1",
             displayName: "Part 1",
             description:
@@ -160,7 +161,7 @@ export class SetupService implements ISetupService {
           },
           {
             id: "reading-part-2",
-            skillId: "reading",
+            skillId: EXAM_SKILLS.READING,
             name: "Part 2",
             displayName: "Part 2",
             description:
@@ -170,7 +171,7 @@ export class SetupService implements ISetupService {
           },
           {
             id: "reading-part-3",
-            skillId: "reading",
+            skillId: EXAM_SKILLS.READING,
             name: "Part 3",
             displayName: "Part 3",
             description:
@@ -180,7 +181,7 @@ export class SetupService implements ISetupService {
           },
           {
             id: "reading-part-4",
-            skillId: "reading",
+            skillId: EXAM_SKILLS.READING,
             name: "Part 4",
             displayName: "Part 4",
             description:
@@ -190,7 +191,7 @@ export class SetupService implements ISetupService {
           },
           {
             id: "speaking-part-1",
-            skillId: "speaking",
+            skillId: EXAM_SKILLS.SPEAKING,
             name: "Part 1",
             displayName: "Part 1",
             description: "You have 3 minute to complete this level. It wil start after 1 minute.",
@@ -199,7 +200,7 @@ export class SetupService implements ISetupService {
           },
           {
             id: "speaking-part-2",
-            skillId: "speaking",
+            skillId: EXAM_SKILLS.SPEAKING,
             name: "Part 2",
             displayName: "Part 2",
             description: "You have 4 minute to complete this level. It wil start after 1 minute.",
@@ -208,7 +209,7 @@ export class SetupService implements ISetupService {
           },
           {
             id: "speaking-part-3",
-            skillId: "speaking",
+            skillId: EXAM_SKILLS.SPEAKING,
             name: "Part 3",
             displayName: "Part 3",
             description:
@@ -218,7 +219,7 @@ export class SetupService implements ISetupService {
           },
           {
             id: "writing-part-1",
-            skillId: "writing",
+            skillId: EXAM_SKILLS.WRITING,
             name: "Part 1",
             displayName: "Part 1",
             description: "You should spend about 20 minutes on this task",
@@ -227,7 +228,7 @@ export class SetupService implements ISetupService {
           },
           {
             id: "writing-part-2",
-            skillId: "writing",
+            skillId: EXAM_SKILLS.WRITING,
             name: "Part 2",
             displayName: "Part 2",
             description: "You should spend about 20 minutes on this task",
