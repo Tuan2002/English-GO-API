@@ -1426,27 +1426,27 @@ export default class ExamServices implements IExamService {
       const exams = await this._context.ExamRepo.createQueryBuilder("exam")
         .where("exam.userId = :userId", { userId })
         .innerJoinAndSelect("exam.examSkillStatuses", "examSkillStatuses")
-        .innerJoinAndSelect("exam.registerGradeExams", "registerGradeExams")
+        // .innerJoinAndSelect("exam.registerGradeExams", "registerGradeExams")
         .andWhere("exam.isDeleted = :isDeleted", { isDeleted: false })
         .orderBy("exam.createdAt", "DESC")
-        .select([
-          "exam.id",
-          "exam.examCode",
-          "exam.startTime",
-          "exam.endTime",
-          "exam.isDone",
-          "exam.isGradedWritingWithPerson",
-          "exam.isGradedSpeakingWithPerson",
-          "examSkillStatuses.skillId",
-          "examSkillStatuses.status",
-          "examSkillStatuses.score",
-          "examSkillStatuses.order",
-          "examSkillStatuses.totalQuestion",
-          "registerGradeExams.id",
-          "registerGradeExams.examId",
-          "registerGradeExams.skillId",
-          "registerGradeExams.status",
-        ])
+        // .select([
+        //   "exam.id",
+        //   "exam.examCode",
+        //   "exam.startTime",
+        //   "exam.endTime",
+        //   "exam.isDone",
+        //   "exam.isGradedWritingWithPerson",
+        //   "exam.isGradedSpeakingWithPerson",
+        //   "examSkillStatuses.skillId",
+        //   "examSkillStatuses.status",
+        //   "examSkillStatuses.score",
+        //   "examSkillStatuses.order",
+        //   "examSkillStatuses.totalQuestion",
+        //   "registerGradeExams.id",
+        //   "registerGradeExams.examId",
+        //   "registerGradeExams.skillId",
+        //   "registerGradeExams.status",
+        // ])
         .getMany();
       return {
         data: exams,
