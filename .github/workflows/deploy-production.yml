@@ -49,6 +49,6 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd /home/${{ vars.SERVER_USER }}/app/nodejs/english-go-api
-            docker-compose pull
-            docker-compose down
-            docker-compose up -d
+            docker compose pull
+            docker compose down
+            docker compose up -d
